@@ -3,7 +3,7 @@ import { FeeAmount, TICK_SPACINGS } from './constants'
 import { Pool } from './entities/pool'
 import { Position } from './entities/position'
 import { NonfungiblePositionManager } from './nonfungiblePositionManager'
-import { encodeSqrtRatioX96 } from './utils/encodeSqrtRatioX96'
+import { encodeSqrtRatioX32 } from './utils/encodeSqrtRatioX32'
 
 describe('NonfungiblePositionManager', () => {
   const token0 = new Token(1, '0x0000000000000000000000000000000000000001', 18, 't0', 'token0')
@@ -11,8 +11,8 @@ describe('NonfungiblePositionManager', () => {
 
   const fee = FeeAmount.MEDIUM
 
-  const pool_0_1 = new Pool(token0, token1, fee, encodeSqrtRatioX96(1, 1), 0, 0, [])
-  const pool_1_weth = new Pool(token1, WETH9[1], fee, encodeSqrtRatioX96(1, 1), 0, 0, [])
+  const pool_0_1 = new Pool(token0, token1, fee, encodeSqrtRatioX32(1, 1), 0, 0, [])
+  const pool_1_weth = new Pool(token1, WETH9[1], fee, encodeSqrtRatioX32(1, 1), 0, 0, [])
 
   const recipient = '0x0000000000000000000000000000000000000003'
   const sender = '0x0000000000000000000000000000000000000004'

@@ -1,6 +1,6 @@
 import { Ether, Token, WETH9 } from '@uniswap/sdk-core'
 import { FeeAmount } from '../constants'
-import { encodeSqrtRatioX96 } from '../utils/encodeSqrtRatioX96'
+import { encodeSqrtRatioX32 } from '../utils/encodeSqrtRatioX32'
 import { TickMath } from '../utils/tickMath'
 import { Pool } from './pool'
 import { Route } from './route'
@@ -12,9 +12,9 @@ describe('Route', () => {
   const token2 = new Token(1, '0x0000000000000000000000000000000000000003', 18, 't2')
   const weth = WETH9[1]
 
-  const pool_0_1 = new Pool(token0, token1, FeeAmount.MEDIUM, encodeSqrtRatioX96(1, 1), 0, 0, [])
-  const pool_0_weth = new Pool(token0, weth, FeeAmount.MEDIUM, encodeSqrtRatioX96(1, 1), 0, 0, [])
-  const pool_1_weth = new Pool(token1, weth, FeeAmount.MEDIUM, encodeSqrtRatioX96(1, 1), 0, 0, [])
+  const pool_0_1 = new Pool(token0, token1, FeeAmount.MEDIUM, encodeSqrtRatioX32(1, 1), 0, 0, [])
+  const pool_0_weth = new Pool(token0, weth, FeeAmount.MEDIUM, encodeSqrtRatioX32(1, 1), 0, 0, [])
+  const pool_1_weth = new Pool(token1, weth, FeeAmount.MEDIUM, encodeSqrtRatioX32(1, 1), 0, 0, [])
 
   describe('path', () => {
     it('constructs a path from the tokens', () => {
@@ -59,36 +59,36 @@ describe('Route', () => {
       token0,
       token1,
       FeeAmount.MEDIUM,
-      encodeSqrtRatioX96(1, 5),
+      encodeSqrtRatioX32(1, 5),
       0,
-      TickMath.getTickAtSqrtRatio(encodeSqrtRatioX96(1, 5)),
+      TickMath.getTickAtSqrtRatio(encodeSqrtRatioX32(1, 5)),
       []
     )
     const pool_1_2 = new Pool(
       token1,
       token2,
       FeeAmount.MEDIUM,
-      encodeSqrtRatioX96(15, 30),
+      encodeSqrtRatioX32(15, 30),
       0,
-      TickMath.getTickAtSqrtRatio(encodeSqrtRatioX96(15, 30)),
+      TickMath.getTickAtSqrtRatio(encodeSqrtRatioX32(15, 30)),
       []
     )
     const pool_0_weth = new Pool(
       token0,
       weth,
       FeeAmount.MEDIUM,
-      encodeSqrtRatioX96(3, 1),
+      encodeSqrtRatioX32(3, 1),
       0,
-      TickMath.getTickAtSqrtRatio(encodeSqrtRatioX96(3, 1)),
+      TickMath.getTickAtSqrtRatio(encodeSqrtRatioX32(3, 1)),
       []
     )
     const pool_1_weth = new Pool(
       token1,
       weth,
       FeeAmount.MEDIUM,
-      encodeSqrtRatioX96(1, 7),
+      encodeSqrtRatioX32(1, 7),
       0,
-      TickMath.getTickAtSqrtRatio(encodeSqrtRatioX96(1, 7)),
+      TickMath.getTickAtSqrtRatio(encodeSqrtRatioX32(1, 7)),
       []
     )
 

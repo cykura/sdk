@@ -1,7 +1,7 @@
 import { Percent, Price, sqrt, Token, CurrencyAmount, TradeType, WETH9, Ether } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import { FeeAmount, TICK_SPACINGS } from '../constants'
-import { encodeSqrtRatioX96 } from '../utils/encodeSqrtRatioX96'
+import { encodeSqrtRatioX32 } from '../utils/encodeSqrtRatioX32'
 import { nearestUsableTick } from '../utils/nearestUsableTick'
 import { TickMath } from '../utils/tickMath'
 import { Pool } from './pool'
@@ -20,7 +20,7 @@ describe('Trade', () => {
     reserve1: CurrencyAmount<Token>,
     feeAmount: FeeAmount = FeeAmount.MEDIUM
   ) {
-    const sqrtRatioX96 = encodeSqrtRatioX96(reserve1.quotient, reserve0.quotient)
+    const sqrtRatioX96 = encodeSqrtRatioX32(reserve1.quotient, reserve0.quotient)
     const liquidity = sqrt(JSBI.multiply(reserve0.quotient, reserve1.quotient))
     return new Pool(
       reserve0.currency,

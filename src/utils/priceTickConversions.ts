@@ -1,7 +1,7 @@
 import { Price, Token } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
-import { Q192 } from '../internalConstants'
-import { encodeSqrtRatioX96 } from './encodeSqrtRatioX96'
+import { Q64 } from '../internalConstants'
+import { encodeSqrtRatioX32 } from './encodeSqrtRatioX32'
 import { TickMath } from './tickMath'
 
 /**
@@ -12,13 +12,13 @@ import { TickMath } from './tickMath'
  * @param tick the tick for which to return the price
  */
 export function tickToPrice(baseToken: Token, quoteToken: Token, tick: number): Price<Token, Token> {
-  const sqrtRatioX96 = TickMath.getSqrtRatioAtTick(tick)
+  const sqrtRatioX32 = TickMath.getSqrtRatioAtTick(tick)
 
-  const ratioX192 = JSBI.multiply(sqrtRatioX96, sqrtRatioX96)
+  const ratioX64 = JSBI.multiply(sqrtRatioX32, sqrtRatioX32)
 
   return baseToken.sortsBefore(quoteToken)
-    ? new Price(baseToken, quoteToken, Q192, ratioX192)
-    : new Price(baseToken, quoteToken, ratioX192, Q192)
+    ? new Price(baseToken, quoteToken, Q64, ratioX64)
+    : new Price(baseToken, quoteToken, ratioX64, Q64)
 }
 
 /**
@@ -30,8 +30,8 @@ export function priceToClosestTick(price: Price<Token, Token>): number {
   const sorted = price.baseCurrency.sortsBefore(price.quoteCurrency)
 
   const sqrtRatioX96 = sorted
-    ? encodeSqrtRatioX96(price.numerator, price.denominator)
-    : encodeSqrtRatioX96(price.denominator, price.numerator)
+    ? encodeSqrtRatioX32(price.numerator, price.denominator)
+    : encodeSqrtRatioX32(price.denominator, price.numerator)
 
   let tick = TickMath.getTickAtSqrtRatio(sqrtRatioX96)
   const nextTickPrice = tickToPrice(price.baseCurrency, price.quoteCurrency, tick + 1)

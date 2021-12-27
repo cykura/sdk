@@ -21,14 +21,14 @@ export declare abstract class TickMath {
      */
     static MAX_SQRT_RATIO: JSBI;
     /**
-     * Returns the sqrt ratio as a Q64.96 for the given tick. The sqrt ratio is computed as sqrt(1.0001)^tick
+     * Returns the sqrt ratio as a Q32.32 for the given tick. The sqrt ratio is computed as sqrt(1.0001)^tick
      * @param tick the tick for which to compute the sqrt ratio
      */
     static getSqrtRatioAtTick(tick: number): JSBI;
     /**
-     * Returns the tick corresponding to a given sqrt ratio, s.t. #getSqrtRatioAtTick(tick) <= sqrtRatioX96
-     * and #getSqrtRatioAtTick(tick + 1) > sqrtRatioX96
-     * @param sqrtRatioX96 the sqrt ratio as a Q64.96 for which to compute the tick
+     * Returns the tick corresponding to a given sqrt ratio, s.t. #getSqrtRatioAtTick(tick) <= sqrtRatioX32
+     * and #getSqrtRatioAtTick(tick + 1) > sqrtRatioX32
+     * @param sqrtRatioX32 the sqrt ratio as a Q32.32 for which to compute the tick
      */
-    static getTickAtSqrtRatio(sqrtRatioX96: JSBI): number;
+    static getTickAtSqrtRatio(sqrtRatioX32: JSBI): number;
 }

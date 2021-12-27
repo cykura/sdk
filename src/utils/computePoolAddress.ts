@@ -1,8 +1,8 @@
-import { defaultAbiCoder } from '@ethersproject/abi'
-import { getCreate2Address } from '@ethersproject/address'
-import { keccak256 } from '@ethersproject/solidity'
+// import { defaultAbiCoder } from '@ethersproject/abi'
+// import { getCreate2Address } from '@ethersproject/address'
+// import { keccak256 } from '@ethersproject/solidity'
 import { Token } from '@uniswap/sdk-core'
-import { FeeAmount, POOL_INIT_CODE_HASH } from '../constants'
+import { FeeAmount } from '../constants'
 
 /**
  * Computes a pool address
@@ -27,12 +27,15 @@ export function computePoolAddress({
   initCodeHashManualOverride?: string
 }): string {
   const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
-  return getCreate2Address(
-    factoryAddress,
-    keccak256(
-      ['bytes'],
-      [defaultAbiCoder.encode(['address', 'address', 'uint24'], [token0.address, token1.address, fee])]
-    ),
-    initCodeHashManualOverride ?? POOL_INIT_CODE_HASH
-  )
+  // return getCreate2Address(
+  //   factoryAddress,
+  //   keccak256(
+  //     ['bytes'],
+  //     [defaultAbiCoder.encode(['address', 'address', 'uint24'], [token0.address, token1.address, fee])]
+  //   ),
+  //   initCodeHashManualOverride ?? POOL_INIT_CODE_HASH
+  // )
+
+  /// Should return the hash of 'Factory + (Fee + token0 + token1) + Defaulthash
+  return 'asd33tf65SDfdasf'
 }

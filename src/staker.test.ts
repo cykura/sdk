@@ -3,14 +3,14 @@ import { FeeAmount } from './constants'
 import { Pool } from './entities/pool'
 import { Staker } from './staker'
 import { NonfungiblePositionManager } from './nonfungiblePositionManager'
-import { encodeSqrtRatioX96 } from './utils/encodeSqrtRatioX96'
+import { encodeSqrtRatioX32 } from './utils/encodeSqrtRatioX32'
 
 describe('Staker', () => {
   const reward = new Token(1, '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', 18, 'r', 'reward')
   const token0 = new Token(1, '0x0000000000000000000000000000000000000001', 18, 't0', 'token0')
   const token1 = new Token(1, '0x0000000000000000000000000000000000000002', 18, 't1', 'token1')
 
-  const pool_0_1 = new Pool(token0, token1, FeeAmount.MEDIUM, encodeSqrtRatioX96(1, 1), 0, 0, [])
+  const pool_0_1 = new Pool(token0, token1, FeeAmount.MEDIUM, encodeSqrtRatioX32(1, 1), 0, 0, [])
 
   const incentiveKey = {
     rewardToken: reward,

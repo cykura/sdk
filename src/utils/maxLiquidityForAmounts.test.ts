@@ -1,6 +1,6 @@
 import { MaxUint256 } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
-import { encodeSqrtRatioX96 } from './encodeSqrtRatioX96'
+import { encodeSqrtRatioX32 } from './encodeSqrtRatioX32'
 import { maxLiquidityForAmounts } from './maxLiquidityForAmounts'
 
 describe('#maxLiquidityForAmounts', () => {
@@ -9,9 +9,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('100 token0, 200 token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(1, 1),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(1, 1),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             '100',
             '200',
             false
@@ -22,9 +22,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('100 token0, max token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(1, 1),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(1, 1),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             '100',
             MaxUint256,
             false
@@ -35,9 +35,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('max token0, 200 token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(1, 1),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(1, 1),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             MaxUint256,
             '200',
             false
@@ -50,9 +50,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('100 token0, 200 token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(99, 110),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(99, 110),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             '100',
             '200',
             false
@@ -63,9 +63,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('100 token0, max token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(99, 110),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(99, 110),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             '100',
             MaxUint256,
             false
@@ -76,9 +76,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('max token0, 200 token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(99, 110),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(99, 110),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             MaxUint256,
             '200',
             false
@@ -91,9 +91,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('100 token0, 200 token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(111, 100),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(111, 100),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             '100',
             '200',
             false
@@ -104,9 +104,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('100 token0, max token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(111, 100),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(111, 100),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             '100',
             MaxUint256,
             false
@@ -117,9 +117,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('max token0, 200 token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(111, 100),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(111, 100),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             MaxUint256,
             '200',
             false
@@ -134,9 +134,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('100 token0, 200 token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(1, 1),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(1, 1),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             '100',
             '200',
             true
@@ -147,9 +147,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('100 token0, max token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(1, 1),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(1, 1),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             '100',
             MaxUint256,
             true
@@ -160,9 +160,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('max token0, 200 token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(1, 1),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(1, 1),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             MaxUint256,
             '200',
             true
@@ -175,9 +175,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('100 token0, 200 token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(99, 110),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(99, 110),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             '100',
             '200',
             true
@@ -188,9 +188,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('100 token0, max token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(99, 110),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(99, 110),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             '100',
             MaxUint256,
             true
@@ -201,9 +201,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('max token0, 200 token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(99, 110),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(99, 110),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             MaxUint256,
             '200',
             true
@@ -216,9 +216,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('100 token0, 200 token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(111, 100),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(111, 100),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             '100',
             '200',
             true
@@ -229,9 +229,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('100 token0, max token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(111, 100),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(111, 100),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             '100',
             MaxUint256,
             true
@@ -242,9 +242,9 @@ describe('#maxLiquidityForAmounts', () => {
       it('max token0, 200 token1', () => {
         expect(
           maxLiquidityForAmounts(
-            encodeSqrtRatioX96(111, 100),
-            encodeSqrtRatioX96(100, 110),
-            encodeSqrtRatioX96(110, 100),
+            encodeSqrtRatioX32(111, 100),
+            encodeSqrtRatioX32(100, 110),
+            encodeSqrtRatioX32(110, 100),
             MaxUint256,
             '200',
             true

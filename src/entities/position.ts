@@ -1,4 +1,4 @@
-import { BigintIsh, MaxUint256, Percent, Price, CurrencyAmount, Token } from '@uniswap/sdk-core'
+import { BigintIsh, MaxUint128, Percent, Price, CurrencyAmount, Token } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 import { ZERO } from '../internalConstants'
@@ -6,7 +6,7 @@ import { maxLiquidityForAmounts } from '../utils/maxLiquidityForAmounts'
 import { tickToPrice } from '../utils/priceTickConversions'
 import { SqrtPriceMath } from '../utils/sqrtPriceMath'
 import { TickMath } from '../utils/tickMath'
-import { encodeSqrtRatioX96 } from '../utils/encodeSqrtRatioX96'
+import { encodeSqrtRatioX32 } from '../utils/encodeSqrtRatioX32'
 import { Pool } from './pool'
 
 interface PositionConstructorArgs {
@@ -81,7 +81,7 @@ export class Position {
         this._token0Amount = CurrencyAmount.fromRawAmount(
           this.pool.token0,
           SqrtPriceMath.getAmount0Delta(
-            this.pool.sqrtRatioX96,
+            this.pool.sqrtRatioX32,
             TickMath.getSqrtRatioAtTick(this.tickUpper),
             this.liquidity,
             false
@@ -106,7 +106,7 @@ export class Position {
           this.pool.token1,
           SqrtPriceMath.getAmount1Delta(
             TickMath.getSqrtRatioAtTick(this.tickLower),
-            this.pool.sqrtRatioX96,
+            this.pool.sqrtRatioX32,
             this.liquidity,
             false
           )
@@ -131,20 +131,20 @@ export class Position {
    * @param slippageTolerance The amount by which the price can 'slip' before the transaction will revert
    * @returns The sqrt ratios after slippage
    */
-  private ratiosAfterSlippage(slippageTolerance: Percent): { sqrtRatioX96Lower: JSBI; sqrtRatioX96Upper: JSBI } {
+  private ratiosAfterSlippage(slippageTolerance: Percent): { sqrtRatioX32Lower: JSBI; sqrtRatioX32Upper: JSBI } {
     const priceLower = this.pool.token0Price.asFraction.multiply(new Percent(1).subtract(slippageTolerance))
     const priceUpper = this.pool.token0Price.asFraction.multiply(slippageTolerance.add(1))
-    let sqrtRatioX96Lower = encodeSqrtRatioX96(priceLower.numerator, priceLower.denominator)
-    if (JSBI.lessThanOrEqual(sqrtRatioX96Lower, TickMath.MIN_SQRT_RATIO)) {
-      sqrtRatioX96Lower = JSBI.add(TickMath.MIN_SQRT_RATIO, JSBI.BigInt(1))
+    let sqrtRatioX32Lower = encodeSqrtRatioX32(priceLower.numerator, priceLower.denominator)
+    if (JSBI.lessThanOrEqual(sqrtRatioX32Lower, TickMath.MIN_SQRT_RATIO)) {
+      sqrtRatioX32Lower = JSBI.add(TickMath.MIN_SQRT_RATIO, JSBI.BigInt(1))
     }
-    let sqrtRatioX96Upper = encodeSqrtRatioX96(priceUpper.numerator, priceUpper.denominator)
-    if (JSBI.greaterThanOrEqual(sqrtRatioX96Upper, TickMath.MAX_SQRT_RATIO)) {
-      sqrtRatioX96Upper = JSBI.subtract(TickMath.MAX_SQRT_RATIO, JSBI.BigInt(1))
+    let sqrtRatioX32Upper = encodeSqrtRatioX32(priceUpper.numerator, priceUpper.denominator)
+    if (JSBI.greaterThanOrEqual(sqrtRatioX32Upper, TickMath.MAX_SQRT_RATIO)) {
+      sqrtRatioX32Upper = JSBI.subtract(TickMath.MAX_SQRT_RATIO, JSBI.BigInt(1))
     }
     return {
-      sqrtRatioX96Lower,
-      sqrtRatioX96Upper
+      sqrtRatioX32Lower,
+      sqrtRatioX32Upper
     }
   }
 
@@ -156,24 +156,24 @@ export class Position {
    */
   public mintAmountsWithSlippage(slippageTolerance: Percent): Readonly<{ amount0: JSBI; amount1: JSBI }> {
     // get lower/upper prices
-    const { sqrtRatioX96Upper, sqrtRatioX96Lower } = this.ratiosAfterSlippage(slippageTolerance)
+    const { sqrtRatioX32Upper, sqrtRatioX32Lower } = this.ratiosAfterSlippage(slippageTolerance)
 
     // construct counterfactual pools
     const poolLower = new Pool(
       this.pool.token0,
       this.pool.token1,
       this.pool.fee,
-      sqrtRatioX96Lower,
+      sqrtRatioX32Lower,
       0 /* liquidity doesn't matter */,
-      TickMath.getTickAtSqrtRatio(sqrtRatioX96Lower)
+      TickMath.getTickAtSqrtRatio(sqrtRatioX32Lower)
     )
     const poolUpper = new Pool(
       this.pool.token0,
       this.pool.token1,
       this.pool.fee,
-      sqrtRatioX96Upper,
+      sqrtRatioX32Upper,
       0 /* liquidity doesn't matter */,
-      TickMath.getTickAtSqrtRatio(sqrtRatioX96Upper)
+      TickMath.getTickAtSqrtRatio(sqrtRatioX32Upper)
     )
 
     // because the router is imprecise, we need to calculate the position that will be created (assuming no slippage)
@@ -212,24 +212,24 @@ export class Position {
    */
   public burnAmountsWithSlippage(slippageTolerance: Percent): Readonly<{ amount0: JSBI; amount1: JSBI }> {
     // get lower/upper prices
-    const { sqrtRatioX96Upper, sqrtRatioX96Lower } = this.ratiosAfterSlippage(slippageTolerance)
+    const { sqrtRatioX32Upper, sqrtRatioX32Lower } = this.ratiosAfterSlippage(slippageTolerance)
 
     // construct counterfactual pools
     const poolLower = new Pool(
       this.pool.token0,
       this.pool.token1,
       this.pool.fee,
-      sqrtRatioX96Lower,
+      sqrtRatioX32Lower,
       0 /* liquidity doesn't matter */,
-      TickMath.getTickAtSqrtRatio(sqrtRatioX96Lower)
+      TickMath.getTickAtSqrtRatio(sqrtRatioX32Lower)
     )
     const poolUpper = new Pool(
       this.pool.token0,
       this.pool.token1,
       this.pool.fee,
-      sqrtRatioX96Upper,
+      sqrtRatioX32Upper,
       0 /* liquidity doesn't matter */,
-      TickMath.getTickAtSqrtRatio(sqrtRatioX96Upper)
+      TickMath.getTickAtSqrtRatio(sqrtRatioX32Upper)
     )
 
     // we want the smaller amounts...
@@ -270,14 +270,14 @@ export class Position {
       } else if (this.pool.tickCurrent < this.tickUpper) {
         return {
           amount0: SqrtPriceMath.getAmount0Delta(
-            this.pool.sqrtRatioX96,
+            this.pool.sqrtRatioX32,
             TickMath.getSqrtRatioAtTick(this.tickUpper),
             this.liquidity,
             true
           ),
           amount1: SqrtPriceMath.getAmount1Delta(
             TickMath.getSqrtRatioAtTick(this.tickLower),
-            this.pool.sqrtRatioX96,
+            this.pool.sqrtRatioX32,
             this.liquidity,
             true
           )
@@ -324,16 +324,16 @@ export class Position {
     amount1: BigintIsh
     useFullPrecision: boolean
   }) {
-    const sqrtRatioAX96 = TickMath.getSqrtRatioAtTick(tickLower)
-    const sqrtRatioBX96 = TickMath.getSqrtRatioAtTick(tickUpper)
+    const sqrtRatioAX32 = TickMath.getSqrtRatioAtTick(tickLower)
+    const sqrtRatioBX32 = TickMath.getSqrtRatioAtTick(tickUpper)
     return new Position({
       pool,
       tickLower,
       tickUpper,
       liquidity: maxLiquidityForAmounts(
-        pool.sqrtRatioX96,
-        sqrtRatioAX96,
-        sqrtRatioBX96,
+        pool.sqrtRatioX32,
+        sqrtRatioAX32,
+        sqrtRatioBX32,
         amount0,
         amount1,
         useFullPrecision
@@ -364,7 +364,7 @@ export class Position {
     amount0: BigintIsh
     useFullPrecision: boolean
   }) {
-    return Position.fromAmounts({ pool, tickLower, tickUpper, amount0, amount1: MaxUint256, useFullPrecision })
+    return Position.fromAmounts({ pool, tickLower, tickUpper, amount0, amount1: MaxUint128, useFullPrecision })
   }
 
   /**
@@ -387,6 +387,6 @@ export class Position {
     amount1: BigintIsh
   }) {
     // this function always uses full precision,
-    return Position.fromAmounts({ pool, tickLower, tickUpper, amount0: MaxUint256, amount1, useFullPrecision: true })
+    return Position.fromAmounts({ pool, tickLower, tickUpper, amount0: MaxUint128, amount1, useFullPrecision: true })
   }
 }

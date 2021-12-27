@@ -4,7 +4,7 @@ import { FeeAmount, TICK_SPACINGS } from './constants'
 import { Pool } from './entities/pool'
 import { SwapRouter } from './swapRouter'
 import { nearestUsableTick, TickMath } from './utils'
-import { encodeSqrtRatioX96 } from './utils/encodeSqrtRatioX96'
+import { encodeSqrtRatioX32 } from './utils/encodeSqrtRatioX32'
 import { Route, Trade } from './entities'
 
 describe('SwapRouter', () => {
@@ -15,7 +15,7 @@ describe('SwapRouter', () => {
   const token3 = new Token(1, '0x0000000000000000000000000000000000000004', 18, 't3', 'token3')
 
   const feeAmount = FeeAmount.MEDIUM
-  const sqrtRatioX96 = encodeSqrtRatioX96(1, 1)
+  const sqrtRatioX96 = encodeSqrtRatioX32(1, 1)
   const liquidity = 1_000_000
   const WETH = WETH9[1]
 

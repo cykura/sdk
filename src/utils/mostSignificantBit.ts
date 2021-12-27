@@ -1,4 +1,4 @@
-import { MaxUint256 } from '@uniswap/sdk-core'
+import { MaxUint128 } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 import { ZERO } from '../internalConstants'
@@ -11,7 +11,7 @@ const POWERS_OF_2 = [128, 64, 32, 16, 8, 4, 2, 1].map((pow: number): [number, JS
 
 export function mostSignificantBit(x: JSBI): number {
   invariant(JSBI.greaterThan(x, ZERO), 'ZERO')
-  invariant(JSBI.lessThanOrEqual(x, MaxUint256), 'MAX')
+  invariant(JSBI.lessThanOrEqual(x, MaxUint128), 'MAX')
 
   let msb: number = 0
   for (const [power, min] of POWERS_OF_2) {
