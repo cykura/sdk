@@ -5,7 +5,7 @@ import { ONE, ZERO } from '../internalConstants'
 import { mostSignificantBit } from './mostSignificantBit'
 
 function mulShift(val: JSBI, mulBy: string): JSBI {
-  return JSBI.signedRightShift(JSBI.multiply(val, JSBI.BigInt(mulBy)), JSBI.BigInt(128))
+  return JSBI.signedRightShift(JSBI.multiply(val, JSBI.BigInt(mulBy)), JSBI.BigInt(64))
 }
 
 const Q32 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(32))
@@ -42,10 +42,7 @@ export abstract class TickMath {
     invariant(tick >= TickMath.MIN_TICK && tick <= TickMath.MAX_TICK && Number.isInteger(tick), 'TICK')
     const absTick: number = tick < 0 ? tick * -1 : tick
 
-    let ratio: JSBI =
-      (absTick & 0x1) != 0
-        ? JSBI.BigInt('0xfffcb933bd6fb800')
-        : JSBI.BigInt('0x10000000000000000')
+    let ratio: JSBI = (absTick & 0x1) != 0 ? JSBI.BigInt('0xfffcb933bd6fb800') : JSBI.BigInt('0x10000000000000000')
     if ((absTick & 0x2) != 0) ratio = mulShift(ratio, '0xfff97272373d4000')
     if ((absTick & 0x4) != 0) ratio = mulShift(ratio, '0xfff2e50f5f657000')
     if ((absTick & 0x8) != 0) ratio = mulShift(ratio, '0xffe5caca7e10f000')
@@ -63,7 +60,7 @@ export abstract class TickMath {
     if ((absTick & 0x8000) != 0) ratio = mulShift(ratio, '0x31be135f97ed3200')
     if ((absTick & 0x10000) != 0) ratio = mulShift(ratio, '0x9aa508b5b85a500')
     if ((absTick & 0x20000) != 0) ratio = mulShift(ratio, '0x5d6af8dedc582c')
-    
+
     if (tick > 0) ratio = JSBI.divide(MaxUint128, ratio)
 
     // back to Q32
@@ -84,39 +81,36 @@ export abstract class TickMath {
       'SQRT_RATIO'
     )
 
-    const sqrtRatioX64 = JSBI.leftShift(sqrtRatioX32, JSBI.BigInt(32))
+    // we are not shifting in CYS
+    // const sqrtRatioX64 = JSBI.leftShift(sqrtRatioX32, JSBI.BigInt(32))
+    const sqrtRatioX64 = sqrtRatioX32
 
     const msb = mostSignificantBit(sqrtRatioX64)
 
     let r: JSBI
-    if (JSBI.greaterThanOrEqual(JSBI.BigInt(msb), JSBI.BigInt(64))) {
-      r = JSBI.signedRightShift(sqrtRatioX64, JSBI.BigInt(msb - 63))
+    if (JSBI.greaterThanOrEqual(JSBI.BigInt(msb), JSBI.BigInt(32))) {
+      r = JSBI.signedRightShift(sqrtRatioX64, JSBI.BigInt(msb - 31))
     } else {
-      r = JSBI.leftShift(sqrtRatioX64, JSBI.BigInt(63 - msb))
+      r = JSBI.leftShift(sqrtRatioX64, JSBI.BigInt(31 - msb))
     }
 
-    let log_2: JSBI = JSBI.leftShift(JSBI.subtract(JSBI.BigInt(msb), JSBI.BigInt(64)), JSBI.BigInt(64))
+    // 128,64 changed to 32,16
+    let log_2: JSBI = JSBI.leftShift(JSBI.subtract(JSBI.BigInt(msb), JSBI.BigInt(32)), JSBI.BigInt(16))
 
     for (let i = 0; i < 14; i++) {
-      r = JSBI.signedRightShift(JSBI.multiply(r, r), JSBI.BigInt(63))
-      const f = JSBI.signedRightShift(r, JSBI.BigInt(64))
-      log_2 = JSBI.bitwiseOr(log_2, JSBI.leftShift(f, JSBI.BigInt(31 - i)))
+      r = JSBI.signedRightShift(JSBI.multiply(r, r), JSBI.BigInt(31))
+      const f = JSBI.signedRightShift(r, JSBI.BigInt(32))
+      log_2 = JSBI.bitwiseOr(log_2, JSBI.leftShift(f, JSBI.BigInt(15 - i)))
       r = JSBI.signedRightShift(r, f)
     }
 
     const log_sqrt10001 = JSBI.multiply(log_2, JSBI.BigInt('908567298'))
 
     const tickLow = JSBI.toNumber(
-      JSBI.signedRightShift(
-        JSBI.subtract(log_sqrt10001, JSBI.BigInt('42949672')),
-        JSBI.BigInt(32)
-      )
+      JSBI.signedRightShift(JSBI.subtract(log_sqrt10001, JSBI.BigInt('42949672')), JSBI.BigInt(32))
     )
     const tickHigh = JSBI.toNumber(
-      JSBI.signedRightShift(
-        JSBI.add(log_sqrt10001, JSBI.BigInt('3677218864')),
-        JSBI.BigInt(32)
-      )
+      JSBI.signedRightShift(JSBI.add(log_sqrt10001, JSBI.BigInt('3677218864')), JSBI.BigInt(32))
     )
 
     return tickLow === tickHigh

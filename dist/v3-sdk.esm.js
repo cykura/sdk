@@ -1144,7 +1144,7 @@ var SwapMath = /*#__PURE__*/function () {
 }();
 
 var TWO = /*#__PURE__*/JSBI.BigInt(2);
-var POWERS_OF_2 = /*#__PURE__*/[64, 32, 16, 8, 4, 2, 1].map(function (pow) {
+var POWERS_OF_2 = /*#__PURE__*/[32, 16, 8, 4, 2, 1].map(function (pow) {
   return [pow, JSBI.exponentiate(TWO, JSBI.BigInt(pow))];
 });
 function mostSignificantBit(x) {
@@ -1167,7 +1167,7 @@ function mostSignificantBit(x) {
 }
 
 function mulShift(val, mulBy) {
-  return JSBI.signedRightShift(JSBI.multiply(val, JSBI.BigInt(mulBy)), JSBI.BigInt(128));
+  return JSBI.signedRightShift(JSBI.multiply(val, JSBI.BigInt(mulBy)), JSBI.BigInt(64));
 }
 
 var Q32$1 = /*#__PURE__*/JSBI.exponentiate( /*#__PURE__*/JSBI.BigInt(2), /*#__PURE__*/JSBI.BigInt(32));
@@ -1215,23 +1215,26 @@ var TickMath = /*#__PURE__*/function () {
   ;
 
   TickMath.getTickAtSqrtRatio = function getTickAtSqrtRatio(sqrtRatioX32) {
-    !(JSBI.greaterThanOrEqual(sqrtRatioX32, TickMath.MIN_SQRT_RATIO) && JSBI.lessThan(sqrtRatioX32, TickMath.MAX_SQRT_RATIO)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'SQRT_RATIO') : invariant(false) : void 0;
-    var sqrtRatioX64 = JSBI.leftShift(sqrtRatioX32, JSBI.BigInt(32));
+    !(JSBI.greaterThanOrEqual(sqrtRatioX32, TickMath.MIN_SQRT_RATIO) && JSBI.lessThan(sqrtRatioX32, TickMath.MAX_SQRT_RATIO)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'SQRT_RATIO') : invariant(false) : void 0; // we are not shifting in CYS
+    // const sqrtRatioX64 = JSBI.leftShift(sqrtRatioX32, JSBI.BigInt(32))
+
+    var sqrtRatioX64 = sqrtRatioX32;
     var msb = mostSignificantBit(sqrtRatioX64);
     var r;
 
-    if (JSBI.greaterThanOrEqual(JSBI.BigInt(msb), JSBI.BigInt(64))) {
-      r = JSBI.signedRightShift(sqrtRatioX64, JSBI.BigInt(msb - 63));
+    if (JSBI.greaterThanOrEqual(JSBI.BigInt(msb), JSBI.BigInt(32))) {
+      r = JSBI.signedRightShift(sqrtRatioX64, JSBI.BigInt(msb - 31));
     } else {
-      r = JSBI.leftShift(sqrtRatioX64, JSBI.BigInt(63 - msb));
-    }
+      r = JSBI.leftShift(sqrtRatioX64, JSBI.BigInt(31 - msb));
+    } // 128,64 changed to 32,16
 
-    var log_2 = JSBI.leftShift(JSBI.subtract(JSBI.BigInt(msb), JSBI.BigInt(64)), JSBI.BigInt(64));
+
+    var log_2 = JSBI.leftShift(JSBI.subtract(JSBI.BigInt(msb), JSBI.BigInt(32)), JSBI.BigInt(16));
 
     for (var i = 0; i < 14; i++) {
-      r = JSBI.signedRightShift(JSBI.multiply(r, r), JSBI.BigInt(63));
-      var f = JSBI.signedRightShift(r, JSBI.BigInt(64));
-      log_2 = JSBI.bitwiseOr(log_2, JSBI.leftShift(f, JSBI.BigInt(31 - i)));
+      r = JSBI.signedRightShift(JSBI.multiply(r, r), JSBI.BigInt(31));
+      var f = JSBI.signedRightShift(r, JSBI.BigInt(32));
+      log_2 = JSBI.bitwiseOr(log_2, JSBI.leftShift(f, JSBI.BigInt(15 - i)));
       r = JSBI.signedRightShift(r, f);
     }
 
