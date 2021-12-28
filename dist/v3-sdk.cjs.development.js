@@ -1145,7 +1145,7 @@ var SwapMath = /*#__PURE__*/function () {
 }();
 
 var TWO = /*#__PURE__*/JSBI.BigInt(2);
-var POWERS_OF_2 = /*#__PURE__*/[128, 64, 32, 16, 8, 4, 2, 1].map(function (pow) {
+var POWERS_OF_2 = /*#__PURE__*/[64, 32, 16, 8, 4, 2, 1].map(function (pow) {
   return [pow, JSBI.exponentiate(TWO, JSBI.BigInt(pow))];
 });
 function mostSignificantBit(x) {
@@ -1217,22 +1217,22 @@ var TickMath = /*#__PURE__*/function () {
 
   TickMath.getTickAtSqrtRatio = function getTickAtSqrtRatio(sqrtRatioX32) {
     !(JSBI.greaterThanOrEqual(sqrtRatioX32, TickMath.MIN_SQRT_RATIO) && JSBI.lessThan(sqrtRatioX32, TickMath.MAX_SQRT_RATIO)) ?  invariant(false, 'SQRT_RATIO')  : void 0;
-    var sqrtRatioX128 = JSBI.leftShift(sqrtRatioX32, JSBI.BigInt(32));
-    var msb = mostSignificantBit(sqrtRatioX128);
+    var sqrtRatioX64 = JSBI.leftShift(sqrtRatioX32, JSBI.BigInt(32));
+    var msb = mostSignificantBit(sqrtRatioX64);
     var r;
 
-    if (JSBI.greaterThanOrEqual(JSBI.BigInt(msb), JSBI.BigInt(128))) {
-      r = JSBI.signedRightShift(sqrtRatioX128, JSBI.BigInt(msb - 127));
+    if (JSBI.greaterThanOrEqual(JSBI.BigInt(msb), JSBI.BigInt(64))) {
+      r = JSBI.signedRightShift(sqrtRatioX64, JSBI.BigInt(msb - 63));
     } else {
-      r = JSBI.leftShift(sqrtRatioX128, JSBI.BigInt(127 - msb));
+      r = JSBI.leftShift(sqrtRatioX64, JSBI.BigInt(63 - msb));
     }
 
-    var log_2 = JSBI.leftShift(JSBI.subtract(JSBI.BigInt(msb), JSBI.BigInt(128)), JSBI.BigInt(64));
+    var log_2 = JSBI.leftShift(JSBI.subtract(JSBI.BigInt(msb), JSBI.BigInt(64)), JSBI.BigInt(64));
 
     for (var i = 0; i < 14; i++) {
-      r = JSBI.signedRightShift(JSBI.multiply(r, r), JSBI.BigInt(127));
-      var f = JSBI.signedRightShift(r, JSBI.BigInt(128));
-      log_2 = JSBI.bitwiseOr(log_2, JSBI.leftShift(f, JSBI.BigInt(63 - i)));
+      r = JSBI.signedRightShift(JSBI.multiply(r, r), JSBI.BigInt(63));
+      var f = JSBI.signedRightShift(r, JSBI.BigInt(64));
+      log_2 = JSBI.bitwiseOr(log_2, JSBI.leftShift(f, JSBI.BigInt(31 - i)));
       r = JSBI.signedRightShift(r, f);
     }
 

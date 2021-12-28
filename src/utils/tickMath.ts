@@ -84,23 +84,23 @@ export abstract class TickMath {
       'SQRT_RATIO'
     )
 
-    const sqrtRatioX128 = JSBI.leftShift(sqrtRatioX32, JSBI.BigInt(32))
+    const sqrtRatioX64 = JSBI.leftShift(sqrtRatioX32, JSBI.BigInt(32))
 
-    const msb = mostSignificantBit(sqrtRatioX128)
+    const msb = mostSignificantBit(sqrtRatioX64)
 
     let r: JSBI
-    if (JSBI.greaterThanOrEqual(JSBI.BigInt(msb), JSBI.BigInt(128))) {
-      r = JSBI.signedRightShift(sqrtRatioX128, JSBI.BigInt(msb - 127))
+    if (JSBI.greaterThanOrEqual(JSBI.BigInt(msb), JSBI.BigInt(64))) {
+      r = JSBI.signedRightShift(sqrtRatioX64, JSBI.BigInt(msb - 63))
     } else {
-      r = JSBI.leftShift(sqrtRatioX128, JSBI.BigInt(127 - msb))
+      r = JSBI.leftShift(sqrtRatioX64, JSBI.BigInt(63 - msb))
     }
 
-    let log_2: JSBI = JSBI.leftShift(JSBI.subtract(JSBI.BigInt(msb), JSBI.BigInt(128)), JSBI.BigInt(64))
+    let log_2: JSBI = JSBI.leftShift(JSBI.subtract(JSBI.BigInt(msb), JSBI.BigInt(64)), JSBI.BigInt(64))
 
     for (let i = 0; i < 14; i++) {
-      r = JSBI.signedRightShift(JSBI.multiply(r, r), JSBI.BigInt(127))
-      const f = JSBI.signedRightShift(r, JSBI.BigInt(128))
-      log_2 = JSBI.bitwiseOr(log_2, JSBI.leftShift(f, JSBI.BigInt(63 - i)))
+      r = JSBI.signedRightShift(JSBI.multiply(r, r), JSBI.BigInt(63))
+      const f = JSBI.signedRightShift(r, JSBI.BigInt(64))
+      log_2 = JSBI.bitwiseOr(log_2, JSBI.leftShift(f, JSBI.BigInt(31 - i)))
       r = JSBI.signedRightShift(r, f)
     }
 
