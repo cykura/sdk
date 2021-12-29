@@ -50,7 +50,6 @@ export function computePoolAddress({
     [POOL_SEED, tk0.toBuffer(), tk1.toBuffer(), u32ToSeed(fee)],
     new PublicKey(LOCAL_PROGRAM_ID)
   ).then(([poolState, poolStateBump]) => {
-    console.log('got pool address', poolState)
     return poolState.toString()
   })
   return pda

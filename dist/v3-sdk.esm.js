@@ -965,7 +965,6 @@ function computePoolAddress(_ref) {
   var tk1 = new PublicKey(token1.address);
   var pda = PublicKey.findProgramAddress([POOL_SEED, tk0.toBuffer(), tk1.toBuffer(), u32ToSeed(fee)], new PublicKey(LOCAL_PROGRAM_ID)).then(function (_ref3) {
     var poolState = _ref3[0];
-    console.log('got pool address', poolState);
     return poolState.toString();
   });
   return pda; // return getCreate2Address(
