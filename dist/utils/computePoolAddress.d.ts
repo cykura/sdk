@@ -17,4 +17,4 @@ export declare function computePoolAddress({ factoryAddress, tokenA, tokenB, fee
     tokenB: Token;
     fee: FeeAmount;
     initCodeHashManualOverride?: string;
-}): string;
+}): Promise<string>;

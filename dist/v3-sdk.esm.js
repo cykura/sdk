@@ -963,12 +963,12 @@ function computePoolAddress(_ref) {
 
   var tk0 = new PublicKey(token0.address);
   var tk1 = new PublicKey(token1.address);
-  PublicKey.findProgramAddress([POOL_SEED, tk0.toBuffer(), tk1.toBuffer(), u32ToSeed(fee)], new PublicKey(LOCAL_PROGRAM_ID)).then(function (_ref3) {
+  var pda = PublicKey.findProgramAddress([POOL_SEED, tk0.toBuffer(), tk1.toBuffer(), u32ToSeed(fee)], new PublicKey(LOCAL_PROGRAM_ID)).then(function (_ref3) {
     var poolState = _ref3[0];
     console.log('got pool address', poolState);
     return poolState.toString();
   });
-  return 'fixTheAsyncCall'; // return getCreate2Address(
+  return pda; // return getCreate2Address(
   //   factoryAddress,
   //   keccak256(
   //     ['bytes'],
@@ -2619,7 +2619,9 @@ var Trade = /*#__PURE__*/function () {
 
       for (var _iterator2 = _createForOfIteratorHelperLoose(route.pools), _step2; !(_step2 = _iterator2()).done;) {
         var pool = _step2.value;
-        poolAddressSet.add(Pool.getAddress(pool.token0, pool.token1, pool.fee));
+        Pool.getAddress(pool.token0, pool.token1, pool.fee).then(function (address) {
+          poolAddressSet.add(address);
+        });
       }
     }
 

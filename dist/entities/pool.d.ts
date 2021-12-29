@@ -16,7 +16,7 @@ export declare class Pool {
     readonly tickDataProvider: TickDataProvider;
     private _token0Price?;
     private _token1Price?;
-    static getAddress(tokenA: Token, tokenB: Token, fee: FeeAmount, initCodeHashManualOverride?: string): string;
+    static getAddress(tokenA: Token, tokenB: Token, fee: FeeAmount, initCodeHashManualOverride?: string): Promise<string>;
     /**
      * Construct a pool
      * @param tokenA One of the tokens in the pool

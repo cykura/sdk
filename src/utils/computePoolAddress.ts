@@ -40,20 +40,20 @@ export function computePoolAddress({
   tokenB: Token
   fee: FeeAmount
   initCodeHashManualOverride?: string
-}): string {
+}): Promise<string> {
   const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
 
   const tk0 = new PublicKey(token0.address)
   const tk1 = new PublicKey(token1.address)
 
-  PublicKey.findProgramAddress(
+  const pda = PublicKey.findProgramAddress(
     [POOL_SEED, tk0.toBuffer(), tk1.toBuffer(), u32ToSeed(fee)],
     new PublicKey(LOCAL_PROGRAM_ID)
   ).then(([poolState, poolStateBump]) => {
     console.log('got pool address', poolState)
     return poolState.toString()
   })
-  return 'fixTheAsyncCall'
+  return pda
 
   // return getCreate2Address(
   //   factoryAddress,
