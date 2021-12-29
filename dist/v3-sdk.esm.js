@@ -1,6 +1,7 @@
 import { MaxUint128 as MaxUint128$1, sqrt, Price, CurrencyAmount, Percent, TradeType, Fraction, sortedInsert, validateAndParseAddress } from '@uniswap/sdk-core';
 import JSBI from 'jsbi';
 import invariant from 'tiny-invariant';
+import { web3 } from '@project-serum/anchor';
 import { pack } from '@ethersproject/solidity';
 import { Interface, defaultAbiCoder } from '@ethersproject/abi';
 import { abi } from '@uniswap/v3-periphery/artifacts/contracts/interfaces/IMulticall.sol/IMulticall.json';
@@ -928,6 +929,18 @@ var ONE = /*#__PURE__*/JSBI.BigInt(1); // used in liquidity amount math
 var Q32 = /*#__PURE__*/JSBI.exponentiate( /*#__PURE__*/JSBI.BigInt(2), /*#__PURE__*/JSBI.BigInt(32));
 var Q64 = /*#__PURE__*/JSBI.exponentiate(Q32, /*#__PURE__*/JSBI.BigInt(2));
 
+var _anchor$web = web3,
+    PublicKey = _anchor$web.PublicKey;
+var POOL_SEED = /*#__PURE__*/Buffer.from('p'); // Export to commons later?
+// Generate seed buffer from a u32 number
+
+function u32ToSeed(num) {
+  var arr = new ArrayBuffer(4);
+  var view = new DataView(arr);
+  view.setUint32(0, num, false);
+  return new Uint8Array(arr);
+}
+var LOCAL_PROGRAM_ID = '37kn8WUzihQoAnhYxueA2BnqCA7VRnrVvYoHy1hQ6Veu';
 /**
  * Computes a pool address
  * @param factoryAddress The Uniswap V3 factory address
@@ -937,13 +950,25 @@ var Q64 = /*#__PURE__*/JSBI.exponentiate(Q32, /*#__PURE__*/JSBI.BigInt(2));
  * @param initCodeHashManualOverride Override the init code hash used to compute the pool address if necessary
  * @returns The pool address
  */
+
 function computePoolAddress(_ref) {
   var tokenA = _ref.tokenA,
-      tokenB = _ref.tokenB;
+      tokenB = _ref.tokenB,
+      fee = _ref.fee;
 
-  var _ref2 = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA];
- // does safety checks
-  // return getCreate2Address(
+  var _ref2 = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA],
+      token0 = _ref2[0],
+      token1 = _ref2[1]; // does safety checks
+
+
+  var tk0 = new PublicKey(token0.address);
+  var tk1 = new PublicKey(token1.address);
+  PublicKey.findProgramAddress([POOL_SEED, tk0.toBuffer(), tk1.toBuffer(), u32ToSeed(fee)], new PublicKey(LOCAL_PROGRAM_ID)).then(function (_ref3) {
+    var poolState = _ref3[0];
+    console.log('got pool address', poolState);
+    return poolState.toString();
+  });
+  return 'fixTheAsyncCall'; // return getCreate2Address(
   //   factoryAddress,
   //   keccak256(
   //     ['bytes'],
@@ -952,9 +977,8 @@ function computePoolAddress(_ref) {
   //   initCodeHashManualOverride ?? POOL_INIT_CODE_HASH
   // )
   /// Should return the hash of 'Factory + (Fee + token0 + token1) + Defaulthash
-
-
-  return 'asd33tf65SDfdasf';
+  // return poolState.toString()
+  // return 'asdfasdfasdf'
 }
 
 var LiquidityMath = /*#__PURE__*/function () {
@@ -4028,5 +4052,5 @@ var SwapRouter = /*#__PURE__*/function () {
 }();
 SwapRouter.INTERFACE = /*#__PURE__*/new Interface(abi$6);
 
-export { ADDRESS_ZERO, FACTORY_ADDRESS, FeeAmount, FullMath, LiquidityMath, Multicall, NoTickDataProvider, NonfungiblePositionManager, POOL_INIT_CODE_HASH, Payments, Pool, Position, Route, SelfPermit, SqrtPriceMath, Staker, SwapQuoter, SwapRouter, TICK_SPACINGS, Tick, TickList, TickListDataProvider, TickMath, Trade, computePoolAddress, encodeRouteToPath, encodeSqrtRatioX32, isSorted, maxLiquidityForAmounts, mostSignificantBit, nearestUsableTick, priceToClosestTick, tickToPrice, toHex, tradeComparator };
+export { ADDRESS_ZERO, FACTORY_ADDRESS, FeeAmount, FullMath, LOCAL_PROGRAM_ID, LiquidityMath, Multicall, NoTickDataProvider, NonfungiblePositionManager, POOL_INIT_CODE_HASH, Payments, Pool, Position, Route, SelfPermit, SqrtPriceMath, Staker, SwapQuoter, SwapRouter, TICK_SPACINGS, Tick, TickList, TickListDataProvider, TickMath, Trade, computePoolAddress, encodeRouteToPath, encodeSqrtRatioX32, isSorted, maxLiquidityForAmounts, mostSignificantBit, nearestUsableTick, priceToClosestTick, tickToPrice, toHex, tradeComparator, u32ToSeed };
 //# sourceMappingURL=v3-sdk.esm.js.map

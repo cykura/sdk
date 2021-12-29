@@ -7,6 +7,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var sdkCore = require('@uniswap/sdk-core');
 var JSBI = _interopDefault(require('jsbi'));
 var invariant = _interopDefault(require('tiny-invariant'));
+var anchor = require('@project-serum/anchor');
 var solidity = require('@ethersproject/solidity');
 var abi = require('@ethersproject/abi');
 var IMulticall_json = require('@uniswap/v3-periphery/artifacts/contracts/interfaces/IMulticall.sol/IMulticall.json');
@@ -929,6 +930,18 @@ var ONE = /*#__PURE__*/JSBI.BigInt(1); // used in liquidity amount math
 var Q32 = /*#__PURE__*/JSBI.exponentiate( /*#__PURE__*/JSBI.BigInt(2), /*#__PURE__*/JSBI.BigInt(32));
 var Q64 = /*#__PURE__*/JSBI.exponentiate(Q32, /*#__PURE__*/JSBI.BigInt(2));
 
+var _anchor$web = anchor.web3,
+    PublicKey = _anchor$web.PublicKey;
+var POOL_SEED = /*#__PURE__*/Buffer.from('p'); // Export to commons later?
+// Generate seed buffer from a u32 number
+
+function u32ToSeed(num) {
+  var arr = new ArrayBuffer(4);
+  var view = new DataView(arr);
+  view.setUint32(0, num, false);
+  return new Uint8Array(arr);
+}
+var LOCAL_PROGRAM_ID = '37kn8WUzihQoAnhYxueA2BnqCA7VRnrVvYoHy1hQ6Veu';
 /**
  * Computes a pool address
  * @param factoryAddress The Uniswap V3 factory address
@@ -938,13 +951,25 @@ var Q64 = /*#__PURE__*/JSBI.exponentiate(Q32, /*#__PURE__*/JSBI.BigInt(2));
  * @param initCodeHashManualOverride Override the init code hash used to compute the pool address if necessary
  * @returns The pool address
  */
+
 function computePoolAddress(_ref) {
   var tokenA = _ref.tokenA,
-      tokenB = _ref.tokenB;
+      tokenB = _ref.tokenB,
+      fee = _ref.fee;
 
-  var _ref2 = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA];
- // does safety checks
-  // return getCreate2Address(
+  var _ref2 = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA],
+      token0 = _ref2[0],
+      token1 = _ref2[1]; // does safety checks
+
+
+  var tk0 = new PublicKey(token0.address);
+  var tk1 = new PublicKey(token1.address);
+  PublicKey.findProgramAddress([POOL_SEED, tk0.toBuffer(), tk1.toBuffer(), u32ToSeed(fee)], new PublicKey(LOCAL_PROGRAM_ID)).then(function (_ref3) {
+    var poolState = _ref3[0];
+    console.log('got pool address', poolState);
+    return poolState.toString();
+  });
+  return 'fixTheAsyncCall'; // return getCreate2Address(
   //   factoryAddress,
   //   keccak256(
   //     ['bytes'],
@@ -953,9 +978,8 @@ function computePoolAddress(_ref) {
   //   initCodeHashManualOverride ?? POOL_INIT_CODE_HASH
   // )
   /// Should return the hash of 'Factory + (Fee + token0 + token1) + Defaulthash
-
-
-  return 'asd33tf65SDfdasf';
+  // return poolState.toString()
+  // return 'asdfasdfasdf'
 }
 
 var LiquidityMath = /*#__PURE__*/function () {
@@ -4032,6 +4056,7 @@ SwapRouter.INTERFACE = /*#__PURE__*/new abi.Interface(SwapRouter_json.abi);
 exports.ADDRESS_ZERO = ADDRESS_ZERO;
 exports.FACTORY_ADDRESS = FACTORY_ADDRESS;
 exports.FullMath = FullMath;
+exports.LOCAL_PROGRAM_ID = LOCAL_PROGRAM_ID;
 exports.LiquidityMath = LiquidityMath;
 exports.Multicall = Multicall;
 exports.NoTickDataProvider = NoTickDataProvider;
@@ -4063,4 +4088,5 @@ exports.priceToClosestTick = priceToClosestTick;
 exports.tickToPrice = tickToPrice;
 exports.toHex = toHex;
 exports.tradeComparator = tradeComparator;
+exports.u32ToSeed = u32ToSeed;
 //# sourceMappingURL=v3-sdk.cjs.development.js.map
