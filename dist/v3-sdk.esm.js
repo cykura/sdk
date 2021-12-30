@@ -940,7 +940,7 @@ function u32ToSeed(num) {
   view.setUint32(0, num, false);
   return new Uint8Array(arr);
 }
-var LOCAL_PROGRAM_ID = '37kn8WUzihQoAnhYxueA2BnqCA7VRnrVvYoHy1hQ6Veu';
+var LOCAL_PROGRAM_ID = '9qe9svzmigVAvWh2qX9AJq3p4N9QbTyx2yRCfN1aAZam';
 /**
  * Computes a pool address
  * @param factoryAddress The Uniswap V3 factory address

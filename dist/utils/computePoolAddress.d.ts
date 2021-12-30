@@ -1,7 +1,7 @@
 import { Token } from '@uniswap/sdk-core';
 import { FeeAmount } from '../constants';
 export declare function u32ToSeed(num: number): Uint8Array;
-export declare const LOCAL_PROGRAM_ID = "37kn8WUzihQoAnhYxueA2BnqCA7VRnrVvYoHy1hQ6Veu";
+export declare const LOCAL_PROGRAM_ID = "9qe9svzmigVAvWh2qX9AJq3p4N9QbTyx2yRCfN1aAZam";
 /**
  * Computes a pool address
  * @param factoryAddress The Uniswap V3 factory address

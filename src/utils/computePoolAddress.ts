@@ -17,7 +17,7 @@ export function u32ToSeed(num: number) {
   return new Uint8Array(arr)
 }
 
-export const LOCAL_PROGRAM_ID = '37kn8WUzihQoAnhYxueA2BnqCA7VRnrVvYoHy1hQ6Veu'
+export const LOCAL_PROGRAM_ID = '9qe9svzmigVAvWh2qX9AJq3p4N9QbTyx2yRCfN1aAZam'
 
 /**
  * Computes a pool address
