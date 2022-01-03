@@ -1585,29 +1585,8 @@ function maxLiquidityForAmount0Imprecise(sqrtRatioAX32, sqrtRatioBX32, amount0) 
     sqrtRatioBX32 = _ref[1];
   }
 
-  var intermediate = JSBI.divide(JSBI.multiply(sqrtRatioAX32, sqrtRatioBX32), Q64);
+  var intermediate = JSBI.divide(JSBI.multiply(sqrtRatioAX32, sqrtRatioBX32), Q32);
   return JSBI.divide(JSBI.multiply(JSBI.BigInt(amount0), intermediate), JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32));
-}
-/**
- * Returns a precise maximum amount of liquidity received for a given amount of token 0 by dividing by Q64 instead of Q96 in the intermediate step,
- * and shifting the subtracted ratio left by 32 bits.
- * @param sqrtRatioAX32 The price at the lower boundary
- * @param sqrtRatioBX32 The price at the upper boundary
- * @param amount0 The token0 amount
- * @returns liquidity for amount0, precise
- */
-
-
-function maxLiquidityForAmount0Precise(sqrtRatioAX32, sqrtRatioBX32, amount0) {
-  if (JSBI.greaterThan(sqrtRatioAX32, sqrtRatioBX32)) {
-    var _ref2 = [sqrtRatioBX32, sqrtRatioAX32];
-    sqrtRatioAX32 = _ref2[0];
-    sqrtRatioBX32 = _ref2[1];
-  }
-
-  var numerator = JSBI.multiply(JSBI.multiply(JSBI.BigInt(amount0), sqrtRatioAX32), sqrtRatioBX32);
-  var denominator = JSBI.multiply(Q64, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32));
-  return JSBI.divide(numerator, denominator);
 }
 /**
  * Computes the maximum amount of liquidity received for a given amount of token1
@@ -1645,9 +1624,8 @@ function maxLiquidityForAmounts(sqrtRatioCurrentX32, sqrtRatioAX32, sqrtRatioBX3
     var _ref4 = [sqrtRatioBX32, sqrtRatioAX32];
     sqrtRatioAX32 = _ref4[0];
     sqrtRatioBX32 = _ref4[1];
-  }
-
-  var maxLiquidityForAmount0 = useFullPrecision ? maxLiquidityForAmount0Precise : maxLiquidityForAmount0Imprecise;
+  } // trying this out?
+  var maxLiquidityForAmount0 = maxLiquidityForAmount0Imprecise;
 
   if (JSBI.lessThanOrEqual(sqrtRatioCurrentX32, sqrtRatioAX32)) {
     return maxLiquidityForAmount0(sqrtRatioAX32, sqrtRatioBX32, amount0);
@@ -2304,15 +2282,14 @@ var Position = /*#__PURE__*/function () {
         tickLower = _ref2.tickLower,
         tickUpper = _ref2.tickUpper,
         amount0 = _ref2.amount0,
-        amount1 = _ref2.amount1,
-        useFullPrecision = _ref2.useFullPrecision;
+        amount1 = _ref2.amount1;
     var sqrtRatioAX32 = TickMath.getSqrtRatioAtTick(tickLower);
     var sqrtRatioBX32 = TickMath.getSqrtRatioAtTick(tickUpper);
     return new Position({
       pool: pool,
       tickLower: tickLower,
       tickUpper: tickUpper,
-      liquidity: maxLiquidityForAmounts(pool.sqrtRatioX32, sqrtRatioAX32, sqrtRatioBX32, amount0, amount1, useFullPrecision)
+      liquidity: maxLiquidityForAmounts(pool.sqrtRatioX32, sqrtRatioAX32, sqrtRatioBX32, amount0, amount1)
     });
   }
   /**
