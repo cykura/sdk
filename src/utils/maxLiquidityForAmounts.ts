@@ -35,7 +35,7 @@ function maxLiquidityForAmount0Precise(sqrtRatioAX32: JSBI, sqrtRatioBX32: JSBI,
   }
 
   const numerator = JSBI.multiply(JSBI.multiply(JSBI.BigInt(amount0), sqrtRatioAX32), sqrtRatioBX32)
-  const denominator = JSBI.multiply(Q64, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32))
+  const denominator = JSBI.multiply(Q32, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32))
 
   return JSBI.divide(numerator, denominator)
 }
@@ -51,7 +51,7 @@ function maxLiquidityForAmount1(sqrtRatioAX32: JSBI, sqrtRatioBX32: JSBI, amount
   if (JSBI.greaterThan(sqrtRatioAX32, sqrtRatioBX32)) {
     ;[sqrtRatioAX32, sqrtRatioBX32] = [sqrtRatioBX32, sqrtRatioAX32]
   }
-  return JSBI.divide(JSBI.multiply(JSBI.BigInt(amount1), Q64), JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32))
+  return JSBI.divide(JSBI.multiply(JSBI.BigInt(amount1), Q32), JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32))
 }
 
 /**

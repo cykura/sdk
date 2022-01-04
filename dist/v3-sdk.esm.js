@@ -1603,7 +1603,7 @@ function maxLiquidityForAmount1(sqrtRatioAX32, sqrtRatioBX32, amount1) {
     sqrtRatioBX32 = _ref3[1];
   }
 
-  return JSBI.divide(JSBI.multiply(JSBI.BigInt(amount1), Q64), JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32));
+  return JSBI.divide(JSBI.multiply(JSBI.BigInt(amount1), Q32), JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32));
 }
 /**
  * Computes the maximum amount of liquidity received for a given amount of token0, token1,
