@@ -1,19 +1,19 @@
 import { MaxUint128 } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
-import { ONE, ZERO, Q64 } from '../internalConstants'
+import { ONE, ZERO, Q64, Q32 } from '../internalConstants'
 import { FullMath } from './fullMath'
 
 const MaxUint160 = JSBI.subtract(JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(160)), ONE)
 
 function multiplyIn128(x: JSBI, y: JSBI): JSBI {
   const product = JSBI.multiply(x, y)
-  return JSBI.bitwiseAnd(product, MaxUint128)
+  return JSBI.bitwiseAnd(product, Q64)
 }
 
 function addIn128(x: JSBI, y: JSBI): JSBI {
   const sum = JSBI.add(x, y)
-  return JSBI.bitwiseAnd(sum, MaxUint128)
+  return JSBI.bitwiseAnd(sum, Q64)
 }
 
 export abstract class SqrtPriceMath {
@@ -41,8 +41,8 @@ export abstract class SqrtPriceMath {
     }
 
     return roundUp
-      ? FullMath.mulDivRoundingUp(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32), Q64)
-      : JSBI.divide(JSBI.multiply(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32)), Q64)
+      ? FullMath.mulDivRoundingUp(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32), Q32)
+      : JSBI.divide(JSBI.multiply(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32)), Q32)
   }
 
   public static getNextSqrtPriceFromInput(sqrtPX32: JSBI, liquidity: JSBI, amountIn: JSBI, zeroForOne: boolean): JSBI {
@@ -104,13 +104,13 @@ export abstract class SqrtPriceMath {
     add: boolean
   ): JSBI {
     if (add) {
-      const quotient = JSBI.lessThanOrEqual(amount, MaxUint160)
+      const quotient = JSBI.lessThanOrEqual(amount, Q32)
         ? JSBI.divide(JSBI.leftShift(amount, JSBI.BigInt(32)), liquidity)
-        : JSBI.divide(JSBI.multiply(amount, Q64), liquidity)
+        : JSBI.divide(JSBI.multiply(amount, Q32), liquidity)
 
       return JSBI.add(sqrtPX32, quotient)
     } else {
-      const quotient = FullMath.mulDivRoundingUp(amount, Q64, liquidity)
+      const quotient = FullMath.mulDivRoundingUp(amount, Q32, liquidity)
 
       invariant(JSBI.greaterThan(sqrtPX32, quotient))
       return JSBI.subtract(sqrtPX32, quotient)

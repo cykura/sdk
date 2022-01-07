@@ -1013,16 +1013,14 @@ var FullMath = /*#__PURE__*/function () {
   return FullMath;
 }();
 
-var MaxUint160 = /*#__PURE__*/JSBI.subtract( /*#__PURE__*/JSBI.exponentiate( /*#__PURE__*/JSBI.BigInt(2), /*#__PURE__*/JSBI.BigInt(160)), ONE);
-
 function multiplyIn128(x, y) {
   var product = JSBI.multiply(x, y);
-  return JSBI.bitwiseAnd(product, MaxUint128$1);
+  return JSBI.bitwiseAnd(product, Q64);
 }
 
 function addIn128(x, y) {
   var sum = JSBI.add(x, y);
-  return JSBI.bitwiseAnd(sum, MaxUint128$1);
+  return JSBI.bitwiseAnd(sum, Q64);
 }
 
 var SqrtPriceMath = /*#__PURE__*/function () {
@@ -1050,7 +1048,7 @@ var SqrtPriceMath = /*#__PURE__*/function () {
       sqrtRatioBX32 = _ref2[1];
     }
 
-    return roundUp ? FullMath.mulDivRoundingUp(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32), Q64) : JSBI.divide(JSBI.multiply(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32)), Q64);
+    return roundUp ? FullMath.mulDivRoundingUp(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32), Q32) : JSBI.divide(JSBI.multiply(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32)), Q32);
   };
 
   SqrtPriceMath.getNextSqrtPriceFromInput = function getNextSqrtPriceFromInput(sqrtPX32, liquidity, amountIn, zeroForOne) {
@@ -1095,10 +1093,10 @@ var SqrtPriceMath = /*#__PURE__*/function () {
 
   SqrtPriceMath.getNextSqrtPriceFromAmount1RoundingDown = function getNextSqrtPriceFromAmount1RoundingDown(sqrtPX32, liquidity, amount, add) {
     if (add) {
-      var quotient = JSBI.lessThanOrEqual(amount, MaxUint160) ? JSBI.divide(JSBI.leftShift(amount, JSBI.BigInt(32)), liquidity) : JSBI.divide(JSBI.multiply(amount, Q64), liquidity);
+      var quotient = JSBI.lessThanOrEqual(amount, Q32) ? JSBI.divide(JSBI.leftShift(amount, JSBI.BigInt(32)), liquidity) : JSBI.divide(JSBI.multiply(amount, Q32), liquidity);
       return JSBI.add(sqrtPX32, quotient);
     } else {
-      var _quotient = FullMath.mulDivRoundingUp(amount, Q64, liquidity);
+      var _quotient = FullMath.mulDivRoundingUp(amount, Q32, liquidity);
 
       !JSBI.greaterThan(sqrtPX32, _quotient) ? process.env.NODE_ENV !== "production" ? invariant(false) : invariant(false) : void 0;
       return JSBI.subtract(sqrtPX32, _quotient);
