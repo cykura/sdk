@@ -1,4 +1,4 @@
-import { BigintIsh, MaxUint128, Percent, Price, CurrencyAmount, Token } from '@uniswap/sdk-core'
+import { BigintIsh, Percent, Price, CurrencyAmount, Token } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 import { ZERO } from '../internalConstants'
@@ -8,6 +8,8 @@ import { SqrtPriceMath } from '../utils/sqrtPriceMath'
 import { TickMath } from '../utils/tickMath'
 import { encodeSqrtRatioX32 } from '../utils/encodeSqrtRatioX32'
 import { Pool } from './pool'
+
+const MaxU32 = JSBI.BigInt('0xffffffff')
 
 interface PositionConstructorArgs {
   pool: Pool
@@ -364,7 +366,7 @@ export class Position {
     amount0: BigintIsh
     useFullPrecision: boolean
   }) {
-    return Position.fromAmounts({ pool, tickLower, tickUpper, amount0, amount1: MaxUint128, useFullPrecision })
+    return Position.fromAmounts({ pool, tickLower, tickUpper, amount0, amount1: MaxU32, useFullPrecision })
   }
 
   /**
@@ -387,6 +389,6 @@ export class Position {
     amount1: BigintIsh
   }) {
     // this function always uses full precision,
-    return Position.fromAmounts({ pool, tickLower, tickUpper, amount0: MaxUint128, amount1, useFullPrecision: true })
+    return Position.fromAmounts({ pool, tickLower, tickUpper, amount0: MaxU32, amount1, useFullPrecision: true })
   }
 }
