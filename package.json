@@ -27,7 +27,7 @@
     "@ethersproject/abi": "^5.0.12",
     "@ethersproject/solidity": "^5.0.9",
     "@project-serum/anchor": "^0.19.1-beta.1",
-    "@uniswap/sdk-core": "cyclos-io/sdk-core",
+    "@uniswap/sdk-core": "git+https://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:x-oauth-basic@github.com/cyclos-io/sdk-core.git",
     "@uniswap/v3-periphery": "^1.1.1",
     "@uniswap/v3-staker": "1.0.0",
     "tiny-invariant": "^1.1.0",

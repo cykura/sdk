@@ -2105,6 +2105,7 @@ var Pool = /*#__PURE__*/function () {
   return Pool;
 }();
 
+var MaxU32 = /*#__PURE__*/JSBI.BigInt('0xffffffff');
 /**
  * Represents a position on a Uniswap V3 Pool
  */
@@ -2312,7 +2313,7 @@ var Position = /*#__PURE__*/function () {
       tickLower: tickLower,
       tickUpper: tickUpper,
       amount0: amount0,
-      amount1: MaxUint128$1,
+      amount1: MaxU32,
       useFullPrecision: useFullPrecision
     });
   }
@@ -2336,7 +2337,7 @@ var Position = /*#__PURE__*/function () {
       pool: pool,
       tickLower: tickLower,
       tickUpper: tickUpper,
-      amount0: MaxUint128$1,
+      amount0: MaxU32,
       amount1: amount1,
       useFullPrecision: true
     });
