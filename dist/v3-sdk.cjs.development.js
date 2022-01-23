@@ -1126,42 +1126,42 @@ var SwapMath = /*#__PURE__*/function () {
       returnValues.amountIn = zeroForOne ? SqrtPriceMath.getAmount0Delta(sqrtRatioTargetX32, sqrtRatioCurrentX32, liquidity, true) : SqrtPriceMath.getAmount1Delta(sqrtRatioCurrentX32, sqrtRatioTargetX32, liquidity, true);
 
       if (JSBI.greaterThanOrEqual(amountRemainingLessFee, returnValues.amountIn)) {
-        returnValues.sqrtRatioNextX96 = sqrtRatioTargetX32;
+        returnValues.sqrtRatioNextX32 = sqrtRatioTargetX32;
       } else {
-        returnValues.sqrtRatioNextX96 = SqrtPriceMath.getNextSqrtPriceFromInput(sqrtRatioCurrentX32, liquidity, amountRemainingLessFee, zeroForOne);
+        returnValues.sqrtRatioNextX32 = SqrtPriceMath.getNextSqrtPriceFromInput(sqrtRatioCurrentX32, liquidity, amountRemainingLessFee, zeroForOne);
       }
     } else {
       returnValues.amountOut = zeroForOne ? SqrtPriceMath.getAmount1Delta(sqrtRatioTargetX32, sqrtRatioCurrentX32, liquidity, false) : SqrtPriceMath.getAmount0Delta(sqrtRatioCurrentX32, sqrtRatioTargetX32, liquidity, false);
 
       if (JSBI.greaterThanOrEqual(JSBI.multiply(amountRemaining, NEGATIVE_ONE), returnValues.amountOut)) {
-        returnValues.sqrtRatioNextX96 = sqrtRatioTargetX32;
+        returnValues.sqrtRatioNextX32 = sqrtRatioTargetX32;
       } else {
-        returnValues.sqrtRatioNextX96 = SqrtPriceMath.getNextSqrtPriceFromOutput(sqrtRatioCurrentX32, liquidity, JSBI.multiply(amountRemaining, NEGATIVE_ONE), zeroForOne);
+        returnValues.sqrtRatioNextX32 = SqrtPriceMath.getNextSqrtPriceFromOutput(sqrtRatioCurrentX32, liquidity, JSBI.multiply(amountRemaining, NEGATIVE_ONE), zeroForOne);
       }
     }
 
-    var max = JSBI.equal(sqrtRatioTargetX32, returnValues.sqrtRatioNextX96);
+    var max = JSBI.equal(sqrtRatioTargetX32, returnValues.sqrtRatioNextX32);
 
     if (zeroForOne) {
-      returnValues.amountIn = max && exactIn ? returnValues.amountIn : SqrtPriceMath.getAmount0Delta(returnValues.sqrtRatioNextX96, sqrtRatioCurrentX32, liquidity, true);
-      returnValues.amountOut = max && !exactIn ? returnValues.amountOut : SqrtPriceMath.getAmount1Delta(returnValues.sqrtRatioNextX96, sqrtRatioCurrentX32, liquidity, false);
+      returnValues.amountIn = max && exactIn ? returnValues.amountIn : SqrtPriceMath.getAmount0Delta(returnValues.sqrtRatioNextX32, sqrtRatioCurrentX32, liquidity, true);
+      returnValues.amountOut = max && !exactIn ? returnValues.amountOut : SqrtPriceMath.getAmount1Delta(returnValues.sqrtRatioNextX32, sqrtRatioCurrentX32, liquidity, false);
     } else {
-      returnValues.amountIn = max && exactIn ? returnValues.amountIn : SqrtPriceMath.getAmount1Delta(sqrtRatioCurrentX32, returnValues.sqrtRatioNextX96, liquidity, true);
-      returnValues.amountOut = max && !exactIn ? returnValues.amountOut : SqrtPriceMath.getAmount0Delta(sqrtRatioCurrentX32, returnValues.sqrtRatioNextX96, liquidity, false);
+      returnValues.amountIn = max && exactIn ? returnValues.amountIn : SqrtPriceMath.getAmount1Delta(sqrtRatioCurrentX32, returnValues.sqrtRatioNextX32, liquidity, true);
+      returnValues.amountOut = max && !exactIn ? returnValues.amountOut : SqrtPriceMath.getAmount0Delta(sqrtRatioCurrentX32, returnValues.sqrtRatioNextX32, liquidity, false);
     }
 
     if (!exactIn && JSBI.greaterThan(returnValues.amountOut, JSBI.multiply(amountRemaining, NEGATIVE_ONE))) {
       returnValues.amountOut = JSBI.multiply(amountRemaining, NEGATIVE_ONE);
     }
 
-    if (exactIn && JSBI.notEqual(returnValues.sqrtRatioNextX96, sqrtRatioTargetX32)) {
+    if (exactIn && JSBI.notEqual(returnValues.sqrtRatioNextX32, sqrtRatioTargetX32)) {
       // we didn't reach the target, so take the remainder of the maximum input as fee
       returnValues.feeAmount = JSBI.subtract(amountRemaining, returnValues.amountIn);
     } else {
       returnValues.feeAmount = FullMath.mulDivRoundingUp(returnValues.amountIn, JSBI.BigInt(feePips), JSBI.subtract(MAX_FEE, JSBI.BigInt(feePips)));
     }
 
-    return [returnValues.sqrtRatioNextX96, returnValues.amountIn, returnValues.amountOut, returnValues.feeAmount];
+    return [returnValues.sqrtRatioNextX32, returnValues.amountIn, returnValues.amountOut, returnValues.feeAmount];
   };
 
   return SwapMath;
