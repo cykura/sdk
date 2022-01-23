@@ -927,7 +927,9 @@ var ZERO = /*#__PURE__*/JSBI.BigInt(0);
 var ONE = /*#__PURE__*/JSBI.BigInt(1); // used in liquidity amount math
 
 var Q32 = /*#__PURE__*/JSBI.exponentiate( /*#__PURE__*/JSBI.BigInt(2), /*#__PURE__*/JSBI.BigInt(32));
-var Q64 = /*#__PURE__*/JSBI.exponentiate(Q32, /*#__PURE__*/JSBI.BigInt(2));
+var Q64 = /*#__PURE__*/JSBI.exponentiate( /*#__PURE__*/JSBI.BigInt(2), /*#__PURE__*/JSBI.BigInt(64));
+var MaxUint32 = /*#__PURE__*/JSBI.subtract(Q32, ONE);
+var U32Resolution = /*#__PURE__*/JSBI.BigInt(32);
 
 var _anchor$web = web3,
     PublicKey = _anchor$web.PublicKey;
@@ -1015,12 +1017,12 @@ var FullMath = /*#__PURE__*/function () {
 
 function multiplyIn128(x, y) {
   var product = JSBI.multiply(x, y);
-  return JSBI.bitwiseAnd(product, Q64);
+  return JSBI.bitwiseAnd(product, MaxUint128$1);
 }
 
 function addIn128(x, y) {
   var sum = JSBI.add(x, y);
-  return JSBI.bitwiseAnd(sum, Q64);
+  return JSBI.bitwiseAnd(sum, MaxUint128$1);
 }
 
 var SqrtPriceMath = /*#__PURE__*/function () {
@@ -1036,7 +1038,7 @@ var SqrtPriceMath = /*#__PURE__*/function () {
       sqrtRatioBX32 = _ref[1];
     }
 
-    var numerator1 = JSBI.leftShift(liquidity, JSBI.BigInt(32));
+    var numerator1 = JSBI.leftShift(liquidity, U32Resolution);
     var numerator2 = JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32);
     return roundUp ? FullMath.mulDivRoundingUp(FullMath.mulDivRoundingUp(numerator1, numerator2, sqrtRatioBX32), ONE, sqrtRatioAX32) : JSBI.divide(JSBI.divide(JSBI.multiply(numerator1, numerator2), sqrtRatioBX32), sqrtRatioAX32);
   };
@@ -1065,7 +1067,7 @@ var SqrtPriceMath = /*#__PURE__*/function () {
 
   SqrtPriceMath.getNextSqrtPriceFromAmount0RoundingUp = function getNextSqrtPriceFromAmount0RoundingUp(sqrtPX32, liquidity, amount, add) {
     if (JSBI.equal(amount, ZERO)) return sqrtPX32;
-    var numerator1 = JSBI.leftShift(liquidity, JSBI.BigInt(32));
+    var numerator1 = JSBI.leftShift(liquidity, U32Resolution);
 
     if (add) {
       var product = multiplyIn128(amount, sqrtPX32);
@@ -1093,7 +1095,7 @@ var SqrtPriceMath = /*#__PURE__*/function () {
 
   SqrtPriceMath.getNextSqrtPriceFromAmount1RoundingDown = function getNextSqrtPriceFromAmount1RoundingDown(sqrtPX32, liquidity, amount, add) {
     if (add) {
-      var quotient = JSBI.lessThanOrEqual(amount, Q32) ? JSBI.divide(JSBI.leftShift(amount, JSBI.BigInt(32)), liquidity) : JSBI.divide(JSBI.multiply(amount, Q32), liquidity);
+      var quotient = JSBI.lessThanOrEqual(amount, MaxUint32) ? JSBI.divide(JSBI.leftShift(amount, U32Resolution), liquidity) : JSBI.divide(JSBI.multiply(amount, Q32), liquidity);
       return JSBI.add(sqrtPX32, quotient);
     } else {
       var _quotient = FullMath.mulDivRoundingUp(amount, Q32, liquidity);

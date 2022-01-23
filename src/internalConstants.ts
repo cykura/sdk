@@ -7,4 +7,10 @@ export const ONE = JSBI.BigInt(1)
 
 // used in liquidity amount math
 export const Q32 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(32))
-export const Q64 = JSBI.exponentiate(Q32, JSBI.BigInt(2))
+export const Q64 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(64))
+export const Q128 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(128))
+
+export const MaxUint32 = JSBI.subtract(Q32, ONE)
+export const MaxUint64 = JSBI.subtract(Q64, ONE)
+
+export const U32Resolution = JSBI.BigInt(32)

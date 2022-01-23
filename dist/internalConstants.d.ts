@@ -4,3 +4,7 @@ export declare const ZERO: JSBI;
 export declare const ONE: JSBI;
 export declare const Q32: JSBI;
 export declare const Q64: JSBI;
+export declare const Q128: JSBI;
+export declare const MaxUint32: JSBI;
+export declare const MaxUint64: JSBI;
+export declare const U32Resolution: JSBI;

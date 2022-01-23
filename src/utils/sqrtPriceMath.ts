@@ -1,19 +1,17 @@
 import { MaxUint128 } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
-import { ONE, ZERO, Q64, Q32 } from '../internalConstants'
+import { ONE, ZERO, Q32, MaxUint32, U32Resolution } from '../internalConstants'
 import { FullMath } from './fullMath'
-
-const MaxUint160 = JSBI.subtract(JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(160)), ONE)
 
 function multiplyIn128(x: JSBI, y: JSBI): JSBI {
   const product = JSBI.multiply(x, y)
-  return JSBI.bitwiseAnd(product, Q64)
+  return JSBI.bitwiseAnd(product, MaxUint128)
 }
 
 function addIn128(x: JSBI, y: JSBI): JSBI {
   const sum = JSBI.add(x, y)
-  return JSBI.bitwiseAnd(sum, Q64)
+  return JSBI.bitwiseAnd(sum, MaxUint128)
 }
 
 export abstract class SqrtPriceMath {
@@ -27,7 +25,7 @@ export abstract class SqrtPriceMath {
       ;[sqrtRatioAX32, sqrtRatioBX32] = [sqrtRatioBX32, sqrtRatioAX32]
     }
 
-    const numerator1 = JSBI.leftShift(liquidity, JSBI.BigInt(32))
+    const numerator1 = JSBI.leftShift(liquidity, U32Resolution)
     const numerator2 = JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32)
 
     return roundUp
@@ -75,7 +73,7 @@ export abstract class SqrtPriceMath {
     add: boolean
   ): JSBI {
     if (JSBI.equal(amount, ZERO)) return sqrtPX32
-    const numerator1 = JSBI.leftShift(liquidity, JSBI.BigInt(32))
+    const numerator1 = JSBI.leftShift(liquidity, U32Resolution)
 
     if (add) {
       let product = multiplyIn128(amount, sqrtPX32)
@@ -104,8 +102,8 @@ export abstract class SqrtPriceMath {
     add: boolean
   ): JSBI {
     if (add) {
-      const quotient = JSBI.lessThanOrEqual(amount, Q32)
-        ? JSBI.divide(JSBI.leftShift(amount, JSBI.BigInt(32)), liquidity)
+      const quotient = JSBI.lessThanOrEqual(amount, MaxUint32)
+        ? JSBI.divide(JSBI.leftShift(amount, U32Resolution), liquidity)
         : JSBI.divide(JSBI.multiply(amount, Q32), liquidity)
 
       return JSBI.add(sqrtPX32, quotient)
