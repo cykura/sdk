@@ -1,6 +1,6 @@
 import { BigintIsh } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
-import { Q64, Q32 } from '../internalConstants'
+import { Q64, Q32, MaxUint32 } from '../internalConstants'
 
 /**
  * Returns an imprecise maximum amount of liquidity received for a given amount of token 0.
@@ -17,7 +17,7 @@ function maxLiquidityForAmount0Imprecise(sqrtRatioAX32: JSBI, sqrtRatioBX32: JSB
   if (JSBI.greaterThan(sqrtRatioAX32, sqrtRatioBX32)) {
     ;[sqrtRatioAX32, sqrtRatioBX32] = [sqrtRatioBX32, sqrtRatioAX32]
   }
-  const intermediate = JSBI.divide(JSBI.multiply(sqrtRatioAX32, sqrtRatioBX32), Q32)
+  const intermediate = JSBI.divide(JSBI.multiply(sqrtRatioAX32, sqrtRatioBX32), MaxUint32)
   return JSBI.divide(JSBI.multiply(JSBI.BigInt(amount0), intermediate), JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32))
 }
 
@@ -35,7 +35,7 @@ function maxLiquidityForAmount0Precise(sqrtRatioAX32: JSBI, sqrtRatioBX32: JSBI,
   }
 
   const numerator = JSBI.multiply(JSBI.multiply(JSBI.BigInt(amount0), sqrtRatioAX32), sqrtRatioBX32)
-  const denominator = JSBI.multiply(Q32, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32))
+  const denominator = JSBI.multiply(MaxUint32, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32))
 
   return JSBI.divide(numerator, denominator)
 }
@@ -51,7 +51,7 @@ function maxLiquidityForAmount1(sqrtRatioAX32: JSBI, sqrtRatioBX32: JSBI, amount
   if (JSBI.greaterThan(sqrtRatioAX32, sqrtRatioBX32)) {
     ;[sqrtRatioAX32, sqrtRatioBX32] = [sqrtRatioBX32, sqrtRatioAX32]
   }
-  return JSBI.divide(JSBI.multiply(JSBI.BigInt(amount1), Q32), JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32))
+  return JSBI.divide(JSBI.multiply(JSBI.BigInt(amount1), MaxUint32), JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32))
 }
 
 /**
