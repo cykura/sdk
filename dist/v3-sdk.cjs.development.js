@@ -4102,6 +4102,7 @@ exports.Route = Route;
 exports.SelfPermit = SelfPermit;
 exports.SqrtPriceMath = SqrtPriceMath;
 exports.Staker = Staker;
+exports.SwapMath = SwapMath;
 exports.SwapQuoter = SwapQuoter;
 exports.SwapRouter = SwapRouter;
 exports.TICK_SPACINGS = TICK_SPACINGS;

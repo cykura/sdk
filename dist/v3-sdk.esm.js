@@ -4085,5 +4085,5 @@ var SwapRouter = /*#__PURE__*/function () {
 }();
 SwapRouter.INTERFACE = /*#__PURE__*/new Interface(abi$6);
 
-export { ADDRESS_ZERO, FACTORY_ADDRESS, FeeAmount, FullMath, LOCAL_PROGRAM_ID, LiquidityMath, Multicall, NoTickDataProvider, NonfungiblePositionManager, POOL_INIT_CODE_HASH, Payments, Pool, Position, Route, SelfPermit, SqrtPriceMath, Staker, SwapQuoter, SwapRouter, TICK_SPACINGS, Tick, TickList, TickListDataProvider, TickMath, Trade, computePoolAddress, encodeRouteToPath, encodeSqrtRatioX32, isSorted, maxLiquidityForAmounts, mostSignificantBit, nearestUsableTick, priceToClosestTick, tickToPrice, toHex, tradeComparator, u32ToSeed };
+export { ADDRESS_ZERO, FACTORY_ADDRESS, FeeAmount, FullMath, LOCAL_PROGRAM_ID, LiquidityMath, Multicall, NoTickDataProvider, NonfungiblePositionManager, POOL_INIT_CODE_HASH, Payments, Pool, Position, Route, SelfPermit, SqrtPriceMath, Staker, SwapMath, SwapQuoter, SwapRouter, TICK_SPACINGS, Tick, TickList, TickListDataProvider, TickMath, Trade, computePoolAddress, encodeRouteToPath, encodeSqrtRatioX32, isSorted, maxLiquidityForAmounts, mostSignificantBit, nearestUsableTick, priceToClosestTick, tickToPrice, toHex, tradeComparator, u32ToSeed };
 //# sourceMappingURL=v3-sdk.esm.js.map
