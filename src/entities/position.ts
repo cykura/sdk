@@ -77,34 +77,18 @@ export class Position {
             false
           )
         )
-        // console.log('AM0 less than tick Lowwer', this._token0Amount.toSignificant())
       } else if (this.pool.tickCurrent < this.tickUpper) {
-        if (this.pool.token0.decimals < this.pool.token1.decimals) {
-          this._token0Amount = CurrencyAmount.fromRawAmount(
-            this.pool.token0,
-            SqrtPriceMath.getAmount0Delta(
-              this.pool.sqrtRatioX32,
-              TickMath.getSqrtRatioAtTick(this.tickUpper),
-              this.liquidity,
-              false
-            )
+        this._token0Amount = CurrencyAmount.fromRawAmount(
+          this.pool.token0,
+          SqrtPriceMath.getAmount0Delta(
+            this.pool.sqrtRatioX32,
+            TickMath.getSqrtRatioAtTick(this.tickUpper),
+            this.liquidity,
+            false
           )
-          // console.log('AMO LT TU token0 < token1', this._token0Amount.toSignificant())
-        } else {
-          this._token0Amount = CurrencyAmount.fromRawAmount(
-            this.pool.token0, // WSOL USDC and USDC WSOL all four ways? This works for both WSOL USDC, USDC WSOL entered both way for deposit amount inputs.
-            SqrtPriceMath.getAmount0Delta(
-              this.pool.sqrtRatioX32,
-              TickMath.getSqrtRatioAtTick(this.tickUpper),
-              this.liquidity,
-              false
-            )
-          )
-          // console.log('AMO LT TU token0 > token1', this._token0Amount.toSignificant())
-        }
+        )
       } else {
         this._token0Amount = CurrencyAmount.fromRawAmount(this.pool.token0, ZERO)
-        // console.log('AM0 greater than tick upper', this._token0Amount.toSignificant())
       }
     }
     return this._token0Amount
@@ -117,31 +101,16 @@ export class Position {
     if (this._token1Amount === null) {
       if (this.pool.tickCurrent < this.tickLower) {
         this._token1Amount = CurrencyAmount.fromRawAmount(this.pool.token1, ZERO)
-        // console.log('AM1 less than tick lower', this._token1Amount.toSignificant())
       } else if (this.pool.tickCurrent < this.tickUpper) {
-        if (this.pool.token0.decimals < this.pool.token1.decimals) {
-          this._token1Amount = CurrencyAmount.fromRawAmount(
-            this.pool.token1,
-            SqrtPriceMath.getAmount1Delta(
-              TickMath.getSqrtRatioAtTick(this.tickLower),
-              this.pool.sqrtRatioX32,
-              this.liquidity,
-              false
-            )
+        this._token1Amount = CurrencyAmount.fromRawAmount(
+          this.pool.token1,
+          SqrtPriceMath.getAmount1Delta(
+            TickMath.getSqrtRatioAtTick(this.tickLower),
+            this.pool.sqrtRatioX32,
+            this.liquidity,
+            false
           )
-          // console.log('AM1 LT TU token0 < token1', this._token1Amount.toSignificant())
-        } else {
-          this._token1Amount = CurrencyAmount.fromRawAmount(
-            this.pool.token1,
-            SqrtPriceMath.getAmount1Delta(
-              TickMath.getSqrtRatioAtTick(this.tickLower),
-              this.pool.sqrtRatioX32,
-              this.liquidity,
-              false
-            )
-          )
-          // console.log('AM1 LT TU token0 > token1', this._token1Amount.toSignificant())
-        }
+        )
       } else {
         this._token1Amount = CurrencyAmount.fromRawAmount(
           this.pool.token1,
@@ -152,7 +121,6 @@ export class Position {
             false
           )
         )
-        // console.log('AM1 greater than Lowwer', this._token1Amount.toSignificant())
       }
     }
     return this._token1Amount

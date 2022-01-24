@@ -1661,22 +1661,8 @@ function nearestUsableTick(tick, tickSpacing) {
 
 function tickToPrice(baseToken, quoteToken, tick) {
   var sqrtRatioX32 = TickMath.getSqrtRatioAtTick(tick);
-  var ratioX64 = JSBI.multiply(sqrtRatioX32, sqrtRatioX32); // handle decimals
-
-  var decimalDiff = baseToken.decimals > quoteToken.decimals ? baseToken.decimals - quoteToken.decimals : quoteToken.decimals - baseToken.decimals;
-  var decimalMul = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimalDiff));
-
-  if (baseToken.decimals !== quoteToken.decimals) {
-    if (baseToken.decimals < quoteToken.decimals) {
-      // USDT WSOL(invert). WSOL USDT
-      return new Price(baseToken, quoteToken, Q64, JSBI.multiply(ratioX64, decimalMul));
-    } else {
-      // WSOL USDC. USDC WSOL (invert)
-      return new Price(baseToken, quoteToken, Q64, JSBI.divide(ratioX64, decimalMul));
-    }
-  } else {
-    return baseToken.sortsBefore(quoteToken) ? new Price(baseToken, quoteToken, Q64, ratioX64) : new Price(baseToken, quoteToken, ratioX64, Q64);
-  }
+  var ratioX64 = JSBI.multiply(sqrtRatioX32, sqrtRatioX32);
+  return baseToken.sortsBefore(quoteToken) ? new Price(baseToken, quoteToken, Q64, ratioX64) : new Price(baseToken, quoteToken, ratioX64, Q64);
 }
 /**
  * Returns the first tick for which the given price is greater than or equal to the tick price
@@ -2091,25 +2077,9 @@ var Pool = /*#__PURE__*/function () {
   _createClass(Pool, [{
     key: "token0Price",
     get: function get() {
-      // handle decimals
-      var decimalDiff = this.token0.decimals > this.token1.decimals ? this.token0.decimals - this.token1.decimals : this.token1.decimals - this.token0.decimals;
-      var decimalMul = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimalDiff));
-      var ratioX64 = JSBI.multiply(this.sqrtRatioX32, this.sqrtRatioX32);
+      var _this$_token0Price;
 
-      if (this.token0.decimals !== this.token1.decimals) {
-        if (this.token0.decimals < this.token1.decimals) {
-          var p = new Price(this.token0, this.token1, Q64, JSBI.multiply(ratioX64, decimalMul));
-          return p;
-        } else {
-          var _p = new Price(this.token0, this.token1, Q64, JSBI.divide(ratioX64, decimalMul));
-
-          return _p;
-        }
-      } else {
-        var _this$_token0Price;
-
-        return (_this$_token0Price = this._token0Price) != null ? _this$_token0Price : this._token0Price = new Price(this.token0, this.token1, Q64, ratioX64);
-      }
+      return (_this$_token0Price = this._token0Price) != null ? _this$_token0Price : this._token0Price = new Price(this.token0, this.token1, Q64, JSBI.multiply(this.sqrtRatioX32, this.sqrtRatioX32));
     }
     /**
      * Returns the current mid price of the pool in terms of token1, i.e. the ratio of token0 over token1
@@ -2118,25 +2088,9 @@ var Pool = /*#__PURE__*/function () {
   }, {
     key: "token1Price",
     get: function get() {
-      // handle decimals
-      var decimalDiff = this.token0.decimals > this.token1.decimals ? this.token0.decimals - this.token1.decimals : this.token1.decimals - this.token0.decimals;
-      var decimalMul = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimalDiff));
-      var ratioX64 = JSBI.multiply(this.sqrtRatioX32, this.sqrtRatioX32);
+      var _this$_token1Price;
 
-      if (this.token0.decimals !== this.token1.decimals) {
-        if (this.token0.decimals < this.token1.decimals) {
-          var p = new Price(this.token0, this.token1, JSBI.divide(ratioX64, decimalMul), Q64);
-          return p;
-        } else {
-          var _p2 = new Price(this.token0, this.token1, JSBI.multiply(ratioX64, decimalMul), Q64);
-
-          return _p2;
-        }
-      } else {
-        var _this$_token1Price;
-
-        return (_this$_token1Price = this._token1Price) != null ? _this$_token1Price : this._token1Price = new Price(this.token1, this.token0, ratioX64, Q64);
-      }
+      return (_this$_token1Price = this._token1Price) != null ? _this$_token1Price : this._token1Price = new Price(this.token1, this.token0, JSBI.multiply(this.sqrtRatioX32, this.sqrtRatioX32), Q64);
     }
   }, {
     key: "chainId",
@@ -2413,16 +2367,11 @@ var Position = /*#__PURE__*/function () {
     get: function get() {
       if (this._token0Amount === null) {
         if (this.pool.tickCurrent < this.tickLower) {
-          this._token0Amount = CurrencyAmount.fromRawAmount(this.pool.token0, SqrtPriceMath.getAmount0Delta(TickMath.getSqrtRatioAtTick(this.tickLower), TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, false)); // console.log('AM0 less than tick Lowwer', this._token0Amount.toSignificant())
+          this._token0Amount = CurrencyAmount.fromRawAmount(this.pool.token0, SqrtPriceMath.getAmount0Delta(TickMath.getSqrtRatioAtTick(this.tickLower), TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, false));
         } else if (this.pool.tickCurrent < this.tickUpper) {
-          if (this.pool.token0.decimals < this.pool.token1.decimals) {
-            this._token0Amount = CurrencyAmount.fromRawAmount(this.pool.token0, SqrtPriceMath.getAmount0Delta(this.pool.sqrtRatioX32, TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, false)); // console.log('AMO LT TU token0 < token1', this._token0Amount.toSignificant())
-          } else {
-            this._token0Amount = CurrencyAmount.fromRawAmount(this.pool.token0, // WSOL USDC and USDC WSOL all four ways? This works for both WSOL USDC, USDC WSOL entered both way for deposit amount inputs.
-            SqrtPriceMath.getAmount0Delta(this.pool.sqrtRatioX32, TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, false)); // console.log('AMO LT TU token0 > token1', this._token0Amount.toSignificant())
-          }
+          this._token0Amount = CurrencyAmount.fromRawAmount(this.pool.token0, SqrtPriceMath.getAmount0Delta(this.pool.sqrtRatioX32, TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, false));
         } else {
-          this._token0Amount = CurrencyAmount.fromRawAmount(this.pool.token0, ZERO); // console.log('AM0 greater than tick upper', this._token0Amount.toSignificant())
+          this._token0Amount = CurrencyAmount.fromRawAmount(this.pool.token0, ZERO);
         }
       }
 
@@ -2437,15 +2386,11 @@ var Position = /*#__PURE__*/function () {
     get: function get() {
       if (this._token1Amount === null) {
         if (this.pool.tickCurrent < this.tickLower) {
-          this._token1Amount = CurrencyAmount.fromRawAmount(this.pool.token1, ZERO); // console.log('AM1 less than tick lower', this._token1Amount.toSignificant())
+          this._token1Amount = CurrencyAmount.fromRawAmount(this.pool.token1, ZERO);
         } else if (this.pool.tickCurrent < this.tickUpper) {
-          if (this.pool.token0.decimals < this.pool.token1.decimals) {
-            this._token1Amount = CurrencyAmount.fromRawAmount(this.pool.token1, SqrtPriceMath.getAmount1Delta(TickMath.getSqrtRatioAtTick(this.tickLower), this.pool.sqrtRatioX32, this.liquidity, false)); // console.log('AM1 LT TU token0 < token1', this._token1Amount.toSignificant())
-          } else {
-            this._token1Amount = CurrencyAmount.fromRawAmount(this.pool.token1, SqrtPriceMath.getAmount1Delta(TickMath.getSqrtRatioAtTick(this.tickLower), this.pool.sqrtRatioX32, this.liquidity, false)); // console.log('AM1 LT TU token0 > token1', this._token1Amount.toSignificant())
-          }
+          this._token1Amount = CurrencyAmount.fromRawAmount(this.pool.token1, SqrtPriceMath.getAmount1Delta(TickMath.getSqrtRatioAtTick(this.tickLower), this.pool.sqrtRatioX32, this.liquidity, false));
         } else {
-          this._token1Amount = CurrencyAmount.fromRawAmount(this.pool.token1, SqrtPriceMath.getAmount1Delta(TickMath.getSqrtRatioAtTick(this.tickLower), TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, false)); // console.log('AM1 greater than Lowwer', this._token1Amount.toSignificant())
+          this._token1Amount = CurrencyAmount.fromRawAmount(this.pool.token1, SqrtPriceMath.getAmount1Delta(TickMath.getSqrtRatioAtTick(this.tickLower), TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, false));
         }
       }
 

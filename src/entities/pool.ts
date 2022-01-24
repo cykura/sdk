@@ -100,50 +100,30 @@ export class Pool {
    * Returns the current mid price of the pool in terms of token0, i.e. the ratio of token1 over token0
    */
   public get token0Price(): Price<Token, Token> {
-    // handle decimals
-    const decimalDiff =
-      this.token0.decimals > this.token1.decimals
-        ? this.token0.decimals - this.token1.decimals
-        : this.token1.decimals - this.token0.decimals
-    const decimalMul = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimalDiff))
-    const ratioX64 = JSBI.multiply(this.sqrtRatioX32, this.sqrtRatioX32)
-
-    if (this.token0.decimals !== this.token1.decimals) {
-      if (this.token0.decimals < this.token1.decimals) {
-        const p = new Price(this.token0, this.token1, Q64, JSBI.multiply(ratioX64, decimalMul))
-        return p
-      } else {
-        const p = new Price(this.token0, this.token1, Q64, JSBI.divide(ratioX64, decimalMul))
-        return p
-      }
-    } else {
-      return this._token0Price ?? (this._token0Price = new Price(this.token0, this.token1, Q64, ratioX64))
-    }
+    return (
+      this._token0Price ??
+      (this._token0Price = new Price(
+        this.token0,
+        this.token1,
+        Q64,
+        JSBI.multiply(this.sqrtRatioX32, this.sqrtRatioX32)
+      ))
+    )
   }
 
   /**
    * Returns the current mid price of the pool in terms of token1, i.e. the ratio of token0 over token1
    */
   public get token1Price(): Price<Token, Token> {
-    // handle decimals
-    const decimalDiff =
-      this.token0.decimals > this.token1.decimals
-        ? this.token0.decimals - this.token1.decimals
-        : this.token1.decimals - this.token0.decimals
-    const decimalMul = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimalDiff))
-    const ratioX64 = JSBI.multiply(this.sqrtRatioX32, this.sqrtRatioX32)
-
-    if (this.token0.decimals !== this.token1.decimals) {
-      if (this.token0.decimals < this.token1.decimals) {
-        const p = new Price(this.token0, this.token1, JSBI.divide(ratioX64, decimalMul), Q64)
-        return p
-      } else {
-        const p = new Price(this.token0, this.token1, JSBI.multiply(ratioX64, decimalMul), Q64)
-        return p
-      }
-    } else {
-      return this._token1Price ?? (this._token1Price = new Price(this.token1, this.token0, ratioX64, Q64))
-    }
+    return (
+      this._token1Price ??
+      (this._token1Price = new Price(
+        this.token1,
+        this.token0,
+        JSBI.multiply(this.sqrtRatioX32, this.sqrtRatioX32),
+        Q64
+      ))
+    )
   }
 
   /**

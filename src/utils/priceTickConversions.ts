@@ -16,26 +16,9 @@ export function tickToPrice(baseToken: Token, quoteToken: Token, tick: number): 
 
   const ratioX64 = JSBI.multiply(sqrtRatioX32, sqrtRatioX32)
 
-  // handle decimals
-  const decimalDiff =
-    baseToken.decimals > quoteToken.decimals
-      ? baseToken.decimals - quoteToken.decimals
-      : quoteToken.decimals - baseToken.decimals
-  const decimalMul = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimalDiff))
-
-  if (baseToken.decimals !== quoteToken.decimals) {
-    if (baseToken.decimals < quoteToken.decimals) {
-      // USDT WSOL(invert). WSOL USDT
-      return new Price(baseToken, quoteToken, Q64, JSBI.multiply(ratioX64, decimalMul))
-    } else {
-      // WSOL USDC. USDC WSOL (invert)
-      return new Price(baseToken, quoteToken, Q64, JSBI.divide(ratioX64, decimalMul))
-    }
-  } else {
-    return baseToken.sortsBefore(quoteToken)
-      ? new Price(baseToken, quoteToken, Q64, ratioX64)
-      : new Price(baseToken, quoteToken, ratioX64, Q64)
-  }
+  return baseToken.sortsBefore(quoteToken)
+    ? new Price(baseToken, quoteToken, Q64, ratioX64)
+    : new Price(baseToken, quoteToken, ratioX64, Q64)
 }
 
 /**
