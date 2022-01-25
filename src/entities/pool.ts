@@ -1,4 +1,5 @@
 import { BigintIsh, Price, Token, CurrencyAmount } from '@uniswap/sdk-core'
+import { web3 } from '@project-serum/anchor'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 import { FACTORY_ADDRESS, FeeAmount, TICK_SPACINGS } from '../constants'
@@ -9,7 +10,8 @@ import { SwapMath } from '../utils/swapMath'
 import { TickMath } from '../utils/tickMath'
 import { Tick, TickConstructorArgs } from './tick'
 import { NoTickDataProvider, TickDataProvider } from './tickDataProvider'
-import { TickListDataProvider } from './tickListDataProvider'
+import { tickPosition } from '.'
+import { TICK_SEED } from '../utils/seeds'
 
 interface StepComputations {
   sqrtPriceStartX32: JSBI
@@ -19,6 +21,12 @@ interface StepComputations {
   amountIn: JSBI
   amountOut: JSBI
   feeAmount: JSBI
+}
+
+interface SwapAccount {
+  pubkey: web3.PublicKey,
+  isSigner: boolean,
+  isMutable: boolean,
 }
 
 /**
@@ -58,7 +66,7 @@ export class Pool {
    * @param sqrtRatioX32 The sqrt of the current ratio of amounts of token1 to token0
    * @param liquidity The current value of in range liquidity
    * @param tickCurrent The current tick of the pool
-   * @param ticks The current state of the pool ticks or a data provider that can return tick data
+   * @param tickDataProvider The current state of the pool ticks or a data provider that can return tick data
    */
   public constructor(
     tokenA: Token,
@@ -67,7 +75,7 @@ export class Pool {
     sqrtRatioX32: BigintIsh,
     liquidity: BigintIsh,
     tickCurrent: number,
-    ticks: TickDataProvider | (Tick | TickConstructorArgs)[] = NO_TICK_DATA_PROVIDER_DEFAULT
+    tickDataProvider: TickDataProvider = NO_TICK_DATA_PROVIDER_DEFAULT
   ) {
     invariant(Number.isInteger(fee) && fee < 1_000_000, 'FEE')
 
@@ -84,7 +92,7 @@ export class Pool {
     this.sqrtRatioX32 = JSBI.BigInt(sqrtRatioX32)
     this.liquidity = JSBI.BigInt(liquidity)
     this.tickCurrent = tickCurrent
-    this.tickDataProvider = Array.isArray(ticks) ? new TickListDataProvider(ticks, TICK_SPACINGS[fee]) : ticks
+    this.tickDataProvider = tickDataProvider
   }
 
   /**
@@ -229,7 +237,7 @@ export class Pool {
     zeroForOne: boolean,
     amountSpecified: JSBI,
     sqrtPriceLimitX32?: JSBI
-  ): Promise<{ amountCalculated: JSBI; sqrtRatioX32: JSBI; liquidity: JSBI; tickCurrent: number }> {
+  ): Promise<{ amountCalculated: JSBI; sqrtRatioX32: JSBI; liquidity: JSBI; tickCurrent: number, accounts: SwapAccount[] }> {
     if (!sqrtPriceLimitX32)
       sqrtPriceLimitX32 = zeroForOne
         ? JSBI.add(TickMath.MIN_SQRT_RATIO, ONE)
@@ -252,8 +260,11 @@ export class Pool {
       amountCalculated: ZERO,
       sqrtPriceX32: this.sqrtRatioX32,
       tick: this.tickCurrent,
+      accounts: [] as SwapAccount[], // bitmap and tick accounts which must be traversed
       liquidity: this.liquidity
     }
+
+    let lastSavedWordPos =  0
 
     // start swap while loop
     while (JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) && state.sqrtPriceX32 != sqrtPriceLimitX32) {
@@ -263,11 +274,25 @@ export class Pool {
       // because each iteration of the while loop rounds, we can't optimize this code (relative to the smart contract)
       // by simply traversing to the next available tick, we instead need to exactly replicate
       // tickBitmap.nextInitializedTickWithinOneWord
-      ;[step.tickNext, step.initialized] = await this.tickDataProvider.nextInitializedTickWithinOneWord(
+      
+      // save the bitmap, and the tick account if it is initialized
+      const nextInitTick = await this.tickDataProvider.nextInitializedTickWithinOneWord(
         state.tick,
         zeroForOne,
         this.tickSpacing
       )
+      step.tickNext = nextInitTick[0]
+      step.initialized = nextInitTick[1]
+      const wordPos = nextInitTick[2]
+      const bitmapAddress = nextInitTick[4]
+      if (lastSavedWordPos !== wordPos) {
+        state.accounts.push({
+          pubkey: bitmapAddress,
+          isMutable: false,
+          isSigner: false,
+        });
+        lastSavedWordPos = wordPos
+      }
 
       if (step.tickNext < TickMath.MIN_TICK) {
         step.tickNext = TickMath.MIN_TICK
@@ -303,6 +328,13 @@ export class Pool {
       if (JSBI.equal(state.sqrtPriceX32, step.sqrtPriceNextX32)) {
         // if the tick is initialized, run the tick transition
         if (step.initialized) {
+          // push the crossed tick to accounts array
+          state.accounts.push({
+            pubkey: await this.tickDataProvider.getTickAddress(step.tickNext),
+            isMutable: true,
+            isSigner: false,
+          })
+          // get the liquidity at this tick
           let liquidityNet = JSBI.BigInt((await this.tickDataProvider.getTick(step.tickNext)).liquidityNet)
           // if we're moving leftward, we interpret liquidityNet as the opposite sign
           // safe because liquidityNet cannot be type(int128).min
@@ -322,7 +354,10 @@ export class Pool {
       amountCalculated: state.amountCalculated,
       sqrtRatioX32: state.sqrtPriceX32,
       liquidity: state.liquidity,
-      tickCurrent: state.tick
+      tickCurrent: state.tick,
+
+      // active ticks being flipped, plus each bitmap which is traversed
+      accounts: state.accounts,
     }
   }
 
