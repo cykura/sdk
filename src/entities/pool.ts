@@ -26,7 +26,7 @@ interface StepComputations {
 interface SwapAccount {
   pubkey: web3.PublicKey,
   isSigner: boolean,
-  isMutable: boolean,
+  isWritable: boolean,
 }
 
 /**
@@ -77,6 +77,7 @@ export class Pool {
     tickCurrent: number,
     tickDataProvider: TickDataProvider = NO_TICK_DATA_PROVIDER_DEFAULT
   ) {
+    // console.log('tick current in pool constructor', tickCurrent)
     invariant(Number.isInteger(fee) && fee < 1_000_000, 'FEE')
 
     const tickCurrentSqrtRatioX32 = TickMath.getSqrtRatioAtTick(tickCurrent)
@@ -180,20 +181,22 @@ export class Pool {
   public async getOutputAmount(
     inputAmount: CurrencyAmount<Token>,
     sqrtPriceLimitX32?: JSBI
-  ): Promise<[CurrencyAmount<Token>, Pool]> {
+  ): Promise<[CurrencyAmount<Token>, Pool, SwapAccount[]]> {
     invariant(this.involvesToken(inputAmount.currency), 'TOKEN')
 
     const zeroForOne = inputAmount.currency.equals(this.token0)
 
-    const { amountCalculated: outputAmount, sqrtRatioX32, liquidity, tickCurrent } = await this.swap(
+    const { amountCalculated: outputAmount, sqrtRatioX32, liquidity, tickCurrent, accounts } = await this.swap(
       zeroForOne,
       inputAmount.quotient,
       sqrtPriceLimitX32
     )
+    // console.log('got tick from swap', tickCurrent)
     const outputToken = zeroForOne ? this.token1 : this.token0
     return [
       CurrencyAmount.fromRawAmount(outputToken, JSBI.multiply(outputAmount, NEGATIVE_ONE)),
-      new Pool(this.token0, this.token1, this.fee, sqrtRatioX32, liquidity, tickCurrent, this.tickDataProvider)
+      new Pool(this.token0, this.token1, this.fee, sqrtRatioX32, liquidity, tickCurrent, this.tickDataProvider),
+      accounts,
     ]
   }
 
@@ -252,7 +255,7 @@ export class Pool {
     }
 
     const exactInput = JSBI.greaterThanOrEqual(amountSpecified, ZERO)
-
+    console.log('exact input', exactInput)
     // keep track of swap state
 
     const state = {
@@ -264,10 +267,10 @@ export class Pool {
       liquidity: this.liquidity
     }
 
-    let lastSavedWordPos =  0
+    let lastSavedWordPos: number | undefined
 
     // start swap while loop
-    while (JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) && state.sqrtPriceX32 != sqrtPriceLimitX32) {
+    while (JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) && state.sqrtPriceX32 != sqrtPriceLimitX32 && state.tick < TickMath.MAX_TICK && state.tick > TickMath.MIN_TICK) {
       let step: Partial<StepComputations> = {}
       step.sqrtPriceStartX32 = state.sqrtPriceX32
 
@@ -285,10 +288,13 @@ export class Pool {
       step.initialized = nextInitTick[1]
       const wordPos = nextInitTick[2]
       const bitmapAddress = nextInitTick[4]
+      // console.log('got next tick', step.tickNext)
+      // console.log('last saved word pos', lastSavedWordPos, 'got word pos', wordPos)
       if (lastSavedWordPos !== wordPos) {
+        console.log('pushing bitmap account', wordPos)
         state.accounts.push({
           pubkey: bitmapAddress,
-          isMutable: false,
+          isWritable: false,
           isSigner: false,
         });
         lastSavedWordPos = wordPos
@@ -329,9 +335,10 @@ export class Pool {
         // if the tick is initialized, run the tick transition
         if (step.initialized) {
           // push the crossed tick to accounts array
+          console.log('pushing tick account', step.tickNext)
           state.accounts.push({
             pubkey: await this.tickDataProvider.getTickAddress(step.tickNext),
-            isMutable: true,
+            isWritable: true,
             isSigner: false,
           })
           // get the liquidity at this tick
@@ -341,6 +348,8 @@ export class Pool {
           if (zeroForOne) liquidityNet = JSBI.multiply(liquidityNet, NEGATIVE_ONE)
 
           state.liquidity = LiquidityMath.addDelta(state.liquidity, liquidityNet)
+        } else {
+          console.log('reached uninitialized tick', step.tickNext)
         }
 
         state.tick = zeroForOne ? step.tickNext - 1 : step.tickNext
