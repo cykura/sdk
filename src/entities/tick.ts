@@ -21,3 +21,20 @@ export class Tick {
     this.liquidityNet = JSBI.BigInt(liquidityNet)
   }
 }
+
+export type TickPosition = {
+  wordPos: number,
+  bitPos: number
+}
+
+/**
+ * Computes the bitmap position for a bit.
+ * @param tickBySpacing Tick divided by spacing
+ * @returns the word and bit position for the given tick
+ */
+ export function tickPosition(tickBySpacing: number): TickPosition {
+  return {
+    wordPos: tickBySpacing >> 8,
+    bitPos: Math.abs(tickBySpacing % 256),
+  }
+}

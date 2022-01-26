@@ -1,8 +1,13 @@
 import { BigintIsh, Price, Token, CurrencyAmount } from '@uniswap/sdk-core';
+import { web3 } from '@project-serum/anchor';
 import JSBI from 'jsbi';
 import { FeeAmount } from '../constants';
-import { Tick, TickConstructorArgs } from './tick';
 import { TickDataProvider } from './tickDataProvider';
+interface SwapAccount {
+    pubkey: web3.PublicKey;
+    isSigner: boolean;
+    isWritable: boolean;
+}
 /**
  * Represents a V3 pool
  */
@@ -25,9 +30,9 @@ export declare class Pool {
      * @param sqrtRatioX32 The sqrt of the current ratio of amounts of token1 to token0
      * @param liquidity The current value of in range liquidity
      * @param tickCurrent The current tick of the pool
-     * @param ticks The current state of the pool ticks or a data provider that can return tick data
+     * @param tickDataProvider The current state of the pool ticks or a data provider that can return tick data
      */
-    constructor(tokenA: Token, tokenB: Token, fee: FeeAmount, sqrtRatioX32: BigintIsh, liquidity: BigintIsh, tickCurrent: number, ticks?: TickDataProvider | (Tick | TickConstructorArgs)[]);
+    constructor(tokenA: Token, tokenB: Token, fee: FeeAmount, sqrtRatioX32: BigintIsh, liquidity: BigintIsh, tickCurrent: number, tickDataProvider?: TickDataProvider);
     /**
      * Returns true if the token is either token0 or token1
      * @param token The token to check
@@ -58,7 +63,7 @@ export declare class Pool {
      * @param sqrtPriceLimitX32 The Q32.32 sqrt price limit
      * @returns The output amount and the pool with updated state
      */
-    getOutputAmount(inputAmount: CurrencyAmount<Token>, sqrtPriceLimitX32?: JSBI): Promise<[CurrencyAmount<Token>, Pool]>;
+    getOutputAmount(inputAmount: CurrencyAmount<Token>, sqrtPriceLimitX32?: JSBI): Promise<[CurrencyAmount<Token>, Pool, SwapAccount[]]>;
     /**
      * Given a desired output amount of a token, return the computed input amount and a pool with state updated after the trade
      * @param outputAmount the output amount for which to quote the input amount
@@ -79,3 +84,4 @@ export declare class Pool {
     private swap;
     get tickSpacing(): number;
 }
+export {};

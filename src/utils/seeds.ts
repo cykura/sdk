@@ -1,0 +1,6 @@
+export const BITMAP_SEED = Buffer.from('b')
+export const POOL_SEED = Buffer.from('p')
+export const POSITION_SEED = Buffer.from('ps')
+export const OBSERVATION_SEED = Buffer.from('o')
+export const TICK_SEED = Buffer.from('t')
+export const FEE_SEED = Buffer.from('f')
