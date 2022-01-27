@@ -2562,6 +2562,13 @@ var TickList = /*#__PURE__*/function () {
   return TickList;
 }();
 
+var BITMAP_SEED = /*#__PURE__*/Buffer.from('b');
+var POOL_SEED$1 = /*#__PURE__*/Buffer.from('p');
+var POSITION_SEED = /*#__PURE__*/Buffer.from('ps');
+var OBSERVATION_SEED = /*#__PURE__*/Buffer.from('o');
+var TICK_SEED = /*#__PURE__*/Buffer.from('t');
+var FEE_SEED = /*#__PURE__*/Buffer.from('f');
+
 var Tick = function Tick(_ref) {
   var index = _ref.index,
       liquidityGross = _ref.liquidityGross,
@@ -3468,6 +3475,73 @@ var Trade = /*#__PURE__*/function () {
   return Trade;
 }();
 
+/**
+ * Decodes the 256 bit bitmap stored in a bitmap account
+ * @param x Bitmap encoded as [u64; 4]
+ * @returns 256 bit word
+ */
+
+function generateBitmapWord(x) {
+  return x[0].add(x[1].shln(64)).add(x[2].shln(126)).add(x[3].shln(192));
+}
+/**
+ * Returns the most significant non-zero bit in the word
+ * @param x
+ * @returns
+ */
+
+function msb(x) {
+  return x.bitLength() - 1;
+}
+/**
+ * Returns the least significant non-zero bit in the word
+ * @param x
+ * @returns
+ */
+
+function lsb(x) {
+  return x.zeroBits();
+}
+/**
+ * Returns the bitmap index (0 - 255) for the next initialized tick.
+ *
+ * If no initialized tick is available, returns the first bit (index 0) the word in lte case,
+ * and the last bit in gte case.
+ * @param word The bitmap word as a u256 number
+ * @param bitPos The starting bit position
+ * @param lte Whether to search for the next initialized tick to the left (less than or equal to the starting tick),
+ * or to the right (greater than or equal to)
+ * @returns Bit index and whether it is initialized
+ */
+
+function nextInitializedBit(word, bitPos, lte) {
+  if (lte) {
+    // all the 1s at or to the right of the current bit_pos
+    var mask = new anchor.BN(1).shln(bitPos).subn(1).add(new anchor.BN(1).shln(bitPos));
+    var masked = word.and(mask);
+    var initialized = !masked.eqn(0);
+    var next = initialized ? msb(masked) : 0;
+    return {
+      next: next,
+      initialized: initialized
+    };
+  } else {
+    // all the 1s at or to the left of the bit_pos
+    var _mask = new anchor.BN(1).shln(bitPos).subn(1).notn(256);
+
+    var _masked = word.and(_mask);
+
+    var _initialized = !_masked.eqn(0);
+
+    var _next = _initialized ? msb(_masked) : 255;
+
+    return {
+      next: _next,
+      initialized: _initialized
+    };
+  }
+}
+
 var Multicall = /*#__PURE__*/function () {
   /**
    * Cannot be constructed.
@@ -4107,14 +4181,19 @@ var SwapRouter = /*#__PURE__*/function () {
 SwapRouter.INTERFACE = /*#__PURE__*/new abi.Interface(SwapRouter_json.abi);
 
 exports.ADDRESS_ZERO = ADDRESS_ZERO;
+exports.BITMAP_SEED = BITMAP_SEED;
 exports.FACTORY_ADDRESS = FACTORY_ADDRESS;
+exports.FEE_SEED = FEE_SEED;
 exports.FullMath = FullMath;
 exports.LOCAL_PROGRAM_ID = LOCAL_PROGRAM_ID;
 exports.LiquidityMath = LiquidityMath;
 exports.Multicall = Multicall;
 exports.NoTickDataProvider = NoTickDataProvider;
 exports.NonfungiblePositionManager = NonfungiblePositionManager;
+exports.OBSERVATION_SEED = OBSERVATION_SEED;
 exports.POOL_INIT_CODE_HASH = POOL_INIT_CODE_HASH;
+exports.POOL_SEED = POOL_SEED$1;
+exports.POSITION_SEED = POSITION_SEED;
 exports.Payments = Payments;
 exports.Pool = Pool;
 exports.Position = Position;
@@ -4125,6 +4204,7 @@ exports.Staker = Staker;
 exports.SwapMath = SwapMath;
 exports.SwapQuoter = SwapQuoter;
 exports.SwapRouter = SwapRouter;
+exports.TICK_SEED = TICK_SEED;
 exports.TICK_SPACINGS = TICK_SPACINGS;
 exports.Tick = Tick;
 exports.TickList = TickList;
@@ -4133,12 +4213,16 @@ exports.Trade = Trade;
 exports.computePoolAddress = computePoolAddress;
 exports.encodeRouteToPath = encodeRouteToPath;
 exports.encodeSqrtRatioX32 = encodeSqrtRatioX32;
+exports.generateBitmapWord = generateBitmapWord;
 exports.i16ToSeed = i16ToSeed;
 exports.i32ToSeed = i32ToSeed;
 exports.isSorted = isSorted;
+exports.lsb = lsb;
 exports.maxLiquidityForAmounts = maxLiquidityForAmounts;
 exports.mostSignificantBit = mostSignificantBit;
+exports.msb = msb;
 exports.nearestUsableTick = nearestUsableTick;
+exports.nextInitializedBit = nextInitializedBit;
 exports.priceToClosestTick = priceToClosestTick;
 exports.tickPosition = tickPosition;
 exports.tickToPrice = tickToPrice;

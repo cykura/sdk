@@ -17,7 +17,7 @@ export function generateBitmapWord(x: BN[]) {
  * @param x 
  * @returns 
  */
-export function mostSignificantBit(x: BN) {
+export function msb(x: BN) {
   return x.bitLength() - 1
 }
 
@@ -26,7 +26,7 @@ export function mostSignificantBit(x: BN) {
  * @param x 
  * @returns 
  */
-export function leastSignificantBit(x: BN) {
+export function lsb(x: BN) {
   return x.zeroBits()
 }
 
@@ -53,7 +53,7 @@ export function nextInitializedBit(word: BN, bitPos: number, lte: boolean): Next
     const masked = word.and(mask)
     const initialized = !masked.eqn(0)
     const next = initialized
-      ? mostSignificantBit(masked)
+      ? msb(masked)
       : 0
     return { next, initialized }
   } else {
@@ -62,7 +62,7 @@ export function nextInitializedBit(word: BN, bitPos: number, lte: boolean): Next
     const masked = word.and(mask)
     const initialized = !masked.eqn(0)
     const next = initialized
-      ? mostSignificantBit(masked)
+      ? msb(masked)
       : 255
     return { next, initialized }
   }

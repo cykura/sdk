@@ -11,13 +11,13 @@ export declare function generateBitmapWord(x: BN[]): BN;
  * @param x
  * @returns
  */
-export declare function mostSignificantBit(x: BN): number;
+export declare function msb(x: BN): number;
 /**
  * Returns the least significant non-zero bit in the word
  * @param x
  * @returns
  */
-export declare function leastSignificantBit(x: BN): number;
+export declare function lsb(x: BN): number;
 export declare type NextBit = {
     next: number;
     initialized: boolean;

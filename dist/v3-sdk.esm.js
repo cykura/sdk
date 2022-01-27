@@ -1,7 +1,7 @@
 import { MaxUint128 as MaxUint128$1, Price, CurrencyAmount, sqrt, Percent, TradeType, Fraction, sortedInsert, validateAndParseAddress } from '@uniswap/sdk-core';
 import JSBI from 'jsbi';
 import invariant from 'tiny-invariant';
-import { web3 } from '@project-serum/anchor';
+import { web3, BN } from '@project-serum/anchor';
 import { pack } from '@ethersproject/solidity';
 import { Interface, defaultAbiCoder } from '@ethersproject/abi';
 import { abi } from '@uniswap/v3-periphery/artifacts/contracts/interfaces/IMulticall.sol/IMulticall.json';
@@ -2561,6 +2561,13 @@ var TickList = /*#__PURE__*/function () {
   return TickList;
 }();
 
+var BITMAP_SEED = /*#__PURE__*/Buffer.from('b');
+var POOL_SEED$1 = /*#__PURE__*/Buffer.from('p');
+var POSITION_SEED = /*#__PURE__*/Buffer.from('ps');
+var OBSERVATION_SEED = /*#__PURE__*/Buffer.from('o');
+var TICK_SEED = /*#__PURE__*/Buffer.from('t');
+var FEE_SEED = /*#__PURE__*/Buffer.from('f');
+
 var Tick = function Tick(_ref) {
   var index = _ref.index,
       liquidityGross = _ref.liquidityGross,
@@ -3467,6 +3474,73 @@ var Trade = /*#__PURE__*/function () {
   return Trade;
 }();
 
+/**
+ * Decodes the 256 bit bitmap stored in a bitmap account
+ * @param x Bitmap encoded as [u64; 4]
+ * @returns 256 bit word
+ */
+
+function generateBitmapWord(x) {
+  return x[0].add(x[1].shln(64)).add(x[2].shln(126)).add(x[3].shln(192));
+}
+/**
+ * Returns the most significant non-zero bit in the word
+ * @param x
+ * @returns
+ */
+
+function msb(x) {
+  return x.bitLength() - 1;
+}
+/**
+ * Returns the least significant non-zero bit in the word
+ * @param x
+ * @returns
+ */
+
+function lsb(x) {
+  return x.zeroBits();
+}
+/**
+ * Returns the bitmap index (0 - 255) for the next initialized tick.
+ *
+ * If no initialized tick is available, returns the first bit (index 0) the word in lte case,
+ * and the last bit in gte case.
+ * @param word The bitmap word as a u256 number
+ * @param bitPos The starting bit position
+ * @param lte Whether to search for the next initialized tick to the left (less than or equal to the starting tick),
+ * or to the right (greater than or equal to)
+ * @returns Bit index and whether it is initialized
+ */
+
+function nextInitializedBit(word, bitPos, lte) {
+  if (lte) {
+    // all the 1s at or to the right of the current bit_pos
+    var mask = new BN(1).shln(bitPos).subn(1).add(new BN(1).shln(bitPos));
+    var masked = word.and(mask);
+    var initialized = !masked.eqn(0);
+    var next = initialized ? msb(masked) : 0;
+    return {
+      next: next,
+      initialized: initialized
+    };
+  } else {
+    // all the 1s at or to the left of the bit_pos
+    var _mask = new BN(1).shln(bitPos).subn(1).notn(256);
+
+    var _masked = word.and(_mask);
+
+    var _initialized = !_masked.eqn(0);
+
+    var _next = _initialized ? msb(_masked) : 255;
+
+    return {
+      next: _next,
+      initialized: _initialized
+    };
+  }
+}
+
 var Multicall = /*#__PURE__*/function () {
   /**
    * Cannot be constructed.
@@ -4105,5 +4179,5 @@ var SwapRouter = /*#__PURE__*/function () {
 }();
 SwapRouter.INTERFACE = /*#__PURE__*/new Interface(abi$6);
 
-export { ADDRESS_ZERO, FACTORY_ADDRESS, FeeAmount, FullMath, LOCAL_PROGRAM_ID, LiquidityMath, Multicall, NoTickDataProvider, NonfungiblePositionManager, POOL_INIT_CODE_HASH, Payments, Pool, Position, Route, SelfPermit, SqrtPriceMath, Staker, SwapMath, SwapQuoter, SwapRouter, TICK_SPACINGS, Tick, TickList, TickMath, Trade, computePoolAddress, encodeRouteToPath, encodeSqrtRatioX32, i16ToSeed, i32ToSeed, isSorted, maxLiquidityForAmounts, mostSignificantBit, nearestUsableTick, priceToClosestTick, tickPosition, tickToPrice, toHex, tradeComparator, u16ToSeed, u32ToSeed };
+export { ADDRESS_ZERO, BITMAP_SEED, FACTORY_ADDRESS, FEE_SEED, FeeAmount, FullMath, LOCAL_PROGRAM_ID, LiquidityMath, Multicall, NoTickDataProvider, NonfungiblePositionManager, OBSERVATION_SEED, POOL_INIT_CODE_HASH, POOL_SEED$1 as POOL_SEED, POSITION_SEED, Payments, Pool, Position, Route, SelfPermit, SqrtPriceMath, Staker, SwapMath, SwapQuoter, SwapRouter, TICK_SEED, TICK_SPACINGS, Tick, TickList, TickMath, Trade, computePoolAddress, encodeRouteToPath, encodeSqrtRatioX32, generateBitmapWord, i16ToSeed, i32ToSeed, isSorted, lsb, maxLiquidityForAmounts, mostSignificantBit, msb, nearestUsableTick, nextInitializedBit, priceToClosestTick, tickPosition, tickToPrice, toHex, tradeComparator, u16ToSeed, u32ToSeed };
 //# sourceMappingURL=v3-sdk.esm.js.map
