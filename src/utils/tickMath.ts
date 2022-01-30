@@ -28,11 +28,11 @@ export abstract class TickMath {
   /**
    * The sqrt ratio corresponding to the minimum tick that could be used on any pool.
    */
-  public static MIN_SQRT_RATIO: JSBI = JSBI.BigInt('65536')
+  public static MIN_SQRT_RATIO: JSBI = JSBI.BigInt('65537')
   /**
    * The sqrt ratio corresponding to the maximum tick that could be used on any pool.
    */
-  public static MAX_SQRT_RATIO: JSBI = JSBI.BigInt('281474976710656')
+  public static MAX_SQRT_RATIO: JSBI = JSBI.BigInt('281472331703918')
 
   /**
    * Returns the sqrt ratio as a Q32.32 for the given tick. The sqrt ratio is computed as sqrt(1.0001)^tick
