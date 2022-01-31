@@ -1302,12 +1302,12 @@ TickMath.MAX_TICK = -TickMath.MIN_TICK;
  * The sqrt ratio corresponding to the minimum tick that could be used on any pool.
  */
 
-TickMath.MIN_SQRT_RATIO = /*#__PURE__*/JSBI.BigInt('65536');
+TickMath.MIN_SQRT_RATIO = /*#__PURE__*/JSBI.BigInt('65537');
 /**
  * The sqrt ratio corresponding to the maximum tick that could be used on any pool.
  */
 
-TickMath.MAX_SQRT_RATIO = /*#__PURE__*/JSBI.BigInt('281474976710656');
+TickMath.MAX_SQRT_RATIO = /*#__PURE__*/JSBI.BigInt('281472331703918');
 
 /**
  * This tick data provider does not know how to fetch any tick data. It throws whenever it is required. Useful if you
