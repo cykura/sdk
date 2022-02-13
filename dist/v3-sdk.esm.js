@@ -1637,8 +1637,8 @@ var Pool = /*#__PURE__*/function () {
                 !JSBI.greaterThan(sqrtPriceLimitX32, this.sqrtRatioX32) ? process.env.NODE_ENV !== "production" ? invariant(false, 'RATIO_CURRENT') : invariant(false) : void 0;
               }
 
-              exactInput = JSBI.greaterThanOrEqual(amountSpecified, ZERO);
-              console.log('exact input', exactInput); // keep track of swap state
+              exactInput = JSBI.greaterThanOrEqual(amountSpecified, ZERO); // console.log('exact input', exactInput)
+              // keep track of swap state
 
               state = {
                 amountSpecifiedRemaining: amountSpecified,
@@ -1649,9 +1649,9 @@ var Pool = /*#__PURE__*/function () {
                 liquidity: this.liquidity
               };
 
-            case 5:
+            case 4:
               if (!(JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) && state.sqrtPriceX32 != sqrtPriceLimitX32 && state.tick < TickMath.MAX_TICK && state.tick > TickMath.MIN_TICK)) {
-                _context3.next = 49;
+                _context3.next = 46;
                 break;
               }
 
@@ -1661,10 +1661,10 @@ var Pool = /*#__PURE__*/function () {
               // tickBitmap.nextInitializedTickWithinOneWord
               // save the bitmap, and the tick account if it is initialized
 
-              _context3.next = 10;
+              _context3.next = 9;
               return this.tickDataProvider.nextInitializedTickWithinOneWord(state.tick, zeroForOne, this.tickSpacing);
 
-            case 10:
+            case 9:
               nextInitTick = _context3.sent;
               step.tickNext = nextInitTick[0];
               step.initialized = nextInitTick[1];
@@ -1673,7 +1673,7 @@ var Pool = /*#__PURE__*/function () {
               // console.log('last saved word pos', lastSavedWordPos, 'got word pos', wordPos)
 
               if (lastSavedWordPos !== wordPos) {
-                console.log('pushing bitmap account', wordPos);
+                // console.log('pushing bitmap account', wordPos)
                 state.accounts.push({
                   pubkey: bitmapAddress,
                   isWritable: false,
@@ -1705,22 +1705,20 @@ var Pool = /*#__PURE__*/function () {
 
 
               if (!JSBI.equal(state.sqrtPriceX32, step.sqrtPriceNextX32)) {
-                _context3.next = 46;
+                _context3.next = 43;
                 break;
               }
 
               if (!step.initialized) {
-                _context3.next = 42;
+                _context3.next = 40;
                 break;
               }
 
-              // push the crossed tick to accounts array
-              console.log('pushing tick account', step.tickNext);
               _context3.t0 = state.accounts;
-              _context3.next = 30;
+              _context3.next = 28;
               return this.tickDataProvider.getTickAddress(step.tickNext);
 
-            case 30:
+            case 28:
               _context3.t1 = _context3.sent;
               _context3.t2 = {
                 pubkey: _context3.t1,
@@ -1731,38 +1729,35 @@ var Pool = /*#__PURE__*/function () {
               _context3.t0.push.call(_context3.t0, _context3.t2);
 
               _context3.t3 = JSBI;
-              _context3.next = 36;
+              _context3.next = 34;
               return this.tickDataProvider.getTick(step.tickNext);
 
-            case 36:
+            case 34:
               _context3.t4 = _context3.sent.liquidityNet;
               liquidityNet = _context3.t3.BigInt.call(_context3.t3, _context3.t4);
               // if we're moving leftward, we interpret liquidityNet as the opposite sign
               // safe because liquidityNet cannot be type(int128).min
               if (zeroForOne) liquidityNet = JSBI.multiply(liquidityNet, NEGATIVE_ONE);
               state.liquidity = LiquidityMath.addDelta(state.liquidity, liquidityNet);
-              _context3.next = 43;
+              _context3.next = 40;
               break;
 
-            case 42:
-              console.log('reached uninitialized tick', step.tickNext);
+            case 40:
+              state.tick = zeroForOne ? step.tickNext - 1 : step.tickNext;
+              _context3.next = 44;
+              break;
 
             case 43:
-              state.tick = zeroForOne ? step.tickNext - 1 : step.tickNext;
-              _context3.next = 47;
-              break;
-
-            case 46:
               if (state.sqrtPriceX32 != step.sqrtPriceStartX32) {
                 // recompute unless we're on a lower tick boundary (i.e. already transitioned ticks), and haven't moved
                 state.tick = TickMath.getTickAtSqrtRatio(state.sqrtPriceX32);
               }
 
-            case 47:
-              _context3.next = 5;
+            case 44:
+              _context3.next = 4;
               break;
 
-            case 49:
+            case 46:
               return _context3.abrupt("return", {
                 amountCalculated: state.amountCalculated,
                 sqrtRatioX32: state.sqrtPriceX32,
@@ -1772,7 +1767,7 @@ var Pool = /*#__PURE__*/function () {
                 accounts: state.accounts
               });
 
-            case 50:
+            case 47:
             case "end":
               return _context3.stop();
           }
