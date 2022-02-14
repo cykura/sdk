@@ -19,7 +19,7 @@ export abstract class SwapMath {
     amountRemaining: JSBI,
     feePips: FeeAmount
   ): [JSBI, JSBI, JSBI, JSBI] {
-    const returnValues: Partial<{
+    const swapStep: Partial<{
       sqrtRatioNextX32: JSBI
       amountIn: JSBI
       amountOut: JSBI
@@ -30,17 +30,18 @@ export abstract class SwapMath {
     const exactIn = JSBI.greaterThanOrEqual(amountRemaining, ZERO)
 
     if (exactIn) {
-      const amountRemainingLessFee = JSBI.divide(
-        JSBI.multiply(amountRemaining, JSBI.subtract(MAX_FEE, JSBI.BigInt(feePips))),
+      const amountRemainingLessFee = FullMath.mulDivFloor(
+        amountRemaining,
+        JSBI.subtract(MAX_FEE, JSBI.BigInt(feePips)),
         MAX_FEE
       )
-      returnValues.amountIn = zeroForOne
+      swapStep.amountIn = zeroForOne
         ? SqrtPriceMath.getAmount0Delta(sqrtRatioTargetX32, sqrtRatioCurrentX32, liquidity, true)
         : SqrtPriceMath.getAmount1Delta(sqrtRatioCurrentX32, sqrtRatioTargetX32, liquidity, true)
-      if (JSBI.greaterThanOrEqual(amountRemainingLessFee, returnValues.amountIn!)) {
-        returnValues.sqrtRatioNextX32 = sqrtRatioTargetX32
+      if (JSBI.greaterThanOrEqual(amountRemainingLessFee, swapStep.amountIn!)) {
+        swapStep.sqrtRatioNextX32 = sqrtRatioTargetX32
       } else {
-        returnValues.sqrtRatioNextX32 = SqrtPriceMath.getNextSqrtPriceFromInput(
+        swapStep.sqrtRatioNextX32 = SqrtPriceMath.getNextSqrtPriceFromInput(
           sqrtRatioCurrentX32,
           liquidity,
           amountRemainingLessFee,
@@ -48,13 +49,13 @@ export abstract class SwapMath {
         )
       }
     } else {
-      returnValues.amountOut = zeroForOne
+      swapStep.amountOut = zeroForOne
         ? SqrtPriceMath.getAmount1Delta(sqrtRatioTargetX32, sqrtRatioCurrentX32, liquidity, false)
         : SqrtPriceMath.getAmount0Delta(sqrtRatioCurrentX32, sqrtRatioTargetX32, liquidity, false)
-      if (JSBI.greaterThanOrEqual(JSBI.multiply(amountRemaining, NEGATIVE_ONE), returnValues.amountOut)) {
-        returnValues.sqrtRatioNextX32 = sqrtRatioTargetX32
+      if (JSBI.greaterThanOrEqual(JSBI.multiply(amountRemaining, NEGATIVE_ONE), swapStep.amountOut)) {
+        swapStep.sqrtRatioNextX32 = sqrtRatioTargetX32
       } else {
-        returnValues.sqrtRatioNextX32 = SqrtPriceMath.getNextSqrtPriceFromOutput(
+        swapStep.sqrtRatioNextX32 = SqrtPriceMath.getNextSqrtPriceFromOutput(
           sqrtRatioCurrentX32,
           liquidity,
           JSBI.multiply(amountRemaining, NEGATIVE_ONE),
@@ -63,43 +64,43 @@ export abstract class SwapMath {
       }
     }
 
-    const max = JSBI.equal(sqrtRatioTargetX32, returnValues.sqrtRatioNextX32)
+    const max = JSBI.equal(sqrtRatioTargetX32, swapStep.sqrtRatioNextX32)
 
     if (zeroForOne) {
-      returnValues.amountIn =
+      swapStep.amountIn =
         max && exactIn
-          ? returnValues.amountIn
-          : SqrtPriceMath.getAmount0Delta(returnValues.sqrtRatioNextX32, sqrtRatioCurrentX32, liquidity, true)
-      returnValues.amountOut =
+          ? swapStep.amountIn
+          : SqrtPriceMath.getAmount0Delta(swapStep.sqrtRatioNextX32, sqrtRatioCurrentX32, liquidity, true)
+      swapStep.amountOut =
         max && !exactIn
-          ? returnValues.amountOut
-          : SqrtPriceMath.getAmount1Delta(returnValues.sqrtRatioNextX32, sqrtRatioCurrentX32, liquidity, false)
+          ? swapStep.amountOut
+          : SqrtPriceMath.getAmount1Delta(swapStep.sqrtRatioNextX32, sqrtRatioCurrentX32, liquidity, false)
     } else {
-      returnValues.amountIn =
+      swapStep.amountIn =
         max && exactIn
-          ? returnValues.amountIn
-          : SqrtPriceMath.getAmount1Delta(sqrtRatioCurrentX32, returnValues.sqrtRatioNextX32, liquidity, true)
-      returnValues.amountOut =
+          ? swapStep.amountIn
+          : SqrtPriceMath.getAmount1Delta(sqrtRatioCurrentX32, swapStep.sqrtRatioNextX32, liquidity, true)
+      swapStep.amountOut =
         max && !exactIn
-          ? returnValues.amountOut
-          : SqrtPriceMath.getAmount0Delta(sqrtRatioCurrentX32, returnValues.sqrtRatioNextX32, liquidity, false)
+          ? swapStep.amountOut
+          : SqrtPriceMath.getAmount0Delta(sqrtRatioCurrentX32, swapStep.sqrtRatioNextX32, liquidity, false)
     }
 
-    if (!exactIn && JSBI.greaterThan(returnValues.amountOut!, JSBI.multiply(amountRemaining, NEGATIVE_ONE))) {
-      returnValues.amountOut = JSBI.multiply(amountRemaining, NEGATIVE_ONE)
+    if (!exactIn && JSBI.greaterThan(swapStep.amountOut!, JSBI.multiply(amountRemaining, NEGATIVE_ONE))) {
+      swapStep.amountOut = JSBI.multiply(amountRemaining, NEGATIVE_ONE)
     }
 
-    if (exactIn && JSBI.notEqual(returnValues.sqrtRatioNextX32, sqrtRatioTargetX32)) {
+    if (exactIn && JSBI.notEqual(swapStep.sqrtRatioNextX32, sqrtRatioTargetX32)) {
       // we didn't reach the target, so take the remainder of the maximum input as fee
-      returnValues.feeAmount = JSBI.subtract(amountRemaining, returnValues.amountIn!)
+      swapStep.feeAmount = JSBI.subtract(amountRemaining, swapStep.amountIn!)
     } else {
-      returnValues.feeAmount = FullMath.mulDivRoundingUp(
-        returnValues.amountIn!,
+      swapStep.feeAmount = FullMath.mulDivCeil(
+        swapStep.amountIn!,
         JSBI.BigInt(feePips),
         JSBI.subtract(MAX_FEE, JSBI.BigInt(feePips))
       )
     }
 
-    return [returnValues.sqrtRatioNextX32!, returnValues.amountIn!, returnValues.amountOut!, returnValues.feeAmount!]
+    return [swapStep.sqrtRatioNextX32!, swapStep.amountIn!, swapStep.amountOut!, swapStep.feeAmount!]
   }
 }

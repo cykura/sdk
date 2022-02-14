@@ -1,4 +1,5 @@
 import JSBI from 'jsbi'
+import invariant from 'tiny-invariant'
 import { NEGATIVE_ONE, ZERO } from '../internalConstants'
 
 export abstract class LiquidityMath {
@@ -8,10 +9,14 @@ export abstract class LiquidityMath {
   private constructor() {}
 
   public static addDelta(x: JSBI, y: JSBI): JSBI {
+    let z: JSBI
     if (JSBI.lessThan(y, ZERO)) {
-      return JSBI.subtract(x, JSBI.multiply(y, NEGATIVE_ONE))
+      z = JSBI.subtract(x, JSBI.multiply(y, NEGATIVE_ONE))
+      invariant(z < x, 'LIQUIDITY_SUB')
     } else {
-      return JSBI.add(x, y)
+      z = JSBI.add(x, y)
+      invariant(z >= x, 'LIQUIDITY_ADD')
     }
+    return z
   }
 }

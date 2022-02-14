@@ -1008,11 +1008,17 @@ var LiquidityMath = /*#__PURE__*/function () {
   function LiquidityMath() {}
 
   LiquidityMath.addDelta = function addDelta(x, y) {
+    var z;
+
     if (JSBI.lessThan(y, ZERO)) {
-      return JSBI.subtract(x, JSBI.multiply(y, NEGATIVE_ONE));
+      z = JSBI.subtract(x, JSBI.multiply(y, NEGATIVE_ONE));
+      !(z < x) ?  invariant(false, 'LIQUIDITY_SUB')  : void 0;
     } else {
-      return JSBI.add(x, y);
+      z = JSBI.add(x, y);
+      !(z >= x) ?  invariant(false, 'LIQUIDITY_ADD')  : void 0;
     }
+
+    return z;
   };
 
   return LiquidityMath;
@@ -1029,6 +1035,18 @@ var FullMath = /*#__PURE__*/function () {
     var result = JSBI.divide(product, denominator);
     if (JSBI.notEqual(JSBI.remainder(product, denominator), ZERO)) result = JSBI.add(result, ONE);
     return result;
+  };
+
+  FullMath.mulDivFloor = function mulDivFloor(a, b, denominator) {
+    !JSBI.notEqual(denominator, ZERO) ?  invariant(false, 'DIVISION_BY_0')  : void 0;
+    var product = JSBI.multiply(a, b);
+    return JSBI.divide(product, denominator);
+  };
+
+  FullMath.mulDivCeil = function mulDivCeil(a, b, denominator) {
+    !JSBI.notEqual(denominator, ZERO) ?  invariant(false, 'DIVISION_BY_0')  : void 0;
+    var product = JSBI.multiply(a, b);
+    return JSBI.divide(JSBI.add(product, JSBI.subtract(denominator, ONE)), denominator);
   };
 
   return FullMath;
@@ -1059,7 +1077,7 @@ var SqrtPriceMath = /*#__PURE__*/function () {
 
     var numerator1 = JSBI.leftShift(liquidity, U32Resolution);
     var numerator2 = JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32);
-    return roundUp ? FullMath.mulDivRoundingUp(FullMath.mulDivRoundingUp(numerator1, numerator2, sqrtRatioBX32), ONE, sqrtRatioAX32) : JSBI.divide(JSBI.divide(JSBI.multiply(numerator1, numerator2), sqrtRatioBX32), sqrtRatioAX32);
+    return roundUp ? FullMath.mulDivRoundingUp(FullMath.mulDivCeil(numerator1, numerator2, sqrtRatioBX32), ONE, sqrtRatioAX32) : JSBI.divide(FullMath.mulDivFloor(numerator1, numerator2, sqrtRatioBX32), sqrtRatioAX32);
   };
 
   SqrtPriceMath.getAmount1Delta = function getAmount1Delta(sqrtRatioAX32, sqrtRatioBX32, liquidity, roundUp) {
@@ -1069,7 +1087,7 @@ var SqrtPriceMath = /*#__PURE__*/function () {
       sqrtRatioBX32 = _ref2[1];
     }
 
-    return roundUp ? FullMath.mulDivRoundingUp(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32), Q32) : JSBI.divide(JSBI.multiply(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32)), Q32);
+    return roundUp ? FullMath.mulDivCeil(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32), Q32) : FullMath.mulDivFloor(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32), Q32);
   };
 
   SqrtPriceMath.getNextSqrtPriceFromInput = function getNextSqrtPriceFromInput(sqrtPX32, liquidity, amountIn, zeroForOne) {
@@ -1087,37 +1105,35 @@ var SqrtPriceMath = /*#__PURE__*/function () {
   SqrtPriceMath.getNextSqrtPriceFromAmount0RoundingUp = function getNextSqrtPriceFromAmount0RoundingUp(sqrtPX32, liquidity, amount, add) {
     if (JSBI.equal(amount, ZERO)) return sqrtPX32;
     var numerator1 = JSBI.leftShift(liquidity, U32Resolution);
+    console.log('COMES HERE');
 
     if (add) {
       var product = multiplyIn128(amount, sqrtPX32);
+      var denominator = addIn128(numerator1, product);
 
-      if (JSBI.equal(JSBI.divide(product, amount), sqrtPX32)) {
-        var denominator = addIn128(numerator1, product);
-
-        if (JSBI.greaterThanOrEqual(denominator, numerator1)) {
-          return FullMath.mulDivRoundingUp(numerator1, sqrtPX32, denominator);
-        }
+      if (JSBI.greaterThanOrEqual(denominator, numerator1)) {
+        return FullMath.mulDivCeil(numerator1, sqrtPX32, denominator);
       }
 
       return FullMath.mulDivRoundingUp(numerator1, ONE, JSBI.add(JSBI.divide(numerator1, sqrtPX32), amount));
     } else {
-      var _product = multiplyIn128(amount, sqrtPX32);
+      var _product = multiplyIn128(amount, sqrtPX32); // invariant(JSBI.equal(JSBI.divide(product, amount), sqrtPX32))
 
-      !JSBI.equal(JSBI.divide(_product, amount), sqrtPX32) ?  invariant(false)  : void 0;
+
       !JSBI.greaterThan(numerator1, _product) ?  invariant(false)  : void 0;
 
       var _denominator = JSBI.subtract(numerator1, _product);
 
-      return FullMath.mulDivRoundingUp(numerator1, sqrtPX32, _denominator);
+      return FullMath.mulDivCeil(numerator1, sqrtPX32, _denominator);
     }
   };
 
   SqrtPriceMath.getNextSqrtPriceFromAmount1RoundingDown = function getNextSqrtPriceFromAmount1RoundingDown(sqrtPX32, liquidity, amount, add) {
     if (add) {
-      var quotient = JSBI.lessThanOrEqual(amount, MaxUint32) ? JSBI.divide(JSBI.leftShift(amount, U32Resolution), liquidity) : JSBI.divide(JSBI.multiply(amount, Q32), liquidity);
+      var quotient = JSBI.lessThanOrEqual(amount, MaxUint32) ? JSBI.divide(JSBI.leftShift(amount, U32Resolution), liquidity) : FullMath.mulDivFloor(amount, Q32, liquidity);
       return JSBI.add(sqrtPX32, quotient);
     } else {
-      var _quotient = FullMath.mulDivRoundingUp(amount, Q32, liquidity);
+      var _quotient = JSBI.lessThanOrEqual(amount, MaxUint32) ? FullMath.mulDivRoundingUp(JSBI.leftShift(amount, U32Resolution), ONE, liquidity) : FullMath.mulDivCeil(amount, Q32, liquidity);
 
       !JSBI.greaterThan(sqrtPX32, _quotient) ?  invariant(false)  : void 0;
       return JSBI.subtract(sqrtPX32, _quotient);
@@ -1135,51 +1151,51 @@ var SwapMath = /*#__PURE__*/function () {
   function SwapMath() {}
 
   SwapMath.computeSwapStep = function computeSwapStep(sqrtRatioCurrentX32, sqrtRatioTargetX32, liquidity, amountRemaining, feePips) {
-    var returnValues = {};
+    var swapStep = {};
     var zeroForOne = JSBI.greaterThanOrEqual(sqrtRatioCurrentX32, sqrtRatioTargetX32);
     var exactIn = JSBI.greaterThanOrEqual(amountRemaining, ZERO);
 
     if (exactIn) {
-      var amountRemainingLessFee = JSBI.divide(JSBI.multiply(amountRemaining, JSBI.subtract(MAX_FEE, JSBI.BigInt(feePips))), MAX_FEE);
-      returnValues.amountIn = zeroForOne ? SqrtPriceMath.getAmount0Delta(sqrtRatioTargetX32, sqrtRatioCurrentX32, liquidity, true) : SqrtPriceMath.getAmount1Delta(sqrtRatioCurrentX32, sqrtRatioTargetX32, liquidity, true);
+      var amountRemainingLessFee = FullMath.mulDivFloor(amountRemaining, JSBI.subtract(MAX_FEE, JSBI.BigInt(feePips)), MAX_FEE);
+      swapStep.amountIn = zeroForOne ? SqrtPriceMath.getAmount0Delta(sqrtRatioTargetX32, sqrtRatioCurrentX32, liquidity, true) : SqrtPriceMath.getAmount1Delta(sqrtRatioCurrentX32, sqrtRatioTargetX32, liquidity, true);
 
-      if (JSBI.greaterThanOrEqual(amountRemainingLessFee, returnValues.amountIn)) {
-        returnValues.sqrtRatioNextX32 = sqrtRatioTargetX32;
+      if (JSBI.greaterThanOrEqual(amountRemainingLessFee, swapStep.amountIn)) {
+        swapStep.sqrtRatioNextX32 = sqrtRatioTargetX32;
       } else {
-        returnValues.sqrtRatioNextX32 = SqrtPriceMath.getNextSqrtPriceFromInput(sqrtRatioCurrentX32, liquidity, amountRemainingLessFee, zeroForOne);
+        swapStep.sqrtRatioNextX32 = SqrtPriceMath.getNextSqrtPriceFromInput(sqrtRatioCurrentX32, liquidity, amountRemainingLessFee, zeroForOne);
       }
     } else {
-      returnValues.amountOut = zeroForOne ? SqrtPriceMath.getAmount1Delta(sqrtRatioTargetX32, sqrtRatioCurrentX32, liquidity, false) : SqrtPriceMath.getAmount0Delta(sqrtRatioCurrentX32, sqrtRatioTargetX32, liquidity, false);
+      swapStep.amountOut = zeroForOne ? SqrtPriceMath.getAmount1Delta(sqrtRatioTargetX32, sqrtRatioCurrentX32, liquidity, false) : SqrtPriceMath.getAmount0Delta(sqrtRatioCurrentX32, sqrtRatioTargetX32, liquidity, false);
 
-      if (JSBI.greaterThanOrEqual(JSBI.multiply(amountRemaining, NEGATIVE_ONE), returnValues.amountOut)) {
-        returnValues.sqrtRatioNextX32 = sqrtRatioTargetX32;
+      if (JSBI.greaterThanOrEqual(JSBI.multiply(amountRemaining, NEGATIVE_ONE), swapStep.amountOut)) {
+        swapStep.sqrtRatioNextX32 = sqrtRatioTargetX32;
       } else {
-        returnValues.sqrtRatioNextX32 = SqrtPriceMath.getNextSqrtPriceFromOutput(sqrtRatioCurrentX32, liquidity, JSBI.multiply(amountRemaining, NEGATIVE_ONE), zeroForOne);
+        swapStep.sqrtRatioNextX32 = SqrtPriceMath.getNextSqrtPriceFromOutput(sqrtRatioCurrentX32, liquidity, JSBI.multiply(amountRemaining, NEGATIVE_ONE), zeroForOne);
       }
     }
 
-    var max = JSBI.equal(sqrtRatioTargetX32, returnValues.sqrtRatioNextX32);
+    var max = JSBI.equal(sqrtRatioTargetX32, swapStep.sqrtRatioNextX32);
 
     if (zeroForOne) {
-      returnValues.amountIn = max && exactIn ? returnValues.amountIn : SqrtPriceMath.getAmount0Delta(returnValues.sqrtRatioNextX32, sqrtRatioCurrentX32, liquidity, true);
-      returnValues.amountOut = max && !exactIn ? returnValues.amountOut : SqrtPriceMath.getAmount1Delta(returnValues.sqrtRatioNextX32, sqrtRatioCurrentX32, liquidity, false);
+      swapStep.amountIn = max && exactIn ? swapStep.amountIn : SqrtPriceMath.getAmount0Delta(swapStep.sqrtRatioNextX32, sqrtRatioCurrentX32, liquidity, true);
+      swapStep.amountOut = max && !exactIn ? swapStep.amountOut : SqrtPriceMath.getAmount1Delta(swapStep.sqrtRatioNextX32, sqrtRatioCurrentX32, liquidity, false);
     } else {
-      returnValues.amountIn = max && exactIn ? returnValues.amountIn : SqrtPriceMath.getAmount1Delta(sqrtRatioCurrentX32, returnValues.sqrtRatioNextX32, liquidity, true);
-      returnValues.amountOut = max && !exactIn ? returnValues.amountOut : SqrtPriceMath.getAmount0Delta(sqrtRatioCurrentX32, returnValues.sqrtRatioNextX32, liquidity, false);
+      swapStep.amountIn = max && exactIn ? swapStep.amountIn : SqrtPriceMath.getAmount1Delta(sqrtRatioCurrentX32, swapStep.sqrtRatioNextX32, liquidity, true);
+      swapStep.amountOut = max && !exactIn ? swapStep.amountOut : SqrtPriceMath.getAmount0Delta(sqrtRatioCurrentX32, swapStep.sqrtRatioNextX32, liquidity, false);
     }
 
-    if (!exactIn && JSBI.greaterThan(returnValues.amountOut, JSBI.multiply(amountRemaining, NEGATIVE_ONE))) {
-      returnValues.amountOut = JSBI.multiply(amountRemaining, NEGATIVE_ONE);
+    if (!exactIn && JSBI.greaterThan(swapStep.amountOut, JSBI.multiply(amountRemaining, NEGATIVE_ONE))) {
+      swapStep.amountOut = JSBI.multiply(amountRemaining, NEGATIVE_ONE);
     }
 
-    if (exactIn && JSBI.notEqual(returnValues.sqrtRatioNextX32, sqrtRatioTargetX32)) {
+    if (exactIn && JSBI.notEqual(swapStep.sqrtRatioNextX32, sqrtRatioTargetX32)) {
       // we didn't reach the target, so take the remainder of the maximum input as fee
-      returnValues.feeAmount = JSBI.subtract(amountRemaining, returnValues.amountIn);
+      swapStep.feeAmount = JSBI.subtract(amountRemaining, swapStep.amountIn);
     } else {
-      returnValues.feeAmount = FullMath.mulDivRoundingUp(returnValues.amountIn, JSBI.BigInt(feePips), JSBI.subtract(MAX_FEE, JSBI.BigInt(feePips)));
+      swapStep.feeAmount = FullMath.mulDivCeil(swapStep.amountIn, JSBI.BigInt(feePips), JSBI.subtract(MAX_FEE, JSBI.BigInt(feePips)));
     }
 
-    return [returnValues.sqrtRatioNextX32, returnValues.amountIn, returnValues.amountOut, returnValues.feeAmount];
+    return [swapStep.sqrtRatioNextX32, swapStep.amountIn, swapStep.amountOut, swapStep.feeAmount];
   };
 
   return SwapMath;
@@ -1571,7 +1587,7 @@ var Pool = /*#__PURE__*/function () {
   _proto.getInputAmount =
   /*#__PURE__*/
   function () {
-    var _getInputAmount = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee2(outputAmount, sqrtPriceLimitX96) {
+    var _getInputAmount = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee2(outputAmount, sqrtPriceLimitX32) {
       var zeroForOne, _yield$this$swap2, inputAmount, sqrtRatioX32, liquidity, tickCurrent, inputToken;
 
       return runtime_1.wrap(function _callee2$(_context2) {
@@ -1581,7 +1597,7 @@ var Pool = /*#__PURE__*/function () {
               !(outputAmount.currency.isToken && this.involvesToken(outputAmount.currency)) ?  invariant(false, 'TOKEN')  : void 0;
               zeroForOne = outputAmount.currency.equals(this.token1);
               _context2.next = 4;
-              return this.swap(zeroForOne, JSBI.multiply(outputAmount.quotient, NEGATIVE_ONE), sqrtPriceLimitX96);
+              return this.swap(zeroForOne, JSBI.multiply(outputAmount.quotient, NEGATIVE_ONE), sqrtPriceLimitX32);
 
             case 4:
               _yield$this$swap2 = _context2.sent;
@@ -1628,6 +1644,7 @@ var Pool = /*#__PURE__*/function () {
         while (1) {
           switch (_context3.prev = _context3.next) {
             case 0:
+              !JSBI.notEqual(amountSpecified, ZERO) ?  invariant(false, 'AMOUNT_LESS_THAN_0')  : void 0;
               if (!sqrtPriceLimitX32) sqrtPriceLimitX32 = zeroForOne ? JSBI.add(TickMath.MIN_SQRT_RATIO, ONE) : JSBI.subtract(TickMath.MAX_SQRT_RATIO, ONE);
 
               if (zeroForOne) {
@@ -1650,9 +1667,11 @@ var Pool = /*#__PURE__*/function () {
                 liquidity: this.liquidity
               };
 
-            case 4:
-              if (!(JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) && state.sqrtPriceX32 != sqrtPriceLimitX32 && state.tick < TickMath.MAX_TICK && state.tick > TickMath.MIN_TICK)) {
-                _context3.next = 46;
+            case 5:
+              if (!(JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) && state.sqrtPriceX32 != sqrtPriceLimitX32 // state.tick < TickMath.MAX_TICK &&
+              // state.tick > TickMath.MIN_TICK
+              )) {
+                _context3.next = 47;
                 break;
               }
 
@@ -1662,10 +1681,10 @@ var Pool = /*#__PURE__*/function () {
               // tickBitmap.nextInitializedTickWithinOneWord
               // save the bitmap, and the tick account if it is initialized
 
-              _context3.next = 9;
+              _context3.next = 10;
               return this.tickDataProvider.nextInitializedTickWithinOneWord(state.tick, zeroForOne, this.tickSpacing);
 
-            case 9:
+            case 10:
               nextInitTick = _context3.sent;
               step.tickNext = nextInitTick[0];
               step.initialized = nextInitTick[1];
@@ -1702,24 +1721,30 @@ var Pool = /*#__PURE__*/function () {
               } else {
                 state.amountSpecifiedRemaining = JSBI.add(state.amountSpecifiedRemaining, step.amountOut);
                 state.amountCalculated = JSBI.add(state.amountCalculated, JSBI.add(step.amountIn, step.feeAmount));
-              } // TODO
+              } // protocol Fee calculation is skipped for now
+              //   if cache.fee_protocol > 0 {
+              //     let delta = step.fee_amount / cache.fee_protocol as u64;
+              //     step.fee_amount -= delta;
+              //     state.protocol_fee += delta;
+              // }
+              // TODO
 
 
               if (!JSBI.equal(state.sqrtPriceX32, step.sqrtPriceNextX32)) {
-                _context3.next = 43;
+                _context3.next = 44;
                 break;
               }
 
               if (!step.initialized) {
-                _context3.next = 40;
+                _context3.next = 41;
                 break;
               }
 
               _context3.t0 = state.accounts;
-              _context3.next = 28;
+              _context3.next = 29;
               return this.tickDataProvider.getTickAddress(step.tickNext);
 
-            case 28:
+            case 29:
               _context3.t1 = _context3.sent;
               _context3.t2 = {
                 pubkey: _context3.t1,
@@ -1730,35 +1755,35 @@ var Pool = /*#__PURE__*/function () {
               _context3.t0.push.call(_context3.t0, _context3.t2);
 
               _context3.t3 = JSBI;
-              _context3.next = 34;
+              _context3.next = 35;
               return this.tickDataProvider.getTick(step.tickNext);
 
-            case 34:
+            case 35:
               _context3.t4 = _context3.sent.liquidityNet;
               liquidityNet = _context3.t3.BigInt.call(_context3.t3, _context3.t4);
               // if we're moving leftward, we interpret liquidityNet as the opposite sign
               // safe because liquidityNet cannot be type(int128).min
               if (zeroForOne) liquidityNet = JSBI.multiply(liquidityNet, NEGATIVE_ONE);
               state.liquidity = LiquidityMath.addDelta(state.liquidity, liquidityNet);
-              _context3.next = 40;
+              _context3.next = 41;
               break;
 
-            case 40:
+            case 41:
               state.tick = zeroForOne ? step.tickNext - 1 : step.tickNext;
-              _context3.next = 44;
+              _context3.next = 45;
               break;
 
-            case 43:
+            case 44:
               if (state.sqrtPriceX32 != step.sqrtPriceStartX32) {
                 // recompute unless we're on a lower tick boundary (i.e. already transitioned ticks), and haven't moved
                 state.tick = TickMath.getTickAtSqrtRatio(state.sqrtPriceX32);
               }
 
-            case 44:
-              _context3.next = 4;
+            case 45:
+              _context3.next = 5;
               break;
 
-            case 46:
+            case 47:
               return _context3.abrupt("return", {
                 amountCalculated: state.amountCalculated,
                 sqrtRatioX32: state.sqrtPriceX32,
@@ -1768,7 +1793,7 @@ var Pool = /*#__PURE__*/function () {
                 accounts: state.accounts
               });
 
-            case 47:
+            case 48:
             case "end":
               return _context3.stop();
           }
@@ -2582,7 +2607,7 @@ var Tick = function Tick(_ref) {
 function tickPosition(tickBySpacing) {
   return {
     wordPos: tickBySpacing >> 8,
-    bitPos: Math.abs(tickBySpacing % 256)
+    bitPos: tickBySpacing % 256
   };
 }
 
@@ -3522,13 +3547,13 @@ function nextInitializedBit(word, bitPos, lte) {
     };
   } else {
     // all the 1s at or to the left of the bit_pos
-    var _mask = new anchor.BN(1).shln(bitPos).subn(1).notn(256);
+    var _mask = new anchor.BN(1).shln(bitPos).subn(1).notn(255);
 
     var _masked = word.and(_mask);
 
     var _initialized = !_masked.eqn(0);
 
-    var _next = _initialized ? msb(_masked) : 255;
+    var _next = _initialized ? lsb(_masked) : 255;
 
     return {
       next: _next,

@@ -35,6 +35,6 @@ export type TickPosition = {
  export function tickPosition(tickBySpacing: number): TickPosition {
   return {
     wordPos: tickBySpacing >> 8,
-    bitPos: Math.abs(tickBySpacing % 256),
+    bitPos: tickBySpacing % 256,
   }
 }

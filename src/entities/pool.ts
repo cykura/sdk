@@ -188,7 +188,7 @@ export class Pool {
    */
   public async getInputAmount(
     outputAmount: CurrencyAmount<Token>,
-    sqrtPriceLimitX96?: JSBI
+    sqrtPriceLimitX32?: JSBI
   ): Promise<[CurrencyAmount<Token>, Pool]> {
     invariant(outputAmount.currency.isToken && this.involvesToken(outputAmount.currency), 'TOKEN')
 
@@ -197,7 +197,7 @@ export class Pool {
     const { amountCalculated: inputAmount, sqrtRatioX32, liquidity, tickCurrent } = await this.swap(
       zeroForOne,
       JSBI.multiply(outputAmount.quotient, NEGATIVE_ONE),
-      sqrtPriceLimitX96
+      sqrtPriceLimitX32
     )
     const inputToken = zeroForOne ? this.token0 : this.token1
     return [
@@ -227,6 +227,8 @@ export class Pool {
     tickCurrent: number
     accounts: SwapAccount[]
   }> {
+    invariant(JSBI.notEqual(amountSpecified, ZERO), 'AMOUNT_LESS_THAN_0')
+
     if (!sqrtPriceLimitX32)
       sqrtPriceLimitX32 = zeroForOne
         ? JSBI.add(TickMath.MIN_SQRT_RATIO, ONE)
@@ -258,9 +260,9 @@ export class Pool {
     // start swap while loop
     while (
       JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) &&
-      state.sqrtPriceX32 != sqrtPriceLimitX32 &&
-      state.tick < TickMath.MAX_TICK &&
-      state.tick > TickMath.MIN_TICK
+      state.sqrtPriceX32 != sqrtPriceLimitX32
+      // state.tick < TickMath.MAX_TICK &&
+      // state.tick > TickMath.MIN_TICK
     ) {
       let step: Partial<StepComputations> = {}
       step.sqrtPriceStartX32 = state.sqrtPriceX32
@@ -320,6 +322,13 @@ export class Pool {
         state.amountSpecifiedRemaining = JSBI.add(state.amountSpecifiedRemaining, step.amountOut)
         state.amountCalculated = JSBI.add(state.amountCalculated, JSBI.add(step.amountIn, step.feeAmount))
       }
+
+      // protocol Fee calculation is skipped for now
+      //   if cache.fee_protocol > 0 {
+      //     let delta = step.fee_amount / cache.fee_protocol as u64;
+      //     step.fee_amount -= delta;
+      //     state.protocol_fee += delta;
+      // }
 
       // TODO
       if (JSBI.equal(state.sqrtPriceX32, step.sqrtPriceNextX32)) {

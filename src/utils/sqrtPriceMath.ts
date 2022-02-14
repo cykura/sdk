@@ -29,8 +29,8 @@ export abstract class SqrtPriceMath {
     const numerator2 = JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32)
 
     return roundUp
-      ? FullMath.mulDivRoundingUp(FullMath.mulDivRoundingUp(numerator1, numerator2, sqrtRatioBX32), ONE, sqrtRatioAX32)
-      : JSBI.divide(JSBI.divide(JSBI.multiply(numerator1, numerator2), sqrtRatioBX32), sqrtRatioAX32)
+      ? FullMath.mulDivRoundingUp(FullMath.mulDivCeil(numerator1, numerator2, sqrtRatioBX32), ONE, sqrtRatioAX32)
+      : JSBI.divide(FullMath.mulDivFloor(numerator1, numerator2, sqrtRatioBX32), sqrtRatioAX32)
   }
 
   public static getAmount1Delta(sqrtRatioAX32: JSBI, sqrtRatioBX32: JSBI, liquidity: JSBI, roundUp: boolean): JSBI {
@@ -39,8 +39,8 @@ export abstract class SqrtPriceMath {
     }
 
     return roundUp
-      ? FullMath.mulDivRoundingUp(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32), Q32)
-      : JSBI.divide(JSBI.multiply(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32)), Q32)
+      ? FullMath.mulDivCeil(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32), Q32)
+      : FullMath.mulDivFloor(liquidity, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32), Q32)
   }
 
   public static getNextSqrtPriceFromInput(sqrtPX32: JSBI, liquidity: JSBI, amountIn: JSBI, zeroForOne: boolean): JSBI {
@@ -74,24 +74,23 @@ export abstract class SqrtPriceMath {
   ): JSBI {
     if (JSBI.equal(amount, ZERO)) return sqrtPX32
     const numerator1 = JSBI.leftShift(liquidity, U32Resolution)
+    console.log('COMES HERE')
 
     if (add) {
       let product = multiplyIn128(amount, sqrtPX32)
-      if (JSBI.equal(JSBI.divide(product, amount), sqrtPX32)) {
-        const denominator = addIn128(numerator1, product)
-        if (JSBI.greaterThanOrEqual(denominator, numerator1)) {
-          return FullMath.mulDivRoundingUp(numerator1, sqrtPX32, denominator)
-        }
+      const denominator = addIn128(numerator1, product)
+      if (JSBI.greaterThanOrEqual(denominator, numerator1)) {
+        return FullMath.mulDivCeil(numerator1, sqrtPX32, denominator)
       }
 
       return FullMath.mulDivRoundingUp(numerator1, ONE, JSBI.add(JSBI.divide(numerator1, sqrtPX32), amount))
     } else {
       let product = multiplyIn128(amount, sqrtPX32)
 
-      invariant(JSBI.equal(JSBI.divide(product, amount), sqrtPX32))
+      // invariant(JSBI.equal(JSBI.divide(product, amount), sqrtPX32))
       invariant(JSBI.greaterThan(numerator1, product))
       const denominator = JSBI.subtract(numerator1, product)
-      return FullMath.mulDivRoundingUp(numerator1, sqrtPX32, denominator)
+      return FullMath.mulDivCeil(numerator1, sqrtPX32, denominator)
     }
   }
 
@@ -104,11 +103,13 @@ export abstract class SqrtPriceMath {
     if (add) {
       const quotient = JSBI.lessThanOrEqual(amount, MaxUint32)
         ? JSBI.divide(JSBI.leftShift(amount, U32Resolution), liquidity)
-        : JSBI.divide(JSBI.multiply(amount, Q32), liquidity)
+        : FullMath.mulDivFloor(amount, Q32, liquidity)
 
       return JSBI.add(sqrtPX32, quotient)
     } else {
-      const quotient = FullMath.mulDivRoundingUp(amount, Q32, liquidity)
+      const quotient = JSBI.lessThanOrEqual(amount, MaxUint32)
+        ? FullMath.mulDivRoundingUp(JSBI.leftShift(amount, U32Resolution), ONE, liquidity)
+        : FullMath.mulDivCeil(amount, Q32, liquidity)
 
       invariant(JSBI.greaterThan(sqrtPX32, quotient))
       return JSBI.subtract(sqrtPX32, quotient)

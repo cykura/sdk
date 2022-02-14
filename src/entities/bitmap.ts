@@ -58,11 +58,11 @@ export function nextInitializedBit(word: BN, bitPos: number, lte: boolean): Next
     return { next, initialized }
   } else {
     // all the 1s at or to the left of the bit_pos
-    const mask = new BN(1).shln(bitPos).subn(1).notn(256)
+    const mask = new BN(1).shln(bitPos).subn(1).notn(255)
     const masked = word.and(mask)
     const initialized = !masked.eqn(0)
     const next = initialized
-      ? msb(masked)
+      ? lsb(masked)
       : 255
     return { next, initialized }
   }
