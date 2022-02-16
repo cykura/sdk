@@ -164,6 +164,7 @@ export class Pool {
   ): Promise<[CurrencyAmount<Token>, Pool, SwapAccount[]]> {
     invariant(this.involvesToken(inputAmount.currency), 'TOKEN')
 
+    // console.log('getOutputAMount', inputAmount.currency.name, this.token0.name)
     const zeroForOne = inputAmount.currency.equals(this.token0)
 
     const { amountCalculated: outputAmount, sqrtRatioX32, liquidity, tickCurrent, accounts } = await this.swap(
@@ -192,6 +193,7 @@ export class Pool {
   ): Promise<[CurrencyAmount<Token>, Pool]> {
     invariant(outputAmount.currency.isToken && this.involvesToken(outputAmount.currency), 'TOKEN')
 
+    // console.log('getOutputAMount', inputAmount.currency.name, this.token0.name)
     const zeroForOne = outputAmount.currency.equals(this.token1)
 
     const { amountCalculated: inputAmount, sqrtRatioX32, liquidity, tickCurrent } = await this.swap(
@@ -257,12 +259,13 @@ export class Pool {
 
     let lastSavedWordPos: number | undefined
 
+    // console.log('0for1 outisde while', zeroForOne)
     // start swap while loop
     while (
       JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) &&
-      state.sqrtPriceX32 != sqrtPriceLimitX32
-      // state.tick < TickMath.MAX_TICK &&
-      // state.tick > TickMath.MIN_TICK
+      state.sqrtPriceX32 != sqrtPriceLimitX32 &&
+      state.tick < TickMath.MAX_TICK &&
+      state.tick > TickMath.MIN_TICK
     ) {
       let step: Partial<StepComputations> = {}
       step.sqrtPriceStartX32 = state.sqrtPriceX32
@@ -271,6 +274,7 @@ export class Pool {
       // by simply traversing to the next available tick, we instead need to exactly replicate
       // tickBitmap.nextInitializedTickWithinOneWord
 
+      // console.log('SDK', 'tick', state.tick, zeroForOne, ' 0for1')
       // save the bitmap, and the tick account if it is initialized
       const nextInitTick = await this.tickDataProvider.nextInitializedTickWithinOneWord(
         state.tick,
@@ -349,10 +353,11 @@ export class Pool {
 
           state.liquidity = LiquidityMath.addDelta(state.liquidity, liquidityNet)
         } else {
-          // console.log('reached uninitialized tick', step.tickNext)
+          console.log('reached uninitialized tick', step.tickNext)
         }
-
+        // console.log('state.tick', state.tick)
         state.tick = zeroForOne ? step.tickNext - 1 : step.tickNext
+        // console.log('updated state.tick', state.tick)
       } else if (state.sqrtPriceX32 != step.sqrtPriceStartX32) {
         // recompute unless we're on a lower tick boundary (i.e. already transitioned ticks), and haven't moved
         state.tick = TickMath.getTickAtSqrtRatio(state.sqrtPriceX32)

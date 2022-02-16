@@ -1010,11 +1010,9 @@ var LiquidityMath = /*#__PURE__*/function () {
     var z;
 
     if (JSBI.lessThan(y, ZERO)) {
-      z = JSBI.subtract(x, JSBI.multiply(y, NEGATIVE_ONE));
-      !(z < x) ? process.env.NODE_ENV !== "production" ? invariant(false, 'LIQUIDITY_SUB') : invariant(false) : void 0;
+      z = JSBI.subtract(x, JSBI.multiply(y, NEGATIVE_ONE)); // invariant(z < x, 'LIQUIDITY_SUB')
     } else {
-      z = JSBI.add(x, y);
-      !(z >= x) ? process.env.NODE_ENV !== "production" ? invariant(false, 'LIQUIDITY_ADD') : invariant(false) : void 0;
+      z = JSBI.add(x, y); // invariant(z >= x, 'LIQUIDITY_ADD')
     }
 
     return z;
@@ -1076,6 +1074,7 @@ var SqrtPriceMath = /*#__PURE__*/function () {
 
     var numerator1 = JSBI.leftShift(liquidity, U32Resolution);
     var numerator2 = JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32);
+    !JSBI.greaterThan(sqrtRatioAX32, ZERO) ? process.env.NODE_ENV !== "production" ? invariant(false, 'SQRTA32_GT_0') : invariant(false) : void 0;
     return roundUp ? FullMath.mulDivRoundingUp(FullMath.mulDivCeil(numerator1, numerator2, sqrtRatioBX32), ONE, sqrtRatioAX32) : JSBI.divide(FullMath.mulDivFloor(numerator1, numerator2, sqrtRatioBX32), sqrtRatioAX32);
   };
 
@@ -1104,7 +1103,6 @@ var SqrtPriceMath = /*#__PURE__*/function () {
   SqrtPriceMath.getNextSqrtPriceFromAmount0RoundingUp = function getNextSqrtPriceFromAmount0RoundingUp(sqrtPX32, liquidity, amount, add) {
     if (JSBI.equal(amount, ZERO)) return sqrtPX32;
     var numerator1 = JSBI.leftShift(liquidity, U32Resolution);
-    console.log('COMES HERE');
 
     if (add) {
       var product = multiplyIn128(amount, sqrtPX32);
@@ -1545,7 +1543,8 @@ var Pool = /*#__PURE__*/function () {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              !this.involvesToken(inputAmount.currency) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+              !this.involvesToken(inputAmount.currency) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0; // console.log('getOutputAMount', inputAmount.currency.name, this.token0.name)
+
               zeroForOne = inputAmount.currency.equals(this.token0);
               _context.next = 4;
               return this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX32);
@@ -1593,7 +1592,8 @@ var Pool = /*#__PURE__*/function () {
         while (1) {
           switch (_context2.prev = _context2.next) {
             case 0:
-              !(outputAmount.currency.isToken && this.involvesToken(outputAmount.currency)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+              !(outputAmount.currency.isToken && this.involvesToken(outputAmount.currency)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0; // console.log('getOutputAMount', inputAmount.currency.name, this.token0.name)
+
               zeroForOne = outputAmount.currency.equals(this.token1);
               _context2.next = 4;
               return this.swap(zeroForOne, JSBI.multiply(outputAmount.quotient, NEGATIVE_ONE), sqrtPriceLimitX32);
@@ -1667,10 +1667,8 @@ var Pool = /*#__PURE__*/function () {
               };
 
             case 5:
-              if (!(JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) && state.sqrtPriceX32 != sqrtPriceLimitX32 // state.tick < TickMath.MAX_TICK &&
-              // state.tick > TickMath.MIN_TICK
-              )) {
-                _context3.next = 47;
+              if (!(JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) && state.sqrtPriceX32 != sqrtPriceLimitX32 && state.tick < TickMath.MAX_TICK && state.tick > TickMath.MIN_TICK)) {
+                _context3.next = 48;
                 break;
               }
 
@@ -1678,6 +1676,7 @@ var Pool = /*#__PURE__*/function () {
               step.sqrtPriceStartX32 = state.sqrtPriceX32; // because each iteration of the while loop rounds, we can't optimize this code (relative to the smart contract)
               // by simply traversing to the next available tick, we instead need to exactly replicate
               // tickBitmap.nextInitializedTickWithinOneWord
+              // console.log('SDK', 'tick', state.tick, zeroForOne, ' 0for1')
               // save the bitmap, and the tick account if it is initialized
 
               _context3.next = 10;
@@ -1730,7 +1729,7 @@ var Pool = /*#__PURE__*/function () {
 
 
               if (!JSBI.equal(state.sqrtPriceX32, step.sqrtPriceNextX32)) {
-                _context3.next = 44;
+                _context3.next = 45;
                 break;
               }
 
@@ -1764,25 +1763,30 @@ var Pool = /*#__PURE__*/function () {
               // safe because liquidityNet cannot be type(int128).min
               if (zeroForOne) liquidityNet = JSBI.multiply(liquidityNet, NEGATIVE_ONE);
               state.liquidity = LiquidityMath.addDelta(state.liquidity, liquidityNet);
-              _context3.next = 41;
+              _context3.next = 42;
               break;
 
             case 41:
-              state.tick = zeroForOne ? step.tickNext - 1 : step.tickNext;
-              _context3.next = 45;
+              console.log('reached uninitialized tick', step.tickNext);
+
+            case 42:
+              // console.log('state.tick', state.tick)
+              state.tick = zeroForOne ? step.tickNext - 1 : step.tickNext; // console.log('updated state.tick', state.tick)
+
+              _context3.next = 46;
               break;
 
-            case 44:
+            case 45:
               if (state.sqrtPriceX32 != step.sqrtPriceStartX32) {
                 // recompute unless we're on a lower tick boundary (i.e. already transitioned ticks), and haven't moved
                 state.tick = TickMath.getTickAtSqrtRatio(state.sqrtPriceX32);
               }
 
-            case 45:
+            case 46:
               _context3.next = 5;
               break;
 
-            case 47:
+            case 48:
               return _context3.abrupt("return", {
                 amountCalculated: state.amountCalculated,
                 sqrtRatioX32: state.sqrtPriceX32,
@@ -1792,7 +1796,7 @@ var Pool = /*#__PURE__*/function () {
                 accounts: state.accounts
               });
 
-            case 48:
+            case 49:
             case "end":
               return _context3.stop();
           }
@@ -2606,7 +2610,8 @@ var Tick = function Tick(_ref) {
 function tickPosition(tickBySpacing) {
   return {
     wordPos: tickBySpacing >> 8,
-    bitPos: tickBySpacing % 256
+    bitPos: tickBySpacing % 256 & 255 // mask with 255 to get the output
+
   };
 }
 

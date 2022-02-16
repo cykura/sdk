@@ -23,7 +23,7 @@ export class Tick {
 }
 
 export type TickPosition = {
-  wordPos: number,
+  wordPos: number
   bitPos: number
 }
 
@@ -32,9 +32,9 @@ export type TickPosition = {
  * @param tickBySpacing Tick divided by spacing
  * @returns the word and bit position for the given tick
  */
- export function tickPosition(tickBySpacing: number): TickPosition {
+export function tickPosition(tickBySpacing: number): TickPosition {
   return {
     wordPos: tickBySpacing >> 8,
-    bitPos: tickBySpacing % 256,
+    bitPos: tickBySpacing % 256 & 255 // mask with 255 to get the output
   }
 }

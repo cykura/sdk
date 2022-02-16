@@ -12,10 +12,10 @@ export abstract class LiquidityMath {
     let z: JSBI
     if (JSBI.lessThan(y, ZERO)) {
       z = JSBI.subtract(x, JSBI.multiply(y, NEGATIVE_ONE))
-      invariant(z < x, 'LIQUIDITY_SUB')
+      // invariant(z < x, 'LIQUIDITY_SUB')
     } else {
       z = JSBI.add(x, y)
-      invariant(z >= x, 'LIQUIDITY_ADD')
+      // invariant(z >= x, 'LIQUIDITY_ADD')
     }
     return z
   }

@@ -28,6 +28,8 @@ export abstract class SqrtPriceMath {
     const numerator1 = JSBI.leftShift(liquidity, U32Resolution)
     const numerator2 = JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32)
 
+    invariant(JSBI.greaterThan(sqrtRatioAX32, ZERO), 'SQRTA32_GT_0')
+
     return roundUp
       ? FullMath.mulDivRoundingUp(FullMath.mulDivCeil(numerator1, numerator2, sqrtRatioBX32), ONE, sqrtRatioAX32)
       : JSBI.divide(FullMath.mulDivFloor(numerator1, numerator2, sqrtRatioBX32), sqrtRatioAX32)
@@ -74,7 +76,6 @@ export abstract class SqrtPriceMath {
   ): JSBI {
     if (JSBI.equal(amount, ZERO)) return sqrtPX32
     const numerator1 = JSBI.leftShift(liquidity, U32Resolution)
-    console.log('COMES HERE')
 
     if (add) {
       let product = multiplyIn128(amount, sqrtPX32)
