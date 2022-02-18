@@ -1,5 +1,6 @@
 import { BigintIsh } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
+import { FullMath } from '.'
 import { Q64, Q32, MaxUint32 } from '../internalConstants'
 
 /**
@@ -17,8 +18,8 @@ function maxLiquidityForAmount0Imprecise(sqrtRatioAX32: JSBI, sqrtRatioBX32: JSB
   if (JSBI.greaterThan(sqrtRatioAX32, sqrtRatioBX32)) {
     ;[sqrtRatioAX32, sqrtRatioBX32] = [sqrtRatioBX32, sqrtRatioAX32]
   }
-  const intermediate = JSBI.divide(JSBI.multiply(sqrtRatioAX32, sqrtRatioBX32), MaxUint32)
-  return JSBI.divide(JSBI.multiply(JSBI.BigInt(amount0), intermediate), JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32))
+  const intermediate = FullMath.mulDivFloor(sqrtRatioAX32, sqrtRatioBX32, MaxUint32)
+  return FullMath.mulDivFloor(JSBI.BigInt(amount0), intermediate, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32))
 }
 
 /**
@@ -51,7 +52,7 @@ function maxLiquidityForAmount1(sqrtRatioAX32: JSBI, sqrtRatioBX32: JSBI, amount
   if (JSBI.greaterThan(sqrtRatioAX32, sqrtRatioBX32)) {
     ;[sqrtRatioAX32, sqrtRatioBX32] = [sqrtRatioBX32, sqrtRatioAX32]
   }
-  return JSBI.divide(JSBI.multiply(JSBI.BigInt(amount1), MaxUint32), JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32))
+  return FullMath.mulDivFloor(JSBI.BigInt(amount1), MaxUint32, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32))
 }
 
 /**

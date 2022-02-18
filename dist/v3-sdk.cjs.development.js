@@ -930,6 +930,7 @@ var ONE = /*#__PURE__*/JSBI.BigInt(1); // used in liquidity amount math
 var Q32 = /*#__PURE__*/JSBI.exponentiate( /*#__PURE__*/JSBI.BigInt(2), /*#__PURE__*/JSBI.BigInt(32));
 var Q64 = /*#__PURE__*/JSBI.exponentiate( /*#__PURE__*/JSBI.BigInt(2), /*#__PURE__*/JSBI.BigInt(64));
 var MaxUint32 = /*#__PURE__*/JSBI.subtract(Q32, ONE);
+var MaxUint64 = /*#__PURE__*/JSBI.subtract(Q64, ONE);
 var U32Resolution = /*#__PURE__*/JSBI.BigInt(32);
 
 var _anchor$web = anchor.web3,
@@ -1846,75 +1847,59 @@ var Pool = /*#__PURE__*/function () {
 }();
 
 /**
- * Returns an imprecise maximum amount of liquidity received for a given amount of token 0.
- * This function is available to accommodate LiquidityAmounts#getLiquidityForAmount0 in the v3 periphery,
- * which could be more precise by at least 32 bits by dividing by Q64 instead of Q96 in the intermediate step,
- * and shifting the subtracted ratio left by 32 bits. This imprecise calculation will likely be replaced in a future
- * v3 router contract.
- * @param sqrtRatioAX32 The price at the lower boundary
- * @param sqrtRatioBX32 The price at the upper boundary
- * @param amount0 The token0 amount
- * @returns liquidity for amount0, imprecise
+ * Converts a big int to a hex string
+ * @param bigintIsh
+ * @returns The hex encoded calldata
  */
 
-function maxLiquidityForAmount0Imprecise(sqrtRatioAX32, sqrtRatioBX32, amount0) {
-  if (JSBI.greaterThan(sqrtRatioAX32, sqrtRatioBX32)) {
-    var _ref = [sqrtRatioBX32, sqrtRatioAX32];
-    sqrtRatioAX32 = _ref[0];
-    sqrtRatioBX32 = _ref[1];
+function toHex(bigintIsh) {
+  var bigInt = JSBI.BigInt(bigintIsh);
+  var hex = bigInt.toString(16);
+
+  if (hex.length % 2 !== 0) {
+    hex = "0" + hex;
   }
 
-  var intermediate = JSBI.divide(JSBI.multiply(sqrtRatioAX32, sqrtRatioBX32), MaxUint32);
-  return JSBI.divide(JSBI.multiply(JSBI.BigInt(amount0), intermediate), JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32));
+  return "0x" + hex;
 }
+
 /**
- * Computes the maximum amount of liquidity received for a given amount of token1
- * @param sqrtRatioAX32 The price at the lower tick boundary
- * @param sqrtRatioBX32 The price at the upper tick boundary
- * @param amount1 The token1 amount
- * @returns liquidity for amount1
+ * Converts a route to a hex encoded path
+ * @param route the v3 path to convert to an encoded path
+ * @param exactOutput whether the route should be encoded in reverse, for making exact output swaps
  */
 
+function encodeRouteToPath(route, exactOutput) {
+  var firstInputToken = route.input.wrapped;
 
-function maxLiquidityForAmount1(sqrtRatioAX32, sqrtRatioBX32, amount1) {
-  if (JSBI.greaterThan(sqrtRatioAX32, sqrtRatioBX32)) {
-    var _ref3 = [sqrtRatioBX32, sqrtRatioAX32];
-    sqrtRatioAX32 = _ref3[0];
-    sqrtRatioBX32 = _ref3[1];
-  }
+  var _route$pools$reduce = route.pools.reduce(function (_ref, pool, index) {
+    var inputToken = _ref.inputToken,
+        path = _ref.path,
+        types = _ref.types;
+    var outputToken = pool.token0.equals(inputToken) ? pool.token1 : pool.token0;
 
-  return JSBI.divide(JSBI.multiply(JSBI.BigInt(amount1), MaxUint32), JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32));
-}
-/**
- * Computes the maximum amount of liquidity received for a given amount of token0, token1,
- * and the prices at the tick boundaries.
- * @param sqrtRatioCurrentX32 the current price
- * @param sqrtRatioAX32 price at lower boundary
- * @param sqrtRatioBX32 price at upper boundary
- * @param amount0 token0 amount
- * @param amount1 token1 amount
- * @param useFullPrecision if false, liquidity will be maximized according to what the router can calculate,
- * not what core can theoretically support
- */
+    if (index === 0) {
+      return {
+        inputToken: outputToken,
+        types: ['address', 'uint24', 'address'],
+        path: [inputToken.address, pool.fee, outputToken.address]
+      };
+    } else {
+      return {
+        inputToken: outputToken,
+        types: [].concat(types, ['uint24', 'address']),
+        path: [].concat(path, [pool.fee, outputToken.address])
+      };
+    }
+  }, {
+    inputToken: firstInputToken,
+    path: [],
+    types: []
+  }),
+      path = _route$pools$reduce.path,
+      types = _route$pools$reduce.types;
 
-
-function maxLiquidityForAmounts(sqrtRatioCurrentX32, sqrtRatioAX32, sqrtRatioBX32, amount0, amount1, useFullPrecision) {
-  if (JSBI.greaterThan(sqrtRatioAX32, sqrtRatioBX32)) {
-    var _ref4 = [sqrtRatioBX32, sqrtRatioAX32];
-    sqrtRatioAX32 = _ref4[0];
-    sqrtRatioBX32 = _ref4[1];
-  } // trying this out?
-  var maxLiquidityForAmount0 = maxLiquidityForAmount0Imprecise;
-
-  if (JSBI.lessThanOrEqual(sqrtRatioCurrentX32, sqrtRatioAX32)) {
-    return maxLiquidityForAmount0(sqrtRatioAX32, sqrtRatioBX32, amount0);
-  } else if (JSBI.lessThan(sqrtRatioCurrentX32, sqrtRatioBX32)) {
-    var liquidity0 = maxLiquidityForAmount0(sqrtRatioCurrentX32, sqrtRatioBX32, amount0);
-    var liquidity1 = maxLiquidityForAmount1(sqrtRatioAX32, sqrtRatioCurrentX32, amount1);
-    return JSBI.lessThan(liquidity0, liquidity1) ? liquidity0 : liquidity1;
-  } else {
-    return maxLiquidityForAmount1(sqrtRatioAX32, sqrtRatioBX32, amount1);
-  }
+  return exactOutput ? solidity.pack(types.reverse(), path.reverse()) : solidity.pack(types, path);
 }
 
 /**
@@ -1929,6 +1914,36 @@ function encodeSqrtRatioX32(amount1, amount0) {
   var denominator = JSBI.BigInt(amount0);
   var ratioX64 = JSBI.divide(numerator, denominator);
   return sdkCore.sqrt(ratioX64);
+}
+
+/**
+ * Determines if a tick list is sorted
+ * @param list The tick list
+ * @param comparator The comparator
+ * @returns true if sorted
+ */
+function isSorted(list, comparator) {
+  for (var i = 0; i < list.length - 1; i++) {
+    if (comparator(list[i], list[i + 1]) > 0) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Returns the closest tick that is nearest a given tick and usable for the given tick spacing
+ * @param tick the target tick
+ * @param tickSpacing the spacing of the pool
+ */
+
+function nearestUsableTick(tick, tickSpacing) {
+  !(Number.isInteger(tick) && Number.isInteger(tickSpacing)) ?  invariant(false, 'INTEGERS')  : void 0;
+  !(tickSpacing > 0) ?  invariant(false, 'TICK_SPACING')  : void 0;
+  !(tick >= TickMath.MIN_TICK && tick <= TickMath.MAX_TICK) ?  invariant(false, 'TICK_BOUND')  : void 0;
+  var rounded = Math.round(tick / tickSpacing) * tickSpacing;
+  if (rounded < TickMath.MIN_TICK) return rounded + tickSpacing;else if (rounded > TickMath.MAX_TICK) return rounded - tickSpacing;else return rounded;
 }
 
 /**
@@ -1967,6 +1982,215 @@ function priceToClosestTick(price) {
   }
 
   return tick;
+}
+
+function tickComparator(a, b) {
+  return a.index - b.index;
+}
+/**
+ * Utility methods for interacting with sorted lists of ticks
+ */
+
+
+var TickList = /*#__PURE__*/function () {
+  /**
+   * Cannot be constructed
+   */
+  function TickList() {}
+
+  TickList.validateList = function validateList(ticks, tickSpacing) {
+    !(tickSpacing > 0) ?  invariant(false, 'TICK_SPACING_NONZERO')  : void 0; // ensure ticks are spaced appropriately
+
+    !ticks.every(function (_ref) {
+      var index = _ref.index;
+      return index % tickSpacing === 0;
+    }) ?  invariant(false, 'TICK_SPACING')  : void 0; // ensure tick liquidity deltas sum to 0
+
+    !JSBI.equal(ticks.reduce(function (accumulator, _ref2) {
+      var liquidityNet = _ref2.liquidityNet;
+      return JSBI.add(accumulator, liquidityNet);
+    }, ZERO), ZERO) ?  invariant(false, 'ZERO_NET')  : void 0;
+    !isSorted(ticks, tickComparator) ?  invariant(false, 'SORTED')  : void 0;
+  };
+
+  TickList.isBelowSmallest = function isBelowSmallest(ticks, tick) {
+    !(ticks.length > 0) ?  invariant(false, 'LENGTH')  : void 0;
+    return tick < ticks[0].index;
+  };
+
+  TickList.isAtOrAboveLargest = function isAtOrAboveLargest(ticks, tick) {
+    !(ticks.length > 0) ?  invariant(false, 'LENGTH')  : void 0;
+    return tick >= ticks[ticks.length - 1].index;
+  };
+
+  TickList.getTick = function getTick(ticks, index) {
+    var tick = ticks[this.binarySearch(ticks, index)];
+    !(tick.index === index) ?  invariant(false, 'NOT_CONTAINED')  : void 0;
+    return tick;
+  }
+  /**
+   * Finds the largest tick in the list of ticks that is less than or equal to tick
+   * @param ticks list of ticks
+   * @param tick tick to find the largest tick that is less than or equal to tick
+   * @private
+   */
+  ;
+
+  TickList.binarySearch = function binarySearch(ticks, tick) {
+    !!this.isBelowSmallest(ticks, tick) ?  invariant(false, 'BELOW_SMALLEST')  : void 0;
+    var l = 0;
+    var r = ticks.length - 1;
+    var i;
+
+    while (true) {
+      i = Math.floor((l + r) / 2);
+
+      if (ticks[i].index <= tick && (i === ticks.length - 1 || ticks[i + 1].index > tick)) {
+        return i;
+      }
+
+      if (ticks[i].index < tick) {
+        l = i + 1;
+      } else {
+        r = i - 1;
+      }
+    }
+  };
+
+  TickList.nextInitializedTick = function nextInitializedTick(ticks, tick, lte) {
+    if (lte) {
+      !!TickList.isBelowSmallest(ticks, tick) ?  invariant(false, 'BELOW_SMALLEST')  : void 0;
+
+      if (TickList.isAtOrAboveLargest(ticks, tick)) {
+        return ticks[ticks.length - 1];
+      }
+
+      var index = this.binarySearch(ticks, tick);
+      return ticks[index];
+    } else {
+      !!this.isAtOrAboveLargest(ticks, tick) ?  invariant(false, 'AT_OR_ABOVE_LARGEST')  : void 0;
+
+      if (this.isBelowSmallest(ticks, tick)) {
+        return ticks[0];
+      }
+
+      var _index = this.binarySearch(ticks, tick);
+
+      return ticks[_index + 1];
+    }
+  };
+
+  TickList.nextInitializedTickWithinOneWord = function nextInitializedTickWithinOneWord(ticks, tick, lte, tickSpacing) {
+    var compressed = Math.floor(tick / tickSpacing); // matches rounding in the code
+
+    if (lte) {
+      var wordPos = compressed >> 8;
+      var minimum = (wordPos << 8) * tickSpacing;
+
+      if (TickList.isBelowSmallest(ticks, tick)) {
+        return [minimum, false];
+      }
+
+      var index = TickList.nextInitializedTick(ticks, tick, lte).index;
+      var nextInitializedTick = Math.max(minimum, index);
+      return [nextInitializedTick, nextInitializedTick === index];
+    } else {
+      var _wordPos = compressed + 1 >> 8;
+
+      var maximum = (_wordPos + 1 << 8) * tickSpacing - 1;
+
+      if (this.isAtOrAboveLargest(ticks, tick)) {
+        return [maximum, false];
+      }
+
+      var _index2 = this.nextInitializedTick(ticks, tick, lte).index;
+
+      var _nextInitializedTick = Math.min(maximum, _index2);
+
+      return [_nextInitializedTick, _nextInitializedTick === _index2];
+    }
+  };
+
+  return TickList;
+}();
+
+var BITMAP_SEED = /*#__PURE__*/Buffer.from('b');
+var POOL_SEED$1 = /*#__PURE__*/Buffer.from('p');
+var POSITION_SEED = /*#__PURE__*/Buffer.from('ps');
+var OBSERVATION_SEED = /*#__PURE__*/Buffer.from('o');
+var TICK_SEED = /*#__PURE__*/Buffer.from('t');
+var FEE_SEED = /*#__PURE__*/Buffer.from('f');
+
+/**
+ * Returns an imprecise maximum amount of liquidity received for a given amount of token 0.
+ * This function is available to accommodate LiquidityAmounts#getLiquidityForAmount0 in the v3 periphery,
+ * which could be more precise by at least 32 bits by dividing by Q64 instead of Q96 in the intermediate step,
+ * and shifting the subtracted ratio left by 32 bits. This imprecise calculation will likely be replaced in a future
+ * v3 router contract.
+ * @param sqrtRatioAX32 The price at the lower boundary
+ * @param sqrtRatioBX32 The price at the upper boundary
+ * @param amount0 The token0 amount
+ * @returns liquidity for amount0, imprecise
+ */
+
+function maxLiquidityForAmount0Imprecise(sqrtRatioAX32, sqrtRatioBX32, amount0) {
+  if (JSBI.greaterThan(sqrtRatioAX32, sqrtRatioBX32)) {
+    var _ref = [sqrtRatioBX32, sqrtRatioAX32];
+    sqrtRatioAX32 = _ref[0];
+    sqrtRatioBX32 = _ref[1];
+  }
+
+  var intermediate = FullMath.mulDivFloor(sqrtRatioAX32, sqrtRatioBX32, MaxUint32);
+  return FullMath.mulDivFloor(JSBI.BigInt(amount0), intermediate, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32));
+}
+/**
+ * Computes the maximum amount of liquidity received for a given amount of token1
+ * @param sqrtRatioAX32 The price at the lower tick boundary
+ * @param sqrtRatioBX32 The price at the upper tick boundary
+ * @param amount1 The token1 amount
+ * @returns liquidity for amount1
+ */
+
+
+function maxLiquidityForAmount1(sqrtRatioAX32, sqrtRatioBX32, amount1) {
+  if (JSBI.greaterThan(sqrtRatioAX32, sqrtRatioBX32)) {
+    var _ref3 = [sqrtRatioBX32, sqrtRatioAX32];
+    sqrtRatioAX32 = _ref3[0];
+    sqrtRatioBX32 = _ref3[1];
+  }
+
+  return FullMath.mulDivFloor(JSBI.BigInt(amount1), MaxUint32, JSBI.subtract(sqrtRatioBX32, sqrtRatioAX32));
+}
+/**
+ * Computes the maximum amount of liquidity received for a given amount of token0, token1,
+ * and the prices at the tick boundaries.
+ * @param sqrtRatioCurrentX32 the current price
+ * @param sqrtRatioAX32 price at lower boundary
+ * @param sqrtRatioBX32 price at upper boundary
+ * @param amount0 token0 amount
+ * @param amount1 token1 amount
+ * @param useFullPrecision if false, liquidity will be maximized according to what the router can calculate,
+ * not what core can theoretically support
+ */
+
+
+function maxLiquidityForAmounts(sqrtRatioCurrentX32, sqrtRatioAX32, sqrtRatioBX32, amount0, amount1, useFullPrecision) {
+  if (JSBI.greaterThan(sqrtRatioAX32, sqrtRatioBX32)) {
+    var _ref4 = [sqrtRatioBX32, sqrtRatioAX32];
+    sqrtRatioAX32 = _ref4[0];
+    sqrtRatioBX32 = _ref4[1];
+  } // trying this out?
+  var maxLiquidityForAmount0 = maxLiquidityForAmount0Imprecise;
+
+  if (JSBI.lessThanOrEqual(sqrtRatioCurrentX32, sqrtRatioAX32)) {
+    return maxLiquidityForAmount0(sqrtRatioAX32, sqrtRatioBX32, amount0);
+  } else if (JSBI.lessThan(sqrtRatioCurrentX32, sqrtRatioBX32)) {
+    var liquidity0 = maxLiquidityForAmount0(sqrtRatioCurrentX32, sqrtRatioBX32, amount0);
+    var liquidity1 = maxLiquidityForAmount1(sqrtRatioAX32, sqrtRatioCurrentX32, amount1);
+    return JSBI.lessThan(liquidity0, liquidity1) ? liquidity0 : liquidity1;
+  } else {
+    return maxLiquidityForAmount1(sqrtRatioAX32, sqrtRatioBX32, amount1);
+  }
 }
 
 /**
@@ -2176,7 +2400,7 @@ var Position = /*#__PURE__*/function () {
       tickLower: tickLower,
       tickUpper: tickUpper,
       amount0: amount0,
-      amount1: sdkCore.MaxUint128,
+      amount1: MaxUint64,
       useFullPrecision: useFullPrecision
     });
   }
@@ -2200,7 +2424,7 @@ var Position = /*#__PURE__*/function () {
       pool: pool,
       tickLower: tickLower,
       tickUpper: tickUpper,
-      amount0: sdkCore.MaxUint128,
+      amount0: MaxUint64,
       amount1: amount1,
       useFullPrecision: true
     });
@@ -2369,229 +2593,6 @@ var Route = /*#__PURE__*/function () {
 
   return Route;
 }();
-
-/**
- * Converts a big int to a hex string
- * @param bigintIsh
- * @returns The hex encoded calldata
- */
-
-function toHex(bigintIsh) {
-  var bigInt = JSBI.BigInt(bigintIsh);
-  var hex = bigInt.toString(16);
-
-  if (hex.length % 2 !== 0) {
-    hex = "0" + hex;
-  }
-
-  return "0x" + hex;
-}
-
-/**
- * Converts a route to a hex encoded path
- * @param route the v3 path to convert to an encoded path
- * @param exactOutput whether the route should be encoded in reverse, for making exact output swaps
- */
-
-function encodeRouteToPath(route, exactOutput) {
-  var firstInputToken = route.input.wrapped;
-
-  var _route$pools$reduce = route.pools.reduce(function (_ref, pool, index) {
-    var inputToken = _ref.inputToken,
-        path = _ref.path,
-        types = _ref.types;
-    var outputToken = pool.token0.equals(inputToken) ? pool.token1 : pool.token0;
-
-    if (index === 0) {
-      return {
-        inputToken: outputToken,
-        types: ['address', 'uint24', 'address'],
-        path: [inputToken.address, pool.fee, outputToken.address]
-      };
-    } else {
-      return {
-        inputToken: outputToken,
-        types: [].concat(types, ['uint24', 'address']),
-        path: [].concat(path, [pool.fee, outputToken.address])
-      };
-    }
-  }, {
-    inputToken: firstInputToken,
-    path: [],
-    types: []
-  }),
-      path = _route$pools$reduce.path,
-      types = _route$pools$reduce.types;
-
-  return exactOutput ? solidity.pack(types.reverse(), path.reverse()) : solidity.pack(types, path);
-}
-
-/**
- * Determines if a tick list is sorted
- * @param list The tick list
- * @param comparator The comparator
- * @returns true if sorted
- */
-function isSorted(list, comparator) {
-  for (var i = 0; i < list.length - 1; i++) {
-    if (comparator(list[i], list[i + 1]) > 0) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-/**
- * Returns the closest tick that is nearest a given tick and usable for the given tick spacing
- * @param tick the target tick
- * @param tickSpacing the spacing of the pool
- */
-
-function nearestUsableTick(tick, tickSpacing) {
-  !(Number.isInteger(tick) && Number.isInteger(tickSpacing)) ?  invariant(false, 'INTEGERS')  : void 0;
-  !(tickSpacing > 0) ?  invariant(false, 'TICK_SPACING')  : void 0;
-  !(tick >= TickMath.MIN_TICK && tick <= TickMath.MAX_TICK) ?  invariant(false, 'TICK_BOUND')  : void 0;
-  var rounded = Math.round(tick / tickSpacing) * tickSpacing;
-  if (rounded < TickMath.MIN_TICK) return rounded + tickSpacing;else if (rounded > TickMath.MAX_TICK) return rounded - tickSpacing;else return rounded;
-}
-
-function tickComparator(a, b) {
-  return a.index - b.index;
-}
-/**
- * Utility methods for interacting with sorted lists of ticks
- */
-
-
-var TickList = /*#__PURE__*/function () {
-  /**
-   * Cannot be constructed
-   */
-  function TickList() {}
-
-  TickList.validateList = function validateList(ticks, tickSpacing) {
-    !(tickSpacing > 0) ?  invariant(false, 'TICK_SPACING_NONZERO')  : void 0; // ensure ticks are spaced appropriately
-
-    !ticks.every(function (_ref) {
-      var index = _ref.index;
-      return index % tickSpacing === 0;
-    }) ?  invariant(false, 'TICK_SPACING')  : void 0; // ensure tick liquidity deltas sum to 0
-
-    !JSBI.equal(ticks.reduce(function (accumulator, _ref2) {
-      var liquidityNet = _ref2.liquidityNet;
-      return JSBI.add(accumulator, liquidityNet);
-    }, ZERO), ZERO) ?  invariant(false, 'ZERO_NET')  : void 0;
-    !isSorted(ticks, tickComparator) ?  invariant(false, 'SORTED')  : void 0;
-  };
-
-  TickList.isBelowSmallest = function isBelowSmallest(ticks, tick) {
-    !(ticks.length > 0) ?  invariant(false, 'LENGTH')  : void 0;
-    return tick < ticks[0].index;
-  };
-
-  TickList.isAtOrAboveLargest = function isAtOrAboveLargest(ticks, tick) {
-    !(ticks.length > 0) ?  invariant(false, 'LENGTH')  : void 0;
-    return tick >= ticks[ticks.length - 1].index;
-  };
-
-  TickList.getTick = function getTick(ticks, index) {
-    var tick = ticks[this.binarySearch(ticks, index)];
-    !(tick.index === index) ?  invariant(false, 'NOT_CONTAINED')  : void 0;
-    return tick;
-  }
-  /**
-   * Finds the largest tick in the list of ticks that is less than or equal to tick
-   * @param ticks list of ticks
-   * @param tick tick to find the largest tick that is less than or equal to tick
-   * @private
-   */
-  ;
-
-  TickList.binarySearch = function binarySearch(ticks, tick) {
-    !!this.isBelowSmallest(ticks, tick) ?  invariant(false, 'BELOW_SMALLEST')  : void 0;
-    var l = 0;
-    var r = ticks.length - 1;
-    var i;
-
-    while (true) {
-      i = Math.floor((l + r) / 2);
-
-      if (ticks[i].index <= tick && (i === ticks.length - 1 || ticks[i + 1].index > tick)) {
-        return i;
-      }
-
-      if (ticks[i].index < tick) {
-        l = i + 1;
-      } else {
-        r = i - 1;
-      }
-    }
-  };
-
-  TickList.nextInitializedTick = function nextInitializedTick(ticks, tick, lte) {
-    if (lte) {
-      !!TickList.isBelowSmallest(ticks, tick) ?  invariant(false, 'BELOW_SMALLEST')  : void 0;
-
-      if (TickList.isAtOrAboveLargest(ticks, tick)) {
-        return ticks[ticks.length - 1];
-      }
-
-      var index = this.binarySearch(ticks, tick);
-      return ticks[index];
-    } else {
-      !!this.isAtOrAboveLargest(ticks, tick) ?  invariant(false, 'AT_OR_ABOVE_LARGEST')  : void 0;
-
-      if (this.isBelowSmallest(ticks, tick)) {
-        return ticks[0];
-      }
-
-      var _index = this.binarySearch(ticks, tick);
-
-      return ticks[_index + 1];
-    }
-  };
-
-  TickList.nextInitializedTickWithinOneWord = function nextInitializedTickWithinOneWord(ticks, tick, lte, tickSpacing) {
-    var compressed = Math.floor(tick / tickSpacing); // matches rounding in the code
-
-    if (lte) {
-      var wordPos = compressed >> 8;
-      var minimum = (wordPos << 8) * tickSpacing;
-
-      if (TickList.isBelowSmallest(ticks, tick)) {
-        return [minimum, false];
-      }
-
-      var index = TickList.nextInitializedTick(ticks, tick, lte).index;
-      var nextInitializedTick = Math.max(minimum, index);
-      return [nextInitializedTick, nextInitializedTick === index];
-    } else {
-      var _wordPos = compressed + 1 >> 8;
-
-      var maximum = (_wordPos + 1 << 8) * tickSpacing - 1;
-
-      if (this.isAtOrAboveLargest(ticks, tick)) {
-        return [maximum, false];
-      }
-
-      var _index2 = this.nextInitializedTick(ticks, tick, lte).index;
-
-      var _nextInitializedTick = Math.min(maximum, _index2);
-
-      return [_nextInitializedTick, _nextInitializedTick === _index2];
-    }
-  };
-
-  return TickList;
-}();
-
-var BITMAP_SEED = /*#__PURE__*/Buffer.from('b');
-var POOL_SEED$1 = /*#__PURE__*/Buffer.from('p');
-var POSITION_SEED = /*#__PURE__*/Buffer.from('ps');
-var OBSERVATION_SEED = /*#__PURE__*/Buffer.from('o');
-var TICK_SEED = /*#__PURE__*/Buffer.from('t');
-var FEE_SEED = /*#__PURE__*/Buffer.from('f');
 
 var Tick = function Tick(_ref) {
   var index = _ref.index,
