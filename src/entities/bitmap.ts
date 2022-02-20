@@ -14,8 +14,8 @@ export function generateBitmapWord(x: BN[]) {
 
 /**
  * Returns the most significant non-zero bit in the word
- * @param x 
- * @returns 
+ * @param x
+ * @returns
  */
 export function msb(x: BN) {
   return x.bitLength() - 1
@@ -23,8 +23,8 @@ export function msb(x: BN) {
 
 /**
  * Returns the least significant non-zero bit in the word
- * @param x 
- * @returns 
+ * @param x
+ * @returns
  */
 export function lsb(x: BN) {
   return x.zeroBits()
@@ -37,7 +37,7 @@ export type NextBit = {
 
 /**
  * Returns the bitmap index (0 - 255) for the next initialized tick.
- * 
+ *
  * If no initialized tick is available, returns the first bit (index 0) the word in lte case,
  * and the last bit in gte case.
  * @param word The bitmap word as a u256 number
@@ -58,7 +58,7 @@ export function nextInitializedBit(word: BN, bitPos: number, lte: boolean): Next
     return { next, initialized }
   } else {
     // all the 1s at or to the left of the bit_pos
-    const mask = new BN(1).shln(bitPos).subn(1).notn(255)
+    const mask = new BN(1).shln(bitPos).subn(1).notn(256)
     const masked = word.and(mask)
     const initialized = !masked.eqn(0)
     const next = initialized

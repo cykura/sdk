@@ -3553,7 +3553,7 @@ function nextInitializedBit(word, bitPos, lte) {
     };
   } else {
     // all the 1s at or to the left of the bit_pos
-    var _mask = new anchor.BN(1).shln(bitPos).subn(1).notn(255);
+    var _mask = new anchor.BN(1).shln(bitPos).subn(1).notn(256);
 
     var _masked = word.and(_mask);
 
