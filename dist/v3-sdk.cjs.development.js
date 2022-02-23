@@ -2690,27 +2690,19 @@ var Trade = /*#__PURE__*/function () {
     !routes.every(function (_ref3) {
       var route = _ref3.route;
       return outputCurrency.wrapped.equals(route.output.wrapped);
-    }) ?  invariant(false, 'OUTPUT_CURRENCY_MATCH')  : void 0;
-    var numPools = routes.map(function (_ref4) {
-      var route = _ref4.route;
-      return route.pools.length;
-    }).reduce(function (total, cur) {
-      return total + cur;
-    }, 0);
-    var poolAddressSet = new Set();
+    }) ?  invariant(false, 'OUTPUT_CURRENCY_MATCH')  : void 0; // Ignoring these checks for now, but will need to add them back later
+    // const numPools = routes.map(({ route }) => route.pools.length).reduce((total, cur) => total + cur, 0)
+    // const poolAddressSet = new Set<string>()
+    // for (const { route } of routes) {
+    //   for (const pool of route.pools) {
+    //     Pool.getAddress(pool.token0, pool.token1, pool.fee).then(address => {
+    //       poolAddressSet.add(address)
+    //     })
+    //   }
+    // }
+    // console.log(numPools, poolAddressSet.size)
+    // invariant(numPools == poolAddressSet.size, 'POOLS_DUPLICATED')
 
-    for (var _iterator = _createForOfIteratorHelperLoose(routes), _step; !(_step = _iterator()).done;) {
-      var route = _step.value.route;
-
-      for (var _iterator2 = _createForOfIteratorHelperLoose(route.pools), _step2; !(_step2 = _iterator2()).done;) {
-        var pool = _step2.value;
-        Pool.getAddress(pool.token0, pool.token1, pool.fee).then(function (address) {
-          poolAddressSet.add(address);
-        });
-      }
-    }
-
-    !(numPools == poolAddressSet.size) ?  invariant(false, 'POOLS_DUPLICATED')  : void 0;
     this.swaps = routes;
     this.tradeType = tradeType;
   }
@@ -2917,22 +2909,22 @@ var Trade = /*#__PURE__*/function () {
   /*#__PURE__*/
   function () {
     var _fromRoutes = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee4(routes, tradeType) {
-      var populatedRoutes, _iterator3, _step3, _step3$value, route, amount, amounts, inputAmount, outputAmount, i, pool, _yield$pool$getOutput2, _outputAmount2, _i2, _pool2, _yield$_pool2$getInpu, _inputAmount2;
+      var populatedRoutes, _iterator, _step, _step$value, route, amount, amounts, inputAmount, outputAmount, i, pool, _yield$pool$getOutput2, _outputAmount2, _i2, _pool2, _yield$_pool2$getInpu, _inputAmount2;
 
       return runtime_1.wrap(function _callee4$(_context4) {
         while (1) {
           switch (_context4.prev = _context4.next) {
             case 0:
               populatedRoutes = [];
-              _iterator3 = _createForOfIteratorHelperLoose(routes);
+              _iterator = _createForOfIteratorHelperLoose(routes);
 
             case 2:
-              if ((_step3 = _iterator3()).done) {
+              if ((_step = _iterator()).done) {
                 _context4.next = 43;
                 break;
               }
 
-              _step3$value = _step3.value, route = _step3$value.route, amount = _step3$value.amount;
+              _step$value = _step.value, route = _step$value.route, amount = _step$value.amount;
               amounts = new Array(route.tokenPath.length);
               inputAmount = void 0;
               outputAmount = void 0;
@@ -3142,13 +3134,13 @@ var Trade = /*#__PURE__*/function () {
   function () {
     var _bestTradeExactIn = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee5(pools, currencyAmountIn, currencyOut, _temp, // used in recursion.
     currentPools, nextAmountIn, bestTrades) {
-      var _ref5, _ref5$maxNumResults, maxNumResults, _ref5$maxHops, maxHops, amountIn, tokenOut, i, pool, amountOut, _yield$pool$getOutput3, poolsExcludingThisPool;
+      var _ref4, _ref4$maxNumResults, maxNumResults, _ref4$maxHops, maxHops, amountIn, tokenOut, i, pool, amountOut, _yield$pool$getOutput3, poolsExcludingThisPool;
 
       return runtime_1.wrap(function _callee5$(_context5) {
         while (1) {
           switch (_context5.prev = _context5.next) {
             case 0:
-              _ref5 = _temp === void 0 ? {} : _temp, _ref5$maxNumResults = _ref5.maxNumResults, maxNumResults = _ref5$maxNumResults === void 0 ? 3 : _ref5$maxNumResults, _ref5$maxHops = _ref5.maxHops, maxHops = _ref5$maxHops === void 0 ? 3 : _ref5$maxHops;
+              _ref4 = _temp === void 0 ? {} : _temp, _ref4$maxNumResults = _ref4.maxNumResults, maxNumResults = _ref4$maxNumResults === void 0 ? 3 : _ref4$maxNumResults, _ref4$maxHops = _ref4.maxHops, maxHops = _ref4$maxHops === void 0 ? 3 : _ref4$maxHops;
 
               if (currentPools === void 0) {
                 currentPools = [];
@@ -3288,13 +3280,13 @@ var Trade = /*#__PURE__*/function () {
   function () {
     var _bestTradeExactOut = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee6(pools, currencyIn, currencyAmountOut, _temp2, // used in recursion.
     currentPools, nextAmountOut, bestTrades) {
-      var _ref6, _ref6$maxNumResults, maxNumResults, _ref6$maxHops, maxHops, amountOut, tokenIn, i, pool, amountIn, _yield$pool$getInputA, poolsExcludingThisPool;
+      var _ref5, _ref5$maxNumResults, maxNumResults, _ref5$maxHops, maxHops, amountOut, tokenIn, i, pool, amountIn, _yield$pool$getInputA, poolsExcludingThisPool;
 
       return runtime_1.wrap(function _callee6$(_context6) {
         while (1) {
           switch (_context6.prev = _context6.next) {
             case 0:
-              _ref6 = _temp2 === void 0 ? {} : _temp2, _ref6$maxNumResults = _ref6.maxNumResults, maxNumResults = _ref6$maxNumResults === void 0 ? 3 : _ref6$maxNumResults, _ref6$maxHops = _ref6.maxHops, maxHops = _ref6$maxHops === void 0 ? 3 : _ref6$maxHops;
+              _ref5 = _temp2 === void 0 ? {} : _temp2, _ref5$maxNumResults = _ref5.maxNumResults, maxNumResults = _ref5$maxNumResults === void 0 ? 3 : _ref5$maxNumResults, _ref5$maxHops = _ref5.maxHops, maxHops = _ref5$maxHops === void 0 ? 3 : _ref5$maxHops;
 
               if (currentPools === void 0) {
                 currentPools = [];
@@ -3430,8 +3422,8 @@ var Trade = /*#__PURE__*/function () {
       }
 
       var inputCurrency = this.swaps[0].inputAmount.currency;
-      var totalInputFromRoutes = this.swaps.map(function (_ref7) {
-        var inputAmount = _ref7.inputAmount;
+      var totalInputFromRoutes = this.swaps.map(function (_ref6) {
+        var inputAmount = _ref6.inputAmount;
         return inputAmount;
       }).reduce(function (total, cur) {
         return total.add(cur);
@@ -3451,8 +3443,8 @@ var Trade = /*#__PURE__*/function () {
       }
 
       var outputCurrency = this.swaps[0].outputAmount.currency;
-      var totalOutputFromRoutes = this.swaps.map(function (_ref8) {
-        var outputAmount = _ref8.outputAmount;
+      var totalOutputFromRoutes = this.swaps.map(function (_ref7) {
+        var outputAmount = _ref7.outputAmount;
         return outputAmount;
       }).reduce(function (total, cur) {
         return total.add(cur);
@@ -3484,10 +3476,10 @@ var Trade = /*#__PURE__*/function () {
 
       var spotOutputAmount = sdkCore.CurrencyAmount.fromRawAmount(this.outputAmount.currency, 0);
 
-      for (var _iterator4 = _createForOfIteratorHelperLoose(this.swaps), _step4; !(_step4 = _iterator4()).done;) {
-        var _step4$value = _step4.value,
-            route = _step4$value.route,
-            inputAmount = _step4$value.inputAmount;
+      for (var _iterator2 = _createForOfIteratorHelperLoose(this.swaps), _step2; !(_step2 = _iterator2()).done;) {
+        var _step2$value = _step2.value,
+            route = _step2$value.route,
+            inputAmount = _step2$value.inputAmount;
         var midPrice = route.midPrice;
         spotOutputAmount = spotOutputAmount.add(midPrice.quote(inputAmount));
       }

