@@ -3071,12 +3071,12 @@ var Trade = /*#__PURE__*/function () {
       amountOut = this.outputAmount;
     }
 
-    !!slippageTolerance.lessThan(ZERO) ? process.env.NODE_ENV !== "production" ? invariant(false, 'SLIPPAGE_TOLERANCE') : invariant(false) : void 0;
+    !!slippageTolerance.lessThan('0') ? process.env.NODE_ENV !== "production" ? invariant(false, 'SLIPPAGE_TOLERANCE') : invariant(false) : void 0;
 
     if (this.tradeType === TradeType.EXACT_OUTPUT) {
       return amountOut;
     } else {
-      var slippageAdjustedAmountOut = new Fraction(ONE).add(slippageTolerance).invert().multiply(amountOut.quotient).quotient;
+      var slippageAdjustedAmountOut = new Fraction('1').add(slippageTolerance).invert().multiply(amountOut.quotient).quotient;
       return CurrencyAmount.fromRawAmount(amountOut.currency, slippageAdjustedAmountOut);
     }
   }
@@ -3092,12 +3092,12 @@ var Trade = /*#__PURE__*/function () {
       amountIn = this.inputAmount;
     }
 
-    !!slippageTolerance.lessThan(ZERO) ? process.env.NODE_ENV !== "production" ? invariant(false, 'SLIPPAGE_TOLERANCE') : invariant(false) : void 0;
+    !!slippageTolerance.lessThan('0') ? process.env.NODE_ENV !== "production" ? invariant(false, 'SLIPPAGE_TOLERANCE') : invariant(false) : void 0;
 
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return amountIn;
     } else {
-      var slippageAdjustedAmountIn = new Fraction(ONE).add(slippageTolerance).multiply(amountIn.quotient).quotient;
+      var slippageAdjustedAmountIn = new Fraction('1').add(slippageTolerance).multiply(amountIn.quotient).quotient;
       return CurrencyAmount.fromRawAmount(amountIn.currency, slippageAdjustedAmountIn);
     }
   }

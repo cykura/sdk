@@ -3072,12 +3072,12 @@ var Trade = /*#__PURE__*/function () {
       amountOut = this.outputAmount;
     }
 
-    !!slippageTolerance.lessThan(ZERO) ?  invariant(false, 'SLIPPAGE_TOLERANCE')  : void 0;
+    !!slippageTolerance.lessThan('0') ?  invariant(false, 'SLIPPAGE_TOLERANCE')  : void 0;
 
     if (this.tradeType === sdkCore.TradeType.EXACT_OUTPUT) {
       return amountOut;
     } else {
-      var slippageAdjustedAmountOut = new sdkCore.Fraction(ONE).add(slippageTolerance).invert().multiply(amountOut.quotient).quotient;
+      var slippageAdjustedAmountOut = new sdkCore.Fraction('1').add(slippageTolerance).invert().multiply(amountOut.quotient).quotient;
       return sdkCore.CurrencyAmount.fromRawAmount(amountOut.currency, slippageAdjustedAmountOut);
     }
   }
@@ -3093,12 +3093,12 @@ var Trade = /*#__PURE__*/function () {
       amountIn = this.inputAmount;
     }
 
-    !!slippageTolerance.lessThan(ZERO) ?  invariant(false, 'SLIPPAGE_TOLERANCE')  : void 0;
+    !!slippageTolerance.lessThan('0') ?  invariant(false, 'SLIPPAGE_TOLERANCE')  : void 0;
 
     if (this.tradeType === sdkCore.TradeType.EXACT_INPUT) {
       return amountIn;
     } else {
-      var slippageAdjustedAmountIn = new sdkCore.Fraction(ONE).add(slippageTolerance).multiply(amountIn.quotient).quotient;
+      var slippageAdjustedAmountIn = new sdkCore.Fraction('1').add(slippageTolerance).multiply(amountIn.quotient).quotient;
       return sdkCore.CurrencyAmount.fromRawAmount(amountIn.currency, slippageAdjustedAmountIn);
     }
   }
