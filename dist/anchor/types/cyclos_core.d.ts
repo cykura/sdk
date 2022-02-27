@@ -1,11 +1,11 @@
 export declare type CyclosCore = {
-    "version": "0.0.0";
+    "version": "0.1.0";
     "name": "cyclos_core";
     "instructions": [{
         "name": "initFactory";
         "accounts": [{
             "name": "owner";
-            "isMut": false;
+            "isMut": true;
             "isSigner": true;
         }, {
             "name": "factoryState";
@@ -16,10 +16,7 @@ export declare type CyclosCore = {
             "isMut": false;
             "isSigner": false;
         }];
-        "args": [{
-            "name": "factoryStateBump";
-            "type": "u8";
-        }];
+        "args": [];
     }, {
         "name": "setOwner";
         "accounts": [{
@@ -40,7 +37,7 @@ export declare type CyclosCore = {
         "name": "enableFeeAmount";
         "accounts": [{
             "name": "owner";
-            "isMut": false;
+            "isMut": true;
             "isSigner": true;
         }, {
             "name": "factoryState";
@@ -56,9 +53,6 @@ export declare type CyclosCore = {
             "isSigner": false;
         }];
         "args": [{
-            "name": "feeStateBump";
-            "type": "u8";
-        }, {
             "name": "fee";
             "type": "u32";
         }, {
@@ -117,12 +111,6 @@ export declare type CyclosCore = {
             "isSigner": false;
         }];
         "args": [{
-            "name": "poolStateBump";
-            "type": "u8";
-        }, {
-            "name": "observationStateBump";
-            "type": "u8";
-        }, {
             "name": "sqrtPriceX32";
             "type": "u64";
         }];
@@ -222,9 +210,6 @@ export declare type CyclosCore = {
             "isSigner": false;
         }];
         "args": [{
-            "name": "tickAccountBump";
-            "type": "u8";
-        }, {
             "name": "tick";
             "type": "i32";
         }];
@@ -260,9 +245,6 @@ export declare type CyclosCore = {
             "isSigner": false;
         }];
         "args": [{
-            "name": "bump";
-            "type": "u8";
-        }, {
             "name": "wordPos";
             "type": "i16";
         }];
@@ -297,10 +279,7 @@ export declare type CyclosCore = {
             "isMut": false;
             "isSigner": false;
         }];
-        "args": [{
-            "name": "bump";
-            "type": "u8";
-        }];
+        "args": [];
     }, {
         "name": "mintCallback";
         "accounts": [{
@@ -420,11 +399,7 @@ export declare type CyclosCore = {
             "isMut": true;
             "isSigner": false;
         }, {
-            "name": "latestObservationState";
-            "isMut": true;
-            "isSigner": false;
-        }, {
-            "name": "nextObservationState";
+            "name": "lastObservationState";
             "isMut": true;
             "isSigner": false;
         }, {
@@ -471,11 +446,7 @@ export declare type CyclosCore = {
             "isMut": true;
             "isSigner": false;
         }, {
-            "name": "latestObservationState";
-            "isMut": false;
-            "isSigner": false;
-        }, {
-            "name": "nextObservationState";
+            "name": "lastObservationState";
             "isMut": false;
             "isSigner": false;
         }];
@@ -568,11 +539,7 @@ export declare type CyclosCore = {
             "isMut": true;
             "isSigner": false;
         }, {
-            "name": "latestObservationState";
-            "isMut": true;
-            "isSigner": false;
-        }, {
-            "name": "nextObservationState";
+            "name": "lastObservationState";
             "isMut": true;
             "isSigner": false;
         }, {
@@ -654,11 +621,7 @@ export declare type CyclosCore = {
             "isMut": true;
             "isSigner": false;
         }, {
-            "name": "latestObservationState";
-            "isMut": true;
-            "isSigner": false;
-        }, {
-            "name": "nextObservationState";
+            "name": "lastObservationState";
             "isMut": true;
             "isSigner": false;
         }, {
@@ -683,9 +646,6 @@ export declare type CyclosCore = {
             "isSigner": false;
         }];
         "args": [{
-            "name": "bump";
-            "type": "u8";
-        }, {
             "name": "amount0Desired";
             "type": "u64";
         }, {
@@ -796,11 +756,7 @@ export declare type CyclosCore = {
             "isMut": true;
             "isSigner": false;
         }, {
-            "name": "latestObservationState";
-            "isMut": true;
-            "isSigner": false;
-        }, {
-            "name": "nextObservationState";
+            "name": "lastObservationState";
             "isMut": true;
             "isSigner": false;
         }, {
@@ -871,11 +827,7 @@ export declare type CyclosCore = {
             "isMut": true;
             "isSigner": false;
         }, {
-            "name": "latestObservationState";
-            "isMut": true;
-            "isSigner": false;
-        }, {
-            "name": "nextObservationState";
+            "name": "lastObservationState";
             "isMut": true;
             "isSigner": false;
         }, {
@@ -939,11 +891,7 @@ export declare type CyclosCore = {
             "isMut": true;
             "isSigner": false;
         }, {
-            "name": "latestObservationState";
-            "isMut": true;
-            "isSigner": false;
-        }, {
-            "name": "nextObservationState";
+            "name": "lastObservationState";
             "isMut": true;
             "isSigner": false;
         }, {
@@ -1009,11 +957,7 @@ export declare type CyclosCore = {
             "isMut": true;
             "isSigner": false;
         }, {
-            "name": "latestObservationState";
-            "isMut": true;
-            "isSigner": false;
-        }, {
-            "name": "nextObservationState";
+            "name": "lastObservationState";
             "isMut": true;
             "isSigner": false;
         }, {
@@ -1615,91 +1559,91 @@ export declare type CyclosCore = {
         }];
     }];
     "errors": [{
-        "code": 300;
+        "code": 6000;
         "name": "LOK";
         "msg": "LOK";
     }, {
-        "code": 301;
+        "code": 6001;
         "name": "ZeroMintAmount";
         "msg": "Minting amount should be greater than 0";
     }, {
-        "code": 302;
+        "code": 6002;
         "name": "TLU";
         "msg": "TLU";
     }, {
-        "code": 303;
+        "code": 6003;
         "name": "TMS";
         "msg": "TMS";
     }, {
-        "code": 304;
+        "code": 6004;
         "name": "TLM";
         "msg": "TLM";
     }, {
-        "code": 305;
+        "code": 6005;
         "name": "TUM";
         "msg": "TUM";
     }, {
-        "code": 306;
+        "code": 6006;
         "name": "M0";
         "msg": "M0";
     }, {
-        "code": 307;
+        "code": 6007;
         "name": "M1";
         "msg": "M1";
     }, {
-        "code": 308;
+        "code": 6008;
         "name": "OS";
         "msg": "OS";
     }, {
-        "code": 309;
+        "code": 6009;
         "name": "AS";
         "msg": "AS";
     }, {
-        "code": 310;
+        "code": 6010;
         "name": "SPL";
         "msg": "SPL";
     }, {
-        "code": 311;
+        "code": 6011;
         "name": "IIA";
         "msg": "IIA";
     }, {
-        "code": 312;
+        "code": 6012;
         "name": "NP";
         "msg": "NP";
     }, {
-        "code": 313;
+        "code": 6013;
         "name": "LO";
         "msg": "LO";
     }, {
-        "code": 314;
+        "code": 6014;
         "name": "R";
         "msg": "R";
     }, {
-        "code": 315;
+        "code": 6015;
         "name": "T";
         "msg": "T";
     }, {
-        "code": 316;
+        "code": 6016;
         "name": "LS";
         "msg": "LS";
     }, {
-        "code": 317;
+        "code": 6017;
         "name": "LA";
         "msg": "LA";
     }, {
-        "code": 318;
+        "code": 6018;
         "name": "TransactionTooOld";
         "msg": "Transaction too old";
     }, {
-        "code": 319;
+        "code": 6019;
         "name": "PriceSlippageCheck";
         "msg": "Price slippage check";
     }, {
-        "code": 320;
+        "code": 6020;
         "name": "NotApproved";
         "msg": "Not approved";
     }, {
-        "code": 321;
+        "code": 6021;
         "name": "TooLittleReceived";
         "msg": "Too little received";
     }];
