@@ -3,10 +3,9 @@ import {
   Percent,
   Token,
   CurrencyAmount,
-  validateAndParseAddress,
   Currency,
   NativeCurrency
-} from '@uniswap/sdk-core'
+} from '@cykura/sdk-core'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 import { Position } from './entities/position'
@@ -226,7 +225,6 @@ export abstract class NonfungiblePositionManager {
 
     // mint
     if (isMint(options)) {
-      const recipient: string = validateAndParseAddress(options.recipient)
 
       calldatas.push(
         NonfungiblePositionManager.INTERFACE.encodeFunctionData('mint', [
@@ -240,7 +238,7 @@ export abstract class NonfungiblePositionManager {
             amount1Desired: toHex(amount1Desired),
             amount0Min,
             amount1Min,
-            recipient,
+            recipient: options.recipient,
             deadline
           }
         ])
@@ -291,14 +289,12 @@ export abstract class NonfungiblePositionManager {
     const involvesETH =
       options.expectedCurrencyOwed0.currency.isNative || options.expectedCurrencyOwed1.currency.isNative
 
-    const recipient = validateAndParseAddress(options.recipient)
-
     // collect
     calldatas.push(
       NonfungiblePositionManager.INTERFACE.encodeFunctionData('collect', [
         {
           tokenId,
-          recipient: involvesETH ? ADDRESS_ZERO : recipient,
+          recipient: involvesETH ? ADDRESS_ZERO : options.recipient,
           amount0Max: MaxUint128,
           amount1Max: MaxUint128
         }
@@ -316,8 +312,8 @@ export abstract class NonfungiblePositionManager {
         ? options.expectedCurrencyOwed1.quotient
         : options.expectedCurrencyOwed0.quotient
 
-      calldatas.push(Payments.encodeUnwrapWETH9(ethAmount, recipient))
-      calldatas.push(Payments.encodeSweepToken(token, tokenAmount, recipient))
+      calldatas.push(Payments.encodeUnwrapWETH9(ethAmount, options.recipient))
+      calldatas.push(Payments.encodeSweepToken(token, tokenAmount, options.recipient))
     }
 
     return calldatas
@@ -361,7 +357,7 @@ export abstract class NonfungiblePositionManager {
     if (options.permit) {
       calldatas.push(
         NonfungiblePositionManager.INTERFACE.encodeFunctionData('permit', [
-          validateAndParseAddress(options.permit.spender),
+          options.permit.spender,
           tokenId,
           toHex(options.permit.deadline),
           options.permit.v,
@@ -414,19 +410,17 @@ export abstract class NonfungiblePositionManager {
   }
 
   public static safeTransferFromParameters(options: SafeTransferOptions): MethodParameters {
-    const recipient = validateAndParseAddress(options.recipient)
-    const sender = validateAndParseAddress(options.sender)
 
     let calldata: string
     if (options.data) {
       calldata = NonfungiblePositionManager.INTERFACE.encodeFunctionData(
         'safeTransferFrom(address,address,uint256,bytes)',
-        [sender, recipient, toHex(options.tokenId), options.data]
+        [options.sender, options.recipient, toHex(options.tokenId), options.data]
       )
     } else {
       calldata = NonfungiblePositionManager.INTERFACE.encodeFunctionData('safeTransferFrom(address,address,uint256)', [
-        sender,
-        recipient,
+        options.sender,
+        options.recipient,
         toHex(options.tokenId)
       ])
     }

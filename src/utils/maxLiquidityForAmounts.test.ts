@@ -1,4 +1,4 @@
-import { MaxUint256 } from '@uniswap/sdk-core'
+import { MaxUint256 } from '@cykura/sdk-core'
 import JSBI from 'jsbi'
 import { encodeSqrtRatioX32 } from './encodeSqrtRatioX32'
 import { maxLiquidityForAmounts } from './maxLiquidityForAmounts'

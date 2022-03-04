@@ -1,7 +1,7 @@
 import JSBI from 'jsbi'
 import { Interface } from '@ethersproject/abi'
 import { abi } from '@uniswap/v3-periphery/artifacts/contracts/interfaces/IPeripheryPaymentsWithFee.sol/IPeripheryPaymentsWithFee.json'
-import { Percent, Token, validateAndParseAddress } from '@uniswap/sdk-core'
+import { Percent, Token } from '@cykura/sdk-core'
 import { toHex } from './utils/calldata'
 
 export interface FeeOptions {
@@ -29,11 +29,10 @@ export abstract class Payments {
   }
 
   public static encodeUnwrapWETH9(amountMinimum: JSBI, recipient: string, feeOptions?: FeeOptions): string {
-    recipient = validateAndParseAddress(recipient)
 
     if (!!feeOptions) {
       const feeBips = this.encodeFeeBips(feeOptions.fee)
-      const feeRecipient: string = validateAndParseAddress(feeOptions.recipient)
+      const feeRecipient: string = feeOptions.recipient
 
       return Payments.INTERFACE.encodeFunctionData('unwrapWETH9WithFee', [
         toHex(amountMinimum),
@@ -52,11 +51,10 @@ export abstract class Payments {
     recipient: string,
     feeOptions?: FeeOptions
   ): string {
-    recipient = validateAndParseAddress(recipient)
 
     if (!!feeOptions) {
       const feeBips = this.encodeFeeBips(feeOptions.fee)
-      const feeRecipient: string = validateAndParseAddress(feeOptions.recipient)
+      const feeRecipient: string = feeOptions.recipient
 
       return Payments.INTERFACE.encodeFunctionData('sweepTokenWithFee', [
         token.address,

@@ -1,4 +1,4 @@
-import { MaxUint128 } from '@uniswap/sdk-core'
+import { MaxUint128 } from '@cykura/sdk-core'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 import { ONE, ZERO, Q32, MaxUint32, U32Resolution } from '../internalConstants'

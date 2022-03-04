@@ -1,4 +1,4 @@
-import { BigintIsh, Token, validateAndParseAddress } from '@uniswap/sdk-core'
+import { BigintIsh, Token } from '@cykura/sdk-core'
 import { MethodParameters, toHex } from './utils/calldata'
 import { defaultAbiCoder, Interface } from '@ethersproject/abi'
 import { abi } from '@uniswap/v3-staker/artifacts/contracts/UniswapV3Staker.sol/UniswapV3Staker.json'
@@ -87,10 +87,10 @@ export abstract class Staker {
         toHex(options.tokenId)
       ])
     )
-    const recipient: string = validateAndParseAddress(options.recipient)
+
     const amount = options.amount ?? 0
     calldatas.push(
-      Staker.INTERFACE.encodeFunctionData('claimReward', [incentiveKey.rewardToken.address, recipient, toHex(amount)])
+      Staker.INTERFACE.encodeFunctionData('claimReward', [incentiveKey.rewardToken.address, options.recipient, toHex(amount)])
     )
     return calldatas
   }
@@ -151,11 +151,10 @@ export abstract class Staker {
       const incentiveKey = incentiveKeys[i]
       calldatas = calldatas.concat(this.encodeClaim(incentiveKey, claimOptions))
     }
-    const owner = validateAndParseAddress(withdrawOptions.owner)
     calldatas.push(
       Staker.INTERFACE.encodeFunctionData('withdrawToken', [
         toHex(withdrawOptions.tokenId),
-        owner,
+        withdrawOptions.owner,
         withdrawOptions.data ? withdrawOptions.data : toHex(0)
       ])
     )
@@ -193,13 +192,12 @@ export abstract class Staker {
    */
   private static _encodeIncentiveKey(incentiveKey: IncentiveKey): {} {
     const { token0, token1, fee } = incentiveKey.pool
-    const refundee = validateAndParseAddress(incentiveKey.refundee)
     return {
       rewardToken: incentiveKey.rewardToken.address,
       pool: Pool.getAddress(token0, token1, fee),
       startTime: toHex(incentiveKey.startTime),
       endTime: toHex(incentiveKey.endTime),
-      refundee
+      refundee: incentiveKey.refundee
     }
   }
 }

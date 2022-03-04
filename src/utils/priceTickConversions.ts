@@ -1,4 +1,4 @@
-import { Price, Token } from '@uniswap/sdk-core'
+import { Price, Token } from '@cykura/sdk-core'
 import JSBI from 'jsbi'
 import { Q64 } from '../internalConstants'
 import { encodeSqrtRatioX32 } from './encodeSqrtRatioX32'

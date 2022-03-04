@@ -1,7 +1,7 @@
 // import { defaultAbiCoder } from '@ethersproject/abi'
 // import { getCreate2Address } from '@ethersproject/address'
 // import { keccak256 } from '@ethersproject/solidity'
-import { Token } from '@uniswap/sdk-core'
+import { Token } from '@cykura/sdk-core'
 import * as anchor from '@project-serum/anchor'
 import { FeeAmount } from '../constants'
 

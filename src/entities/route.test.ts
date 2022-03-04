@@ -1,4 +1,4 @@
-import { Ether, Token, WETH9 } from '@uniswap/sdk-core'
+import { Ether, Token, WETH9 } from '@cykura/sdk-core'
 import { FeeAmount } from '../constants'
 import { encodeSqrtRatioX32 } from '../utils/encodeSqrtRatioX32'
 import { TickMath } from '../utils/tickMath'

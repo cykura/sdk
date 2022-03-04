@@ -1,4 +1,4 @@
-import { BigintIsh, Percent, Price, CurrencyAmount, Token, MaxUint128 } from '@uniswap/sdk-core'
+import { BigintIsh, Percent, Price, CurrencyAmount, Token, MaxUint128 } from '@cykura/sdk-core'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 import { MaxUint32, MaxUint64, ZERO } from '../internalConstants'

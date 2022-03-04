@@ -944,6 +944,21 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
+"@cykura/sdk-core@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@cykura/sdk-core/-/sdk-core-0.1.1.tgz#6e54d7546ec53b97dee929727037630e2e17ce1a"
+  integrity sha512-DHbC5RZ3QBmGVd4X5cLXZddgcisUroCP04OMwo/Ix59WoBhnGThAne3s5DtqcyLdMvws7uEmNMetocmMe6gb7w==
+  dependencies:
+    "@ethersproject/address" "^5.0.2"
+    "@project-serum/anchor" "^0.22.0"
+    "@types/bs58" "^4.0.1"
+    big.js "^5.2.2"
+    bs58 "^4.0.1"
+    decimal.js-light "^2.5.0"
+    jsbi "^3.1.4"
+    tiny-invariant "^1.1.0"
+    toformat "^2.0.0"
+
 "@ethersproject/abi@^5.0.12":
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/abi/-/abi-5.5.0.tgz#fb52820e22e50b854ff15ce1647cc508d6660613"
@@ -1378,9 +1393,9 @@
     toml "^3.0.0"
 
 "@project-serum/anchor@^0.22.0":
-  version "0.22.0"
-  resolved "https://registry.yarnpkg.com/@project-serum/anchor/-/anchor-0.22.0.tgz#79d182851346fb46d471577c63eabdf6f199c03e"
-  integrity sha512-EJOE790pAQjm07loh7/JYzfcgfYv3SChBb2b9lhVdjjiimSEQrf3ESy+CGMAqcFAsyr699Ewj5k7RizY1y31cg==
+  version "0.22.1"
+  resolved "https://registry.yarnpkg.com/@project-serum/anchor/-/anchor-0.22.1.tgz#698a9620f94691de0a12bbc650a5c8380e2f0e8a"
+  integrity sha512-5pHeyvQhzLahIQ8aZymmDMZJAJFklN0joZdI+YIqFkK2uU/mlKr6rBLQjxysf/j1mLLiNG00tdyLfUtTAdQz7w==
   dependencies:
     "@project-serum/borsh" "^0.2.5"
     "@solana/web3.js" "^1.17.0"
@@ -1760,20 +1775,6 @@
   version "4.0.1-alpha"
   resolved "https://registry.yarnpkg.com/@uniswap/lib/-/lib-4.0.1-alpha.tgz#2881008e55f075344675b3bca93f020b028fbd02"
   integrity sha512-f6UIliwBbRsgVLxIaBANF6w09tYqc6Y/qXdsrbEmXHyFA7ILiKrIwRFXe1yOg8M3cksgVsO9N7yuL2DdCGQKBA==
-
-"@uniswap/sdk-core@git+https://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:x-oauth-basic@github.com/cyclos-io/sdk-core.git#d166bc946e06cdf51c5e368e85666b17529cd026":
-  version "3.0.1"
-  resolved "git+https://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:x-oauth-basic@github.com/cyclos-io/sdk-core.git#d166bc946e06cdf51c5e368e85666b17529cd026"
-  dependencies:
-    "@ethersproject/address" "^5.0.2"
-    "@project-serum/anchor" "^0.22.0"
-    "@types/bs58" "^4.0.1"
-    big.js "^5.2.2"
-    bs58 "^4.0.1"
-    decimal.js-light "^2.5.0"
-    jsbi "^3.1.4"
-    tiny-invariant "^1.1.0"
-    toformat "^2.0.0"
 
 "@uniswap/v2-core@1.0.1":
   version "1.0.1"
@@ -4669,9 +4670,9 @@ js-yaml@^3.13.1:
     esprima "^4.0.0"
 
 jsbi@^3.1.4:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/jsbi/-/jsbi-3.1.4.tgz#9654dd02207a66a4911b4e4bb74265bc2cbc9dd0"
-  integrity sha512-52QRRFSsi9impURE8ZUbzAMCLjPm4THO7H2fcuIvaaeFTbSysvkodbQQXIVsNgq/ypDbq6dJiuGKL0vZ/i9hUg==
+  version "3.2.5"
+  resolved "https://registry.yarnpkg.com/jsbi/-/jsbi-3.2.5.tgz#b37bb90e0e5c2814c1c2a1bcd8c729888a2e37d6"
+  integrity sha512-aBE4n43IPvjaddScbvWRA2YlTzKEynHzu7MqOyTipdHucf/VxS63ViCjxYRg86M8Rxwbt/GfzHl1kKERkt45fQ==
 
 jsbn@~0.1.0:
   version "0.1.1"

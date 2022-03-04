@@ -1,20 +1,20 @@
 {
-  "name": "@uniswap/v3-sdk",
+  "name": "@cykura/sdk",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "3.7.1",
-  "description": "⚒️ An SDK for building applications on top of Uniswap V3",
+  "version": "0.1.0",
+  "description": "⚒️ An SDK for building applications on top of Cykura",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist"
   ],
-  "repository": "https://github.com/Uniswap/uniswap-v3-sdk.git",
+  "repository": "https://github.com/cykura/sdk.git",
   "keywords": [
-    "uniswap",
-    "ethereum"
+    "cykura",
+    "solana"
   ],
   "module": "dist/v3-sdk.esm.js",
   "scripts": {
@@ -24,11 +24,11 @@
     "prepublishOnly": "tsdx build"
   },
   "dependencies": {
+    "@cykura/sdk-core": "^0.1.1",
     "@ethersproject/abi": "^5.0.12",
     "@ethersproject/solidity": "^5.0.9",
     "@project-serum/anchor": "^0.20.1",
     "@solana/web3.js": "^1.32.0",
-    "@uniswap/sdk-core": "git+https://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:x-oauth-basic@github.com/cyclos-io/sdk-core.git#d166bc946e06cdf51c5e368e85666b17529cd026",
     "@uniswap/v3-periphery": "^1.1.1",
     "@uniswap/v3-staker": "1.0.0",
     "tiny-invariant": "^1.1.0",

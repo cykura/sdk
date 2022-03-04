@@ -1,4 +1,4 @@
-import { BigintIsh, Price, Token, CurrencyAmount } from '@uniswap/sdk-core'
+import { BigintIsh, Price, Token, CurrencyAmount } from '@cykura/sdk-core'
 import { web3 } from '@project-serum/anchor'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'

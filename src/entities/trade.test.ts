@@ -1,4 +1,4 @@
-import { Percent, Price, sqrt, Token, CurrencyAmount, TradeType, WETH9, Ether } from '@uniswap/sdk-core'
+import { Percent, Price, sqrt, Token, CurrencyAmount, TradeType, WETH9, Ether } from '@cykura/sdk-core'
 import JSBI from 'jsbi'
 import { FeeAmount, TICK_SPACINGS } from '../constants'
 import { encodeSqrtRatioX32 } from '../utils/encodeSqrtRatioX32'

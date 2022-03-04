@@ -1,4 +1,4 @@
-import { BigintIsh } from '@uniswap/sdk-core'
+import { BigintIsh } from '@cykura/sdk-core'
 import * as anchor from  '@project-serum/anchor'
 import { PublicKey } from '@solana/web3.js'
 import { u16ToSeed, u32ToSeed } from '../utils/computePoolAddress'

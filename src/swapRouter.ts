@@ -1,5 +1,5 @@
 import { Interface } from '@ethersproject/abi'
-import { BigintIsh, Currency, CurrencyAmount, Percent, TradeType, validateAndParseAddress } from '@uniswap/sdk-core'
+import { BigintIsh, Currency, CurrencyAmount, Percent, TradeType } from '@cykura/sdk-core'
 import invariant from 'tiny-invariant'
 import { Trade } from './entities/trade'
 import { ADDRESS_ZERO } from './constants'
@@ -110,7 +110,6 @@ export abstract class SwapRouter {
       calldatas.push(SelfPermit.encodePermit(sampleTrade.inputAmount.currency, options.inputTokenPermit))
     }
 
-    const recipient: string = validateAndParseAddress(options.recipient)
     const deadline = toHex(options.deadline)
 
     for (const trade of trades) {
@@ -127,7 +126,7 @@ export abstract class SwapRouter {
               tokenIn: route.tokenPath[0].address,
               tokenOut: route.tokenPath[1].address,
               fee: route.pools[0].fee,
-              recipient: routerMustCustody ? ADDRESS_ZERO : recipient,
+              recipient: routerMustCustody ? ADDRESS_ZERO : options.recipient,
               deadline,
               amountIn,
               amountOutMinimum: amountOut,
@@ -140,7 +139,7 @@ export abstract class SwapRouter {
               tokenIn: route.tokenPath[0].address,
               tokenOut: route.tokenPath[1].address,
               fee: route.pools[0].fee,
-              recipient: routerMustCustody ? ADDRESS_ZERO : recipient,
+              recipient: routerMustCustody ? ADDRESS_ZERO : options.recipient,
               deadline,
               amountOut,
               amountInMaximum: amountIn,
@@ -157,7 +156,7 @@ export abstract class SwapRouter {
           if (trade.tradeType === TradeType.EXACT_INPUT) {
             const exactInputParams = {
               path,
-              recipient: routerMustCustody ? ADDRESS_ZERO : recipient,
+              recipient: routerMustCustody ? ADDRESS_ZERO : options.recipient,
               deadline,
               amountIn,
               amountOutMinimum: amountOut
@@ -167,7 +166,7 @@ export abstract class SwapRouter {
           } else {
             const exactOutputParams = {
               path,
-              recipient: routerMustCustody ? ADDRESS_ZERO : recipient,
+              recipient: routerMustCustody ? ADDRESS_ZERO : options.recipient,
               deadline,
               amountOut,
               amountInMaximum: amountIn
@@ -183,19 +182,19 @@ export abstract class SwapRouter {
     if (routerMustCustody) {
       if (!!options.fee) {
         if (outputIsNative) {
-          calldatas.push(Payments.encodeUnwrapWETH9(totalAmountOut.quotient, recipient, options.fee))
+          calldatas.push(Payments.encodeUnwrapWETH9(totalAmountOut.quotient, options.recipient, options.fee))
         } else {
           calldatas.push(
             Payments.encodeSweepToken(
               sampleTrade.outputAmount.currency.wrapped,
               totalAmountOut.quotient,
-              recipient,
+              options.recipient,
               options.fee
             )
           )
         }
       } else {
-        calldatas.push(Payments.encodeUnwrapWETH9(totalAmountOut.quotient, recipient))
+        calldatas.push(Payments.encodeUnwrapWETH9(totalAmountOut.quotient, options.recipient))
       }
     }
 
