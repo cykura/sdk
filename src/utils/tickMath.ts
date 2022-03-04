@@ -1,8 +1,9 @@
 import { MaxUint128 } from '@cykura/sdk-core'
+import { BN } from '@project-serum/anchor'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 import { ONE, ZERO } from '../internalConstants'
-import { mostSignificantBit } from './mostSignificantBit'
+import { msb as mostSignificantBit } from '../entities/bitmap'
 
 function mulShift(val: JSBI, mulBy: string): JSBI {
   return JSBI.signedRightShift(JSBI.multiply(val, JSBI.BigInt(mulBy)), JSBI.BigInt(64))
@@ -81,17 +82,13 @@ export abstract class TickMath {
       'SQRT_RATIO'
     )
 
-    // we are not shifting in CYS
-    // const sqrtRatioX64 = JSBI.leftShift(sqrtRatioX32, JSBI.BigInt(32))
-    const sqrtRatioX64 = sqrtRatioX32
-
-    const msb = mostSignificantBit(sqrtRatioX64)
+    const msb = mostSignificantBit(new BN(sqrtRatioX32.toString()))
 
     let r: JSBI
     if (JSBI.greaterThanOrEqual(JSBI.BigInt(msb), JSBI.BigInt(32))) {
-      r = JSBI.signedRightShift(sqrtRatioX64, JSBI.BigInt(msb - 31))
+      r = JSBI.signedRightShift(sqrtRatioX32, JSBI.BigInt(msb - 31))
     } else {
-      r = JSBI.leftShift(sqrtRatioX64, JSBI.BigInt(31 - msb))
+      r = JSBI.leftShift(sqrtRatioX32, JSBI.BigInt(31 - msb))
     }
 
     // 128,64 changed to 32,16

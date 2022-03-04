@@ -5,13 +5,13 @@ import { TickMath } from './tickMath'
 describe('TickMath', () => {
   describe('#MIN_TICK', () => {
     it('equals correct value', () => {
-      expect(TickMath.MIN_TICK).toEqual(-887272)
+      expect(TickMath.MIN_TICK).toEqual(-221818)
     })
   })
 
   describe('#MAX_TICK', () => {
     it('equals correct value', () => {
-      expect(TickMath.MAX_TICK).toEqual(887272)
+      expect(TickMath.MAX_TICK).toEqual(221818)
     })
   })
 
@@ -33,7 +33,7 @@ describe('TickMath', () => {
     })
 
     it('returns the correct value for tick 0', () => {
-      expect(TickMath.getSqrtRatioAtTick(0)).toEqual(JSBI.leftShift(JSBI.BigInt(1), JSBI.BigInt(96)))
+      expect(TickMath.getSqrtRatioAtTick(0)).toEqual(JSBI.leftShift(JSBI.BigInt(1), JSBI.BigInt(32)))
     })
 
     it('returns the correct value for max tick', () => {
