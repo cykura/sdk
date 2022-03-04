@@ -8,10 +8,7 @@ import { computePoolAddress } from '../utils/computePoolAddress'
 import { LiquidityMath } from '../utils/liquidityMath'
 import { SwapMath } from '../utils/swapMath'
 import { TickMath } from '../utils/tickMath'
-import { Tick, TickConstructorArgs } from './tick'
 import { NoTickDataProvider, TickDataProvider } from './tickDataProvider'
-import { tickPosition } from '.'
-import { TICK_SEED } from '../utils/seeds'
 
 interface StepComputations {
   sqrtPriceStartX32: JSBI
@@ -53,9 +50,8 @@ export class Pool {
     tokenA: Token,
     tokenB: Token,
     fee: FeeAmount,
-    initCodeHashManualOverride?: string
-  ): Promise<string> {
-    return computePoolAddress({ factoryAddress: FACTORY_ADDRESS, fee, tokenA, tokenB, initCodeHashManualOverride })
+  ): Promise<web3.PublicKey> {
+    return computePoolAddress({ factoryAddress: FACTORY_ADDRESS, fee, tokenA, tokenB })
   }
 
   /**
@@ -77,18 +73,17 @@ export class Pool {
     tickCurrent: number,
     tickDataProvider: TickDataProvider = NO_TICK_DATA_PROVIDER_DEFAULT
   ) {
-    // console.log('tick current in pool constructor', tickCurrent)
     invariant(Number.isInteger(fee) && fee < 1_000_000, 'FEE')
 
     const tickCurrentSqrtRatioX32 = TickMath.getSqrtRatioAtTick(tickCurrent)
     const nextTickSqrtRatioX32 = TickMath.getSqrtRatioAtTick(tickCurrent + 1)
     invariant(
       JSBI.greaterThanOrEqual(JSBI.BigInt(sqrtRatioX32), tickCurrentSqrtRatioX32) &&
-        JSBI.lessThanOrEqual(JSBI.BigInt(sqrtRatioX32), nextTickSqrtRatioX32),
+      JSBI.lessThanOrEqual(JSBI.BigInt(sqrtRatioX32), nextTickSqrtRatioX32),
       'PRICE_BOUNDS'
     )
-    // always create a copy of the list since we want the pool's tick list to be immutable
-    ;[this.token0, this.token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
+      // always create a copy of the list since we want the pool's tick list to be immutable
+      ;[this.token0, this.token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
     this.fee = fee
     this.sqrtRatioX32 = JSBI.BigInt(sqrtRatioX32)
     this.liquidity = JSBI.BigInt(liquidity)
@@ -164,7 +159,6 @@ export class Pool {
   ): Promise<[CurrencyAmount<Token>, Pool, SwapAccount[]]> {
     invariant(this.involvesToken(inputAmount.currency), 'TOKEN')
 
-    // console.log('getOutputAMount', inputAmount.currency.name, this.token0.name)
     const zeroForOne = inputAmount.currency.equals(this.token0)
 
     const { amountCalculated: outputAmount, sqrtRatioX32, liquidity, tickCurrent, accounts } = await this.swap(
@@ -172,7 +166,6 @@ export class Pool {
       inputAmount.quotient,
       sqrtPriceLimitX32
     )
-    // console.log('got tick from swap', tickCurrent)
     const outputToken = zeroForOne ? this.token1 : this.token0
     return [
       CurrencyAmount.fromRawAmount(outputToken, JSBI.multiply(outputAmount, NEGATIVE_ONE)),
@@ -193,7 +186,6 @@ export class Pool {
   ): Promise<[CurrencyAmount<Token>, Pool]> {
     invariant(outputAmount.currency.isToken && this.involvesToken(outputAmount.currency), 'TOKEN')
 
-    // console.log('getOutputAMount', inputAmount.currency.name, this.token0.name)
     const zeroForOne = outputAmount.currency.equals(this.token1)
 
     const { amountCalculated: inputAmount, sqrtRatioX32, liquidity, tickCurrent } = await this.swap(
@@ -209,7 +201,7 @@ export class Pool {
   }
 
   /**
-   * Executes a swap
+   * Simulate a swap
    * @param zeroForOne Whether the amount in is token0 or token1
    * @param amountSpecified The amount of the swap, which implicitly configures the swap as exact input (positive), or exact output (negative)
    * @param sqrtPriceLimitX32 The Q32.32 sqrt price limit. If zero for one, the price cannot be less than this value after the swap. If one for zero, the price cannot be greater than this value after the swap
@@ -217,6 +209,7 @@ export class Pool {
    * @returns sqrtRatioX32
    * @returns liquidity
    * @returns tickCurrent
+   * @returns accounts Tick accounts flipped and bitmaps traversed
    */
   private async swap(
     zeroForOne: boolean,
@@ -243,23 +236,19 @@ export class Pool {
       invariant(JSBI.lessThan(sqrtPriceLimitX32, TickMath.MAX_SQRT_RATIO), 'RATIO_MAX')
       invariant(JSBI.greaterThan(sqrtPriceLimitX32, this.sqrtRatioX32), 'RATIO_CURRENT')
     }
-
     const exactInput = JSBI.greaterThanOrEqual(amountSpecified, ZERO)
-    // console.log('exact input', exactInput)
-    // keep track of swap state
 
     const state = {
       amountSpecifiedRemaining: amountSpecified,
       amountCalculated: ZERO,
       sqrtPriceX32: this.sqrtRatioX32,
       tick: this.tickCurrent,
-      accounts: [] as SwapAccount[], // bitmap and tick accounts which must be traversed
+      accounts: [] as SwapAccount[],
       liquidity: this.liquidity
     }
 
     let lastSavedWordPos: number | undefined
 
-    // console.log('0for1 outisde while', zeroForOne)
     // start swap while loop
     while (
       JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) &&
@@ -270,11 +259,6 @@ export class Pool {
       let step: Partial<StepComputations> = {}
       step.sqrtPriceStartX32 = state.sqrtPriceX32
 
-      // because each iteration of the while loop rounds, we can't optimize this code (relative to the smart contract)
-      // by simply traversing to the next available tick, we instead need to exactly replicate
-      // tickBitmap.nextInitializedTickWithinOneWord
-
-      // console.log('SDK', 'tick', state.tick, zeroForOne, ' 0for1')
       // save the bitmap, and the tick account if it is initialized
       const nextInitTick = await this.tickDataProvider.nextInitializedTickWithinOneWord(
         state.tick,
@@ -285,10 +269,7 @@ export class Pool {
       step.initialized = nextInitTick[1]
       const wordPos = nextInitTick[2]
       const bitmapAddress = nextInitTick[4]
-      // console.log('got next tick', step.tickNext)
-      // console.log('last saved word pos', lastSavedWordPos, 'got word pos', wordPos)
       if (lastSavedWordPos !== wordPos) {
-        // console.log('pushing bitmap account', wordPos)
         state.accounts.push({
           pubkey: bitmapAddress,
           isWritable: false,
@@ -304,17 +285,17 @@ export class Pool {
       }
 
       step.sqrtPriceNextX32 = TickMath.getSqrtRatioAtTick(step.tickNext)
-      ;[state.sqrtPriceX32, step.amountIn, step.amountOut, step.feeAmount] = SwapMath.computeSwapStep(
-        state.sqrtPriceX32,
-        (zeroForOne
-        ? JSBI.lessThan(step.sqrtPriceNextX32, sqrtPriceLimitX32)
-        : JSBI.greaterThan(step.sqrtPriceNextX32, sqrtPriceLimitX32))
-          ? sqrtPriceLimitX32
-          : step.sqrtPriceNextX32,
-        state.liquidity,
-        state.amountSpecifiedRemaining,
-        this.fee
-      )
+        ;[state.sqrtPriceX32, step.amountIn, step.amountOut, step.feeAmount] = SwapMath.computeSwapStep(
+          state.sqrtPriceX32,
+          (zeroForOne
+            ? JSBI.lessThan(step.sqrtPriceNextX32, sqrtPriceLimitX32)
+            : JSBI.greaterThan(step.sqrtPriceNextX32, sqrtPriceLimitX32))
+            ? sqrtPriceLimitX32
+            : step.sqrtPriceNextX32,
+          state.liquidity,
+          state.amountSpecifiedRemaining,
+          this.fee
+        )
 
       if (exactInput) {
         state.amountSpecifiedRemaining = JSBI.subtract(
@@ -327,19 +308,11 @@ export class Pool {
         state.amountCalculated = JSBI.add(state.amountCalculated, JSBI.add(step.amountIn, step.feeAmount))
       }
 
-      // protocol Fee calculation is skipped for now
-      //   if cache.fee_protocol > 0 {
-      //     let delta = step.fee_amount / cache.fee_protocol as u64;
-      //     step.fee_amount -= delta;
-      //     state.protocol_fee += delta;
-      // }
-
       // TODO
       if (JSBI.equal(state.sqrtPriceX32, step.sqrtPriceNextX32)) {
         // if the tick is initialized, run the tick transition
         if (step.initialized) {
           // push the crossed tick to accounts array
-          // console.log('pushing tick account', step.tickNext)
           state.accounts.push({
             pubkey: await this.tickDataProvider.getTickAddress(step.tickNext),
             isWritable: true,
@@ -355,9 +328,7 @@ export class Pool {
         } else {
           console.log('reached uninitialized tick', step.tickNext)
         }
-        // console.log('state.tick', state.tick)
         state.tick = zeroForOne ? step.tickNext - 1 : step.tickNext
-        // console.log('updated state.tick', state.tick)
       } else if (state.sqrtPriceX32 != step.sqrtPriceStartX32) {
         // recompute unless we're on a lower tick boundary (i.e. already transitioned ticks), and haven't moved
         state.tick = TickMath.getTickAtSqrtRatio(state.sqrtPriceX32)
@@ -369,8 +340,6 @@ export class Pool {
       sqrtRatioX32: state.sqrtPriceX32,
       liquidity: state.liquidity,
       tickCurrent: state.tick,
-
-      // active ticks being flipped, plus each bitmap which is traversed
       accounts: state.accounts
     }
   }
