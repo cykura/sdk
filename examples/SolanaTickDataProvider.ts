@@ -16,9 +16,11 @@ import { PublicKey } from '@solana/web3.js'
 import JSBI from 'jsbi'
 
 export class SolanaTickDataProvider implements TickDataProvider {
+  // @ts-ignore
   program: anchor.Program<CyclosCore>
   pool: PoolVars
 
+  // @ts-ignore
   constructor(program: anchor.Program<CyclosCore>, pool: PoolVars) {
     this.program = program
     this.pool = pool

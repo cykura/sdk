@@ -1,5 +1,5 @@
 export type CyclosCore = {
-  version: '0.0.0'
+  version: '0.1.0'
   name: 'cyclos_core'
   instructions: [
     {
@@ -2118,7 +2118,7 @@ export type CyclosCore = {
 }
 
 export const IDL: CyclosCore = {
-  version: '0.0.0',
+  version: '0.1.0',
   name: 'cyclos_core',
   instructions: [
     {
@@ -2127,20 +2127,20 @@ export const IDL: CyclosCore = {
         {
           name: 'owner',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'factoryState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'systemProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
-      args: [],
+      args: []
     },
     {
       name: 'setOwner',
@@ -2148,20 +2148,20 @@ export const IDL: CyclosCore = {
         {
           name: 'owner',
           isMut: false,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'newOwner',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'factoryState',
           isMut: true,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
-      args: [],
+      args: []
     },
     {
       name: 'enableFeeAmount',
@@ -2169,34 +2169,34 @@ export const IDL: CyclosCore = {
         {
           name: 'owner',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'factoryState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'feeState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'systemProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'fee',
-          type: 'u32',
+          type: 'u32'
         },
         {
           name: 'tickSpacing',
-          type: 'u16',
-        },
-      ],
+          type: 'u16'
+        }
+      ]
     },
     {
       name: 'createAndInitPool',
@@ -2204,70 +2204,70 @@ export const IDL: CyclosCore = {
         {
           name: 'poolCreator',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'token0',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'token1',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'feeState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'poolState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'initialObservationState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault0',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault1',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'systemProgram',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'rent',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'associatedTokenProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'sqrtPriceX32',
-          type: 'u64',
-        },
-      ],
+          type: 'u64'
+        }
+      ]
     },
     {
       name: 'increaseObservationCardinalityNext',
@@ -2275,25 +2275,25 @@ export const IDL: CyclosCore = {
         {
           name: 'payer',
           isMut: false,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'poolState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'systemProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'observationAccountBumps',
-          type: 'bytes',
-        },
-      ],
+          type: 'bytes'
+        }
+      ]
     },
     {
       name: 'setFeeProtocol',
@@ -2301,20 +2301,20 @@ export const IDL: CyclosCore = {
         {
           name: 'owner',
           isMut: false,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'factoryState',
           isMut: true,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'feeProtocol',
-          type: 'u8',
-        },
-      ],
+          type: 'u8'
+        }
+      ]
     },
     {
       name: 'collectProtocol',
@@ -2322,54 +2322,54 @@ export const IDL: CyclosCore = {
         {
           name: 'owner',
           isMut: false,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'factoryState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'poolState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault0',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault1',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'recipientWallet0',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'recipientWallet1',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'amount0Requested',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amount1Requested',
-          type: 'u64',
-        },
-      ],
+          type: 'u64'
+        }
+      ]
     },
     {
       name: 'initTickAccount',
@@ -2377,30 +2377,30 @@ export const IDL: CyclosCore = {
         {
           name: 'signer',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'poolState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'systemProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'tick',
-          type: 'i32',
-        },
-      ],
+          type: 'i32'
+        }
+      ]
     },
     {
       name: 'closeTickAccount',
@@ -2408,15 +2408,15 @@ export const IDL: CyclosCore = {
         {
           name: 'tickState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'recipient',
           isMut: true,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
-      args: [],
+      args: []
     },
     {
       name: 'initBitmapAccount',
@@ -2424,30 +2424,30 @@ export const IDL: CyclosCore = {
         {
           name: 'signer',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'poolState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'bitmapState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'systemProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'wordPos',
-          type: 'i16',
-        },
-      ],
+          type: 'i16'
+        }
+      ]
     },
     {
       name: 'initPositionAccount',
@@ -2455,40 +2455,40 @@ export const IDL: CyclosCore = {
         {
           name: 'signer',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'recipient',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'poolState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickLowerState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickUpperState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'positionState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'systemProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
-      args: [],
+      args: []
     },
     {
       name: 'mintCallback',
@@ -2496,44 +2496,44 @@ export const IDL: CyclosCore = {
         {
           name: 'minter',
           isMut: false,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'tokenAccount0',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenAccount1',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault0',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault1',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'amount0Owed',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amount1Owed',
-          type: 'u64',
-        },
-      ],
+          type: 'u64'
+        }
+      ]
     },
     {
       name: 'swapCallback',
@@ -2541,44 +2541,44 @@ export const IDL: CyclosCore = {
         {
           name: 'signer',
           isMut: false,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'inputTokenAccount',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'outputTokenAccount',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'inputVault',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'outputVault',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'amount0Delta',
-          type: 'i64',
+          type: 'i64'
         },
         {
           name: 'amount1Delta',
-          type: 'i64',
-        },
-      ],
+          type: 'i64'
+        }
+      ]
     },
     {
       name: 'mint',
@@ -2586,85 +2586,85 @@ export const IDL: CyclosCore = {
         {
           name: 'minter',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'tokenAccount0',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenAccount1',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault0',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault1',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'recipient',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'poolState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickLowerState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickUpperState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'bitmapLowerState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'bitmapUpperState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'positionState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'lastObservationState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'callbackHandler',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'amount',
-          type: 'u64',
-        },
-      ],
+          type: 'u64'
+        }
+      ]
     },
     {
       name: 'burn',
@@ -2672,50 +2672,50 @@ export const IDL: CyclosCore = {
         {
           name: 'owner',
           isMut: false,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'poolState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickLowerState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickUpperState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'bitmapLowerState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'bitmapUpperState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'positionState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'lastObservationState',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'amount',
-          type: 'u64',
-        },
-      ],
+          type: 'u64'
+        }
+      ]
     },
     {
       name: 'collect',
@@ -2723,64 +2723,64 @@ export const IDL: CyclosCore = {
         {
           name: 'owner',
           isMut: false,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'poolState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickLowerState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickUpperState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'positionState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault0',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault1',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'recipientWallet0',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'recipientWallet1',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'amount0Requested',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amount1Requested',
-          type: 'u64',
-        },
-      ],
+          type: 'u64'
+        }
+      ]
     },
     {
       name: 'swap',
@@ -2788,64 +2788,64 @@ export const IDL: CyclosCore = {
         {
           name: 'signer',
           isMut: false,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'inputTokenAccount',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'outputTokenAccount',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'inputVault',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'outputVault',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'factoryState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'poolState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'lastObservationState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'callbackHandler',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'amountSpecified',
-          type: 'i64',
+          type: 'i64'
         },
         {
           name: 'sqrtPriceLimitX32',
-          type: 'u64',
-        },
-      ],
+          type: 'u64'
+        }
+      ]
     },
     {
       name: 'mintTokenizedPosition',
@@ -2853,136 +2853,136 @@ export const IDL: CyclosCore = {
         {
           name: 'minter',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'recipient',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'factoryState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'nftMint',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'nftAccount',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'poolState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'corePositionState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickLowerState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickUpperState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'bitmapLowerState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'bitmapUpperState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenizedPositionState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenAccount0',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenAccount1',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault0',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault1',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'lastObservationState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'rent',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'coreProgram',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'systemProgram',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'associatedTokenProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'amount0Desired',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amount1Desired',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amount0Min',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amount1Min',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'deadline',
-          type: 'i64',
-        },
-      ],
+          type: 'i64'
+        }
+      ]
     },
     {
       name: 'addMetaplexMetadata',
@@ -2990,50 +2990,50 @@ export const IDL: CyclosCore = {
         {
           name: 'payer',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'factoryState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'nftMint',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenizedPositionState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'metadataAccount',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'rent',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'metadataProgram',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'systemProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
-      args: [],
+      args: []
     },
     {
       name: 'increaseLiquidity',
@@ -3041,106 +3041,106 @@ export const IDL: CyclosCore = {
         {
           name: 'payer',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'factoryState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenizedPositionState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'poolState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'corePositionState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickLowerState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickUpperState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'bitmapLowerState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'bitmapUpperState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenAccount0',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenAccount1',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault0',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault1',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'lastObservationState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'coreProgram',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'amount0Desired',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amount1Desired',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amount0Min',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amount1Min',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'deadline',
-          type: 'i64',
-        },
-      ],
+          type: 'i64'
+        }
+      ]
     },
     {
       name: 'decreaseLiquidity',
@@ -3148,82 +3148,82 @@ export const IDL: CyclosCore = {
         {
           name: 'ownerOrDelegate',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'nftAccount',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenizedPositionState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'factoryState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'poolState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'corePositionState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickLowerState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickUpperState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'bitmapLowerState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'bitmapUpperState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'lastObservationState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'coreProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'liquidity',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amount0Min',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amount1Min',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'deadline',
-          type: 'i64',
-        },
-      ],
+          type: 'i64'
+        }
+      ]
     },
     {
       name: 'collectFromTokenized',
@@ -3231,99 +3231,99 @@ export const IDL: CyclosCore = {
         {
           name: 'ownerOrDelegate',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'nftAccount',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenizedPositionState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'factoryState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'poolState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'corePositionState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickLowerState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tickUpperState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'bitmapLowerState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'bitmapUpperState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'lastObservationState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault0',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'vault1',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'recipientWallet0',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'recipientWallet1',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'coreProgram',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'amount0Max',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amount1Max',
-          type: 'u64',
-        },
-      ],
+          type: 'u64'
+        }
+      ]
     },
     {
       name: 'exactInputSingle',
@@ -3331,72 +3331,72 @@ export const IDL: CyclosCore = {
         {
           name: 'signer',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'factoryState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'poolState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'inputTokenAccount',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'outputTokenAccount',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'inputVault',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'outputVault',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'lastObservationState',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'coreProgram',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'deadline',
-          type: 'i64',
+          type: 'i64'
         },
         {
           name: 'amountIn',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amountOutMinimum',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'sqrtPriceLimitX32',
-          type: 'u64',
-        },
-      ],
+          type: 'u64'
+        }
+      ]
     },
     {
       name: 'exactInput',
@@ -3404,48 +3404,48 @@ export const IDL: CyclosCore = {
         {
           name: 'signer',
           isMut: true,
-          isSigner: true,
+          isSigner: true
         },
         {
           name: 'factoryState',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'inputTokenAccount',
           isMut: true,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'coreProgram',
           isMut: false,
-          isSigner: false,
+          isSigner: false
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false,
-        },
+          isSigner: false
+        }
       ],
       args: [
         {
           name: 'deadline',
-          type: 'i64',
+          type: 'i64'
         },
         {
           name: 'amountIn',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'amountOutMinimum',
-          type: 'u64',
+          type: 'u64'
         },
         {
           name: 'additionalAccountsPerPool',
-          type: 'bytes',
-        },
-      ],
-    },
+          type: 'bytes'
+        }
+      ]
+    }
   ],
   accounts: [
     {
@@ -3455,18 +3455,18 @@ export const IDL: CyclosCore = {
         fields: [
           {
             name: 'bump',
-            type: 'u8',
+            type: 'u8'
           },
           {
             name: 'owner',
-            type: 'publicKey',
+            type: 'publicKey'
           },
           {
             name: 'feeProtocol',
-            type: 'u8',
-          },
-        ],
-      },
+            type: 'u8'
+          }
+        ]
+      }
     },
     {
       name: 'feeState',
@@ -3475,18 +3475,18 @@ export const IDL: CyclosCore = {
         fields: [
           {
             name: 'bump',
-            type: 'u8',
+            type: 'u8'
           },
           {
             name: 'fee',
-            type: 'u32',
+            type: 'u32'
           },
           {
             name: 'tickSpacing',
-            type: 'u16',
-          },
-        ],
-      },
+            type: 'u16'
+          }
+        ]
+      }
     },
     {
       name: 'observationState',
@@ -3495,30 +3495,30 @@ export const IDL: CyclosCore = {
         fields: [
           {
             name: 'bump',
-            type: 'u8',
+            type: 'u8'
           },
           {
             name: 'index',
-            type: 'u16',
+            type: 'u16'
           },
           {
             name: 'blockTimestamp',
-            type: 'u32',
+            type: 'u32'
           },
           {
             name: 'tickCumulative',
-            type: 'i64',
+            type: 'i64'
           },
           {
             name: 'secondsPerLiquidityCumulativeX32',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'initialized',
-            type: 'bool',
-          },
-        ],
-      },
+            type: 'bool'
+          }
+        ]
+      }
     },
     {
       name: 'poolState',
@@ -3527,70 +3527,70 @@ export const IDL: CyclosCore = {
         fields: [
           {
             name: 'bump',
-            type: 'u8',
+            type: 'u8'
           },
           {
             name: 'token0',
-            type: 'publicKey',
+            type: 'publicKey'
           },
           {
             name: 'token1',
-            type: 'publicKey',
+            type: 'publicKey'
           },
           {
             name: 'fee',
-            type: 'u32',
+            type: 'u32'
           },
           {
             name: 'tickSpacing',
-            type: 'u16',
+            type: 'u16'
           },
           {
             name: 'liquidity',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'sqrtPriceX32',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'tick',
-            type: 'i32',
+            type: 'i32'
           },
           {
             name: 'observationIndex',
-            type: 'u16',
+            type: 'u16'
           },
           {
             name: 'observationCardinality',
-            type: 'u16',
+            type: 'u16'
           },
           {
             name: 'observationCardinalityNext',
-            type: 'u16',
+            type: 'u16'
           },
           {
             name: 'feeGrowthGlobal0X32',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'feeGrowthGlobal1X32',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'protocolFeesToken0',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'protocolFeesToken1',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'unlocked',
-            type: 'bool',
-          },
-        ],
-      },
+            type: 'bool'
+          }
+        ]
+      }
     },
     {
       name: 'positionState',
@@ -3599,30 +3599,30 @@ export const IDL: CyclosCore = {
         fields: [
           {
             name: 'bump',
-            type: 'u8',
+            type: 'u8'
           },
           {
             name: 'liquidity',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'feeGrowthInside0LastX32',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'feeGrowthInside1LastX32',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'tokensOwed0',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'tokensOwed1',
-            type: 'u64',
-          },
-        ],
-      },
+            type: 'u64'
+          }
+        ]
+      }
     },
     {
       name: 'positionManagerState',
@@ -3631,10 +3631,10 @@ export const IDL: CyclosCore = {
         fields: [
           {
             name: 'bump',
-            type: 'u8',
-          },
-        ],
-      },
+            type: 'u8'
+          }
+        ]
+      }
     },
     {
       name: 'swapRouterState',
@@ -3643,18 +3643,18 @@ export const IDL: CyclosCore = {
         fields: [
           {
             name: 'bump',
-            type: 'u8',
+            type: 'u8'
           },
           {
             name: 'core',
-            type: 'publicKey',
+            type: 'publicKey'
           },
           {
             name: 'amountInCached',
-            type: 'u64',
-          },
-        ],
-      },
+            type: 'u64'
+          }
+        ]
+      }
     },
     {
       name: 'tickState',
@@ -3663,42 +3663,42 @@ export const IDL: CyclosCore = {
         fields: [
           {
             name: 'bump',
-            type: 'u8',
+            type: 'u8'
           },
           {
             name: 'tick',
-            type: 'i32',
+            type: 'i32'
           },
           {
             name: 'liquidityNet',
-            type: 'i64',
+            type: 'i64'
           },
           {
             name: 'liquidityGross',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'feeGrowthOutside0X32',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'feeGrowthOutside1X32',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'tickCumulativeOutside',
-            type: 'i64',
+            type: 'i64'
           },
           {
             name: 'secondsPerLiquidityOutsideX32',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'secondsOutside',
-            type: 'u32',
-          },
-        ],
-      },
+            type: 'u32'
+          }
+        ]
+      }
     },
     {
       name: 'tickBitmapState',
@@ -3707,20 +3707,20 @@ export const IDL: CyclosCore = {
         fields: [
           {
             name: 'bump',
-            type: 'u8',
+            type: 'u8'
           },
           {
             name: 'wordPos',
-            type: 'i16',
+            type: 'i16'
           },
           {
             name: 'word',
             type: {
-              array: ['u64', 4],
-            },
-          },
-        ],
-      },
+              array: ['u64', 4]
+            }
+          }
+        ]
+      }
     },
     {
       name: 'tokenizedPositionState',
@@ -3729,47 +3729,47 @@ export const IDL: CyclosCore = {
         fields: [
           {
             name: 'bump',
-            type: 'u8',
+            type: 'u8'
           },
           {
             name: 'mint',
-            type: 'publicKey',
+            type: 'publicKey'
           },
           {
             name: 'poolId',
-            type: 'publicKey',
+            type: 'publicKey'
           },
           {
             name: 'tickLower',
-            type: 'i32',
+            type: 'i32'
           },
           {
             name: 'tickUpper',
-            type: 'i32',
+            type: 'i32'
           },
           {
             name: 'liquidity',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'feeGrowthInside0LastX32',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'feeGrowthInside1LastX32',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'tokensOwed0',
-            type: 'u64',
+            type: 'u64'
           },
           {
             name: 'tokensOwed1',
-            type: 'u64',
-          },
-        ],
-      },
-    },
+            type: 'u64'
+          }
+        ]
+      }
+    }
   ],
   types: [
     {
@@ -3778,74 +3778,74 @@ export const IDL: CyclosCore = {
         kind: 'enum',
         variants: [
           {
-            name: 'LOK',
+            name: 'LOK'
           },
           {
-            name: 'ZeroMintAmount',
+            name: 'ZeroMintAmount'
           },
           {
-            name: 'TLU',
+            name: 'TLU'
           },
           {
-            name: 'TMS',
+            name: 'TMS'
           },
           {
-            name: 'TLM',
+            name: 'TLM'
           },
           {
-            name: 'TUM',
+            name: 'TUM'
           },
           {
-            name: 'M0',
+            name: 'M0'
           },
           {
-            name: 'M1',
+            name: 'M1'
           },
           {
-            name: 'OS',
+            name: 'OS'
           },
           {
-            name: 'AS',
+            name: 'AS'
           },
           {
-            name: 'SPL',
+            name: 'SPL'
           },
           {
-            name: 'IIA',
+            name: 'IIA'
           },
           {
-            name: 'NP',
+            name: 'NP'
           },
           {
-            name: 'LO',
+            name: 'LO'
           },
           {
-            name: 'R',
+            name: 'R'
           },
           {
-            name: 'T',
+            name: 'T'
           },
           {
-            name: 'LS',
+            name: 'LS'
           },
           {
-            name: 'LA',
+            name: 'LA'
           },
           {
-            name: 'TransactionTooOld',
+            name: 'TransactionTooOld'
           },
           {
-            name: 'PriceSlippageCheck',
+            name: 'PriceSlippageCheck'
           },
           {
-            name: 'NotApproved',
+            name: 'NotApproved'
           },
           {
-            name: 'TooLittleReceived',
-          },
-        ],
-      },
-    },
+            name: 'TooLittleReceived'
+          }
+        ]
+      }
+    }
   ],
   events: [
     {
@@ -3854,14 +3854,14 @@ export const IDL: CyclosCore = {
         {
           name: 'oldOwner',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'newOwner',
           type: 'publicKey',
-          index: false,
-        },
-      ],
+          index: false
+        }
+      ]
     },
     {
       name: 'SetFeeProtocolEvent',
@@ -3869,14 +3869,14 @@ export const IDL: CyclosCore = {
         {
           name: 'feeProtocolOld',
           type: 'u8',
-          index: false,
+          index: false
         },
         {
           name: 'feeProtocol',
           type: 'u8',
-          index: false,
-        },
-      ],
+          index: false
+        }
+      ]
     },
     {
       name: 'FeeAmountEnabled',
@@ -3884,14 +3884,14 @@ export const IDL: CyclosCore = {
         {
           name: 'fee',
           type: 'u32',
-          index: false,
+          index: false
         },
         {
           name: 'tickSpacing',
           type: 'u16',
-          index: false,
-        },
-      ],
+          index: false
+        }
+      ]
     },
     {
       name: 'IncreaseObservationCardinalityNext',
@@ -3899,14 +3899,14 @@ export const IDL: CyclosCore = {
         {
           name: 'observationCardinalityNextOld',
           type: 'u16',
-          index: false,
+          index: false
         },
         {
           name: 'observationCardinalityNextNew',
           type: 'u16',
-          index: false,
-        },
-      ],
+          index: false
+        }
+      ]
     },
     {
       name: 'PoolCreatedAndInitialized',
@@ -3914,39 +3914,39 @@ export const IDL: CyclosCore = {
         {
           name: 'token0',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'token1',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'fee',
           type: 'u32',
-          index: false,
+          index: false
         },
         {
           name: 'tickSpacing',
           type: 'u16',
-          index: false,
+          index: false
         },
         {
           name: 'poolState',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'sqrtPriceX32',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'tick',
           type: 'i32',
-          index: false,
-        },
-      ],
+          index: false
+        }
+      ]
     },
     {
       name: 'CollectProtocolEvent',
@@ -3954,34 +3954,34 @@ export const IDL: CyclosCore = {
         {
           name: 'poolState',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'sender',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'recipientWallet0',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'recipientWallet1',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'amount0',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'amount1',
           type: 'u64',
-          index: false,
-        },
-      ],
+          index: false
+        }
+      ]
     },
     {
       name: 'SwapEvent',
@@ -3989,49 +3989,49 @@ export const IDL: CyclosCore = {
         {
           name: 'poolState',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'sender',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'tokenAccount0',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'tokenAccount1',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'amount0',
           type: 'i64',
-          index: false,
+          index: false
         },
         {
           name: 'amount1',
           type: 'i64',
-          index: false,
+          index: false
         },
         {
           name: 'sqrtPriceX32',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'liquidity',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'tick',
           type: 'i32',
-          index: false,
-        },
-      ],
+          index: false
+        }
+      ]
     },
     {
       name: 'MintEvent',
@@ -4039,44 +4039,44 @@ export const IDL: CyclosCore = {
         {
           name: 'poolState',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'sender',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'owner',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'tickLower',
           type: 'i32',
-          index: false,
+          index: false
         },
         {
           name: 'tickUpper',
           type: 'i32',
-          index: false,
+          index: false
         },
         {
           name: 'amount',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'amount0',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'amount1',
           type: 'u64',
-          index: false,
-        },
-      ],
+          index: false
+        }
+      ]
     },
     {
       name: 'BurnEvent',
@@ -4084,39 +4084,39 @@ export const IDL: CyclosCore = {
         {
           name: 'poolState',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'owner',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'tickLower',
           type: 'i32',
-          index: false,
+          index: false
         },
         {
           name: 'tickUpper',
           type: 'i32',
-          index: false,
+          index: false
         },
         {
           name: 'amount',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'amount0',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'amount1',
           type: 'u64',
-          index: false,
-        },
-      ],
+          index: false
+        }
+      ]
     },
     {
       name: 'CollectEvent',
@@ -4124,34 +4124,34 @@ export const IDL: CyclosCore = {
         {
           name: 'poolState',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'owner',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'tickLower',
           type: 'i32',
-          index: false,
+          index: false
         },
         {
           name: 'tickUpper',
           type: 'i32',
-          index: false,
+          index: false
         },
         {
           name: 'amount0',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'amount1',
           type: 'u64',
-          index: false,
-        },
-      ],
+          index: false
+        }
+      ]
     },
     {
       name: 'IncreaseLiquidityEvent',
@@ -4159,24 +4159,24 @@ export const IDL: CyclosCore = {
         {
           name: 'tokenId',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'liquidity',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'amount0',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'amount1',
           type: 'u64',
-          index: false,
-        },
-      ],
+          index: false
+        }
+      ]
     },
     {
       name: 'DecreaseLiquidityEvent',
@@ -4184,24 +4184,24 @@ export const IDL: CyclosCore = {
         {
           name: 'tokenId',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'liquidity',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'amount0',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'amount1',
           type: 'u64',
-          index: false,
-        },
-      ],
+          index: false
+        }
+      ]
     },
     {
       name: 'CollectTokenizedEvent',
@@ -4209,29 +4209,29 @@ export const IDL: CyclosCore = {
         {
           name: 'tokenId',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'recipientWallet0',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'recipientWallet1',
           type: 'publicKey',
-          index: false,
+          index: false
         },
         {
           name: 'amount0',
           type: 'u64',
-          index: false,
+          index: false
         },
         {
           name: 'amount1',
           type: 'u64',
-          index: false,
-        },
-      ],
-    },
-  ],
+          index: false
+        }
+      ]
+    }
+  ]
 }
