@@ -10,7 +10,7 @@ import { SwapMath } from '../utils/swapMath'
 import { TickMath } from '../utils/tickMath'
 import { NoTickDataProvider, TickDataProvider } from './tickDataProvider'
 
-interface StepComputations {
+export interface StepComputations {
   sqrtPriceStartX32: JSBI
   tickNext: number
   initialized: boolean
@@ -20,7 +20,7 @@ interface StepComputations {
   feeAmount: JSBI
 }
 
-interface SwapAccount {
+export interface SwapAccount {
   pubkey: web3.PublicKey
   isSigner: boolean
   isWritable: boolean
