@@ -5,10 +5,9 @@ import { Route } from '../src/entities/route'
 import { Trade } from '../src/entities/trade'
 import { POOL_SEED, u32ToSeed } from '../src/utils'
 import { FeeAmount } from '../src/constants'
-// import { FeeAmount, Pool, POOL_SEED, u32ToSeed, Route, Trade } from '../'
 import { AccountMeta, Connection, Keypair, PublicKey } from '@solana/web3.js'
 import * as anchor from '@project-serum/anchor'
-import { CyclosCore, IDL } from './cykura-core'
+import { CyclosCore, IDL } from '../src/anchor/types/cyclos_core'
 import { SolanaTickDataProvider } from './SolanaTickDataProvider'
 
 // CONSTANTS
@@ -113,12 +112,14 @@ async function getAllPossibleOutputs(mint0: string, mint1: string, inputAmount: 
 
     bestTrade = await useBestV3TradeExactIn(existingPools, parsedAmount, token1 as Currency)
   } else {
-    const typedValueParsed = inputAmount * Math.pow(10, isExactIn ? token0.decimals : token1.decimals)
-    const parsedAmount = CurrencyAmount.fromRawAmount(isExactIn ? token0 : token1, JSBI.BigInt(typedValueParsed))
+    // Not implemented
 
-    bestTrade = await useBestV3TradeExactOut(existingPools, token0 as Currency, parsedAmount)
+    // const typedValueParsed = inputAmount * Math.pow(10, isExactIn ? token0.decimals : token1.decimals)
+    // const parsedAmount = CurrencyAmount.fromRawAmount(isExactIn ? token0 : token1, JSBI.BigInt(typedValueParsed))
+
+    // bestTrade = await useBestV3TradeExactOut(existingPools, token0 as Currency, parsedAmount)
   }
-  console.log(bestTrade.trade.outputAmount.toSignificant())
+  console.log(bestTrade.trade?.outputAmount.toSignificant())
 }
 
 function computeAllRoutes(
@@ -211,8 +212,8 @@ async function usePools(
   )
 
   const mapPoolStates: { [address: string]: PState } = {}
-  poolStates.forEach((pState: { publicKey: PublicKey; account: PState }) => {
-    mapPoolStates[pState.publicKey.toString() as string] = pState.account
+  poolStates.forEach((pState) => {
+    mapPoolStates[pState.publicKey.toString() as string] = pState.account as PState
   })
 
   if (Object.keys(mapPoolStates).length == 0 && poolList.length == 0) {
@@ -221,7 +222,7 @@ async function usePools(
 
   const allFetchedPublicKeys: string[] = Object.keys(mapPoolStates)
 
-  const existingPools: boolean[] = poolList.map((p: string) => (allFetchedPublicKeys.includes(p) ? true : false))
+  const existingPools = poolList.map((poolAddress) => allFetchedPublicKeys.includes(poolAddress!))
 
   return existingPools.map((key, index) => {
     const [token0, token1, fee] = transformed[index] ?? []
@@ -333,7 +334,7 @@ async function useBestV3TradeExactIn(
       currentBest: {
         bestRoute: Route<Currency, Currency> | null
         amountOut: CurrencyAmount<typeof currencyOut> | null
-        swapAccounts: AccountMeta[] | null
+        swapAccounts: AccountMeta[] | undefined
       },
       amount: any,
       i: any
@@ -359,7 +360,7 @@ async function useBestV3TradeExactIn(
     {
       bestRoute: null,
       amountOut: null,
-      swapAccounts: null,
+      swapAccounts: undefined,
     }
   )
 
@@ -375,93 +376,6 @@ async function useBestV3TradeExactIn(
     trade: Trade.createUncheckedTrade({
       route: bestRoute,
       tradeType: TradeType.EXACT_INPUT,
-      inputAmount: amountIn,
-      outputAmount: amountOut,
-    }),
-    accounts: swapAccounts, // Figure out how to pass the actual accounts here
-  }
-}
-
-async function useBestV3TradeExactOut(
-  existingPools: Pool[],
-  currencyIn: Currency,
-  amountOut: CurrencyAmount<Currency>
-): Promise<{
-  state: V3TradeState
-  trade: Trade<Currency, Currency, TradeType.EXACT_OUTPUT> | null
-  accounts: AccountMeta[] | undefined
-}> {
-  const routes = computeAllRoutes(amountOut.currency, currencyIn, existingPools, 101, [], [], amountOut.currency, 1)
-
-  const result: any = Promise.all(
-    routes.map((route, i) => {
-      const { pools } = route as any
-
-      const res = Promise.all(
-        pools.map(async (_: any, i: any) => {
-          const pool = pools[i] as any
-          if (!amountOut || !currencyIn) return
-          return await pool.getOutputAmount(amountOut)
-        })
-      )
-      return res
-    })
-  )
-
-  const d: [CurrencyAmount<Currency>, Pool, any][] = await result
-  // Array of expectedAmounts
-  // console.log(d.flat().map(d => `OUT ${d[0].toSignificant()} `))
-
-  const absAmounts = d
-    .flat()
-    .filter((amt) => amt !== undefined)
-    .map((amount) => {
-      const amt: CurrencyAmount<Currency> = amount![0]
-
-      let absAmt = amt
-      // If negative. take abs
-      if (+amt.toFixed(2) < 0) {
-        const { numerator, denominator } = amt.multiply('-1')
-        absAmt = CurrencyAmount.fromFractionalAmount(currencyIn, numerator, denominator)
-      }
-
-      return [absAmt, amount![1], amount![2]]
-    })
-
-  let bestPath:
-    | {
-        bestRoute: Route<Currency, Currency>
-        amountIn: CurrencyAmount<typeof currencyIn>
-        swapAccounts: AccountMeta[]
-      }
-    | undefined = undefined
-
-  for (const index in absAmounts) {
-    const amount = absAmounts[index]
-    // find the path which gives the smallest amountIn
-    if (!bestPath || bestPath.amountIn.lessThan(amount[0] as CurrencyAmount<Currency>)) {
-      bestPath = {
-        bestRoute: routes[index],
-        amountIn: amount[0] as CurrencyAmount<Currency>,
-        swapAccounts: amount[2] as AccountMeta[],
-      }
-    }
-  }
-
-  if (!bestPath) {
-    return {
-      state: V3TradeState.NO_ROUTE_FOUND,
-      trade: null,
-      accounts: undefined,
-    }
-  }
-  const { bestRoute, amountIn, swapAccounts } = bestPath
-
-  return {
-    state: V3TradeState.VALID,
-    trade: Trade.createUncheckedTrade({
-      route: bestRoute,
-      tradeType: TradeType.EXACT_OUTPUT,
       inputAmount: amountIn,
       outputAmount: amountOut,
     }),

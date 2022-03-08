@@ -1,16 +1,5 @@
-// import {
-//   TickDataProvider,
-//   PoolVars,
-//   u32ToSeed,
-//   BITMAP_SEED,
-//   u16ToSeed,
-//   generateBitmapWord,
-//   nextInitializedBit,
-//   tickPosition,
-//   TICK_SEED
-// } from '@cykura/sdk'
 import { BigintIsh } from '@cykura/sdk-core'
-import { CyclosCore } from './cykura-core'
+import { CyclosCore } from '../src/anchor/types/cyclos_core'
 import * as anchor from '@project-serum/anchor'
 import { PublicKey } from '@solana/web3.js'
 import JSBI from 'jsbi'
@@ -24,10 +13,16 @@ export class SolanaTickDataProvider implements TickDataProvider {
   program: anchor.Program<CyclosCore>
   pool: PoolVars
 
+  bitmapCache: Map<number, {
+    address: PublicKey,
+    word: anchor.BN,
+  } | undefined>
+
   // @ts-ignore
   constructor(program: anchor.Program<CyclosCore>, pool: PoolVars) {
     this.program = program
     this.pool = pool
+    this.bitmapCache = new Map()
   }
 
   async getTick(tick: number): Promise<{ liquidityNet: BigintIsh }> {
@@ -61,6 +56,13 @@ export class SolanaTickDataProvider implements TickDataProvider {
     )[0]
   }
 
+  /**
+   *
+   * @param tick The current tick
+   * @param lte Whether to look for a tick less than or equal to the current one, or a tick greater than or equal to
+   * @param tickSpacing The tick spacing for the pool
+   * @returns
+   */
   async nextInitializedTickWithinOneWord(
     tick: number,
     lte: boolean,
@@ -76,32 +78,46 @@ export class SolanaTickDataProvider implements TickDataProvider {
 
     const { wordPos, bitPos } = tickPosition(compressed)
 
-    const bitmapState = (
-      await PublicKey.findProgramAddress(
-        [
-          BITMAP_SEED,
-          this.pool.token0.toBuffer(),
-          this.pool.token1.toBuffer(),
-          u32ToSeed(this.pool.fee),
-          u16ToSeed(wordPos)
-        ],
-        this.program.programId
-      )
-    )[0]
+    // TODO #1 optimize- save address and account in cache
+    let bitmapState: PublicKey
+    let word: anchor.BN
 
-    let nextBit = lte ? 0 : 255
-    let initialized = false
-    try {
-      const { word: wordArray } = await this.program.account.tickBitmapState.fetch(bitmapState)
-      const word = generateBitmapWord(wordArray)
-      const nextInitBit = nextInitializedBit(word, bitPos, lte)
-      nextBit = nextInitBit.next
-      initialized = nextInitBit.initialized
-    } catch (error) {
-      console.log(error)
+    if (!this.bitmapCache.has(wordPos)) {
+      console.log('cache missing for wordPos', wordPos)
+      // this.bitmapCache.set(wordPos)
+      const bitmapAddress = (
+        await PublicKey.findProgramAddress(
+          [
+            BITMAP_SEED,
+            this.pool.token0.toBuffer(),
+            this.pool.token1.toBuffer(),
+            u32ToSeed(this.pool.fee),
+            u16ToSeed(wordPos)
+          ],
+          this.program.programId
+        )
+      )[0]
+
+      let word: anchor.BN
+      try {
+        const { word: wordArray } = await this.program.account.tickBitmapState.fetch(bitmapState)
+        word = generateBitmapWord(wordArray)
+      } catch(error) {
+        // An uninitialized bitmap will have no initialized ticks, i.e. the bitmap will be empty
+        word = new anchor.BN(0)
+      }
+
+      this.bitmapCache.set(wordPos, {
+        address: bitmapAddress,
+        word,
+      })
+      console.log('cache saved for wordPos', wordPos)
     }
-    const nextTick = (wordPos * 256 + nextBit) * tickSpacing
 
-    return [nextTick, initialized, wordPos, bitPos, bitmapState]
+    let cachedState = this.bitmapCache.get(wordPos)
+    const { next: nextBit, initialized } = nextInitializedBit(cachedState.word, bitPos, lte)
+
+    const nextTick = (wordPos * 256 + nextBit) * tickSpacing
+    return [nextTick, initialized, wordPos, bitPos, cachedState.address]
   }
 }

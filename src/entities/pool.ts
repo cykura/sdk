@@ -1,5 +1,6 @@
 import { Price, Token, CurrencyAmount } from '@cykura/sdk-core'
 import { web3 } from '@project-serum/anchor'
+import { AccountMeta } from '@solana/web3.js'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 import { FACTORY_ADDRESS, FeeAmount, TICK_SPACINGS } from '../constants'
@@ -18,12 +19,6 @@ export interface StepComputations {
   amountIn: JSBI
   amountOut: JSBI
   feeAmount: JSBI
-}
-
-export interface SwapAccount {
-  pubkey: web3.PublicKey
-  isSigner: boolean
-  isWritable: boolean
 }
 
 /**
@@ -73,12 +68,10 @@ export class Pool {
     tickCurrent: number,
     tickDataProvider: TickDataProvider = NO_TICK_DATA_PROVIDER_DEFAULT
   ) {
-    console.log('in constructor')
     invariant(Number.isInteger(fee) && fee < 1_000_000, 'FEE')
 
     const tickCurrentSqrtRatioX32 = TickMath.getSqrtRatioAtTick(tickCurrent)
     const nextTickSqrtRatioX32 = TickMath.getSqrtRatioAtTick(tickCurrent + 1)
-    console.log('got ticks')
     invariant(
       JSBI.greaterThanOrEqual(sqrtRatioX32, tickCurrentSqrtRatioX32) &&
       JSBI.lessThanOrEqual(sqrtRatioX32, nextTickSqrtRatioX32),
@@ -158,7 +151,7 @@ export class Pool {
   public async getOutputAmount(
     inputAmount: CurrencyAmount<Token>,
     sqrtPriceLimitX32?: JSBI
-  ): Promise<[CurrencyAmount<Token>, Pool, SwapAccount[]]> {
+  ): Promise<[CurrencyAmount<Token>, Pool, AccountMeta[]]> {
     invariant(this.involvesToken(inputAmount.currency), 'TOKEN')
 
     const zeroForOne = inputAmount.currency.equals(this.token0)
@@ -222,7 +215,7 @@ export class Pool {
     sqrtRatioX32: JSBI
     liquidity: JSBI
     tickCurrent: number
-    accounts: SwapAccount[]
+    accounts: AccountMeta[]
   }> {
     invariant(JSBI.notEqual(amountSpecified, ZERO), 'AMOUNT_LESS_THAN_0')
 
@@ -245,13 +238,13 @@ export class Pool {
       amountCalculated: ZERO,
       sqrtPriceX32: this.sqrtRatioX32,
       tick: this.tickCurrent,
-      accounts: [] as SwapAccount[],
+      accounts: [] as AccountMeta[],
       liquidity: this.liquidity
     }
 
     let lastSavedWordPos: number | undefined
 
-    // start swap while loop
+    // loop across ticks until input liquidity is consumed, or the limit price is reached
     while (
       JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) &&
       state.sqrtPriceX32 != sqrtPriceLimitX32 &&
@@ -271,6 +264,7 @@ export class Pool {
       step.initialized = nextInitTick[1]
       const wordPos = nextInitTick[2]
       const bitmapAddress = nextInitTick[4]
+
       if (lastSavedWordPos !== wordPos) {
         state.accounts.push({
           pubkey: bitmapAddress,
@@ -300,6 +294,7 @@ export class Pool {
         )
 
       if (exactInput) {
+        // subtract the input amount. The loop exits if remaining amount becomes 0
         state.amountSpecifiedRemaining = JSBI.subtract(
           state.amountSpecifiedRemaining,
           JSBI.add(step.amountIn, step.feeAmount)
