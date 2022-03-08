@@ -30,6 +30,14 @@ export class SolanaTickDataProvider implements TickDataProvider {
     this.tickCache = new Map()
   }
 
+  /**
+   * Saves a bitmap and and its ticks in cache
+   * @param wordPos Word position of the bitmap account to cache
+   */
+  async eagerLoadCache(wordPos: number) {
+    const bitmapAddress = await this.getBitmapAddress(wordPos)
+  }
+
   async getTick(tick: number): Promise<{ liquidityNet: JSBI }> {
     let savedTick = this.tickCache.get(tick)
 
@@ -63,6 +71,21 @@ export class SolanaTickDataProvider implements TickDataProvider {
     )[0]
   }
 
+  async getBitmapAddress(wordPos: number): Promise<anchor.web3.PublicKey> {
+    return (
+      await PublicKey.findProgramAddress(
+        [
+          BITMAP_SEED,
+          this.pool.token0.toBuffer(),
+          this.pool.token1.toBuffer(),
+          u32ToSeed(this.pool.fee),
+          u32ToSeed(wordPos)
+        ],
+        this.program.programId
+      )
+    )[0]
+  }
+
   /**
    *
    * @param tick The current tick
@@ -86,18 +109,7 @@ export class SolanaTickDataProvider implements TickDataProvider {
     const { wordPos, bitPos } = tickPosition(compressed)
 
     if (!this.bitmapCache.has(wordPos)) {
-      const bitmapAddress = (
-        await PublicKey.findProgramAddress(
-          [
-            BITMAP_SEED,
-            this.pool.token0.toBuffer(),
-            this.pool.token1.toBuffer(),
-            u32ToSeed(this.pool.fee),
-            u16ToSeed(wordPos)
-          ],
-          this.program.programId
-        )
-      )[0]
+      const bitmapAddress = await this.getBitmapAddress(wordPos)
 
       let word: anchor.BN
       try {
