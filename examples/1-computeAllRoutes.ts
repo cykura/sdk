@@ -1,6 +1,11 @@
 import JSBI from 'jsbi'
 import { Currency, CurrencyAmount, Token, TradeType } from '@cykura/sdk-core'
-import { FeeAmount, Pool, POOL_SEED, u32ToSeed, Route, Trade } from '@cykura/sdk'
+import { Pool } from '../src/entities/pool'
+import { Route } from '../src/entities/route'
+import { Trade } from '../src/entities/trade'
+import { POOL_SEED, u32ToSeed } from '../src/utils'
+import { FeeAmount } from '../src/constants'
+// import { FeeAmount, Pool, POOL_SEED, u32ToSeed, Route, Trade } from '../'
 import { AccountMeta, Connection, Keypair, PublicKey } from '@solana/web3.js'
 import * as anchor from '@project-serum/anchor'
 import { CyclosCore, IDL } from './cykura-core'
@@ -44,7 +49,7 @@ getAllPossibleOutputs(
   'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
   'BRLsMczKuaR5w9vSubF4j8HwEGGprVAyyVgS4EX7DKEg',
   10,
-  false
+  true
 )
 
 /**
@@ -53,8 +58,8 @@ getAllPossibleOutputs(
  * @param mint1 Address of token1
  * @param inputAmount The fee in hundredths of a bips of the input amount of every swap that is collected by the pool
  * @param isExactIn The token for which inputAmount was entered
- 
- * @returns 
+
+ * @returns
  */
 async function getAllPossibleOutputs(mint0: string, mint1: string, inputAmount: number, isExactIn: boolean) {
   // Fetch Tokens
@@ -235,6 +240,7 @@ async function usePools(
     const { token0: token0Add, token1: token1Add, fee: poolFee, sqrtPriceX32, liquidity, tick } = poolState
 
     if (!sqrtPriceX32.toString() || !liquidity.toString()) {
+      console.log('pool doesnt exist')
       return [PoolState.NOT_EXISTS, null]
     }
 
@@ -248,17 +254,20 @@ async function usePools(
         token1: new PublicKey(token1Add),
         fee: poolFee,
       })
+      console.log('constructing pool', JSBI.BigInt(sqrtPriceX32), JSBI.BigInt(liquidity))
+      const pool = new Pool(
+        token0,
+        token1,
+        poolFee,
+        JSBI.BigInt(sqrtPriceX32),
+        JSBI.BigInt(liquidity),
+        tick,
+        tickDataProvider
+      )
+      console.log('pool created')
       return [
         PoolState.EXISTS,
-        new Pool(
-          token0,
-          token1,
-          poolFee,
-          JSBI.BigInt(sqrtPriceX32.toString()),
-          JSBI.BigInt(liquidity.toString()),
-          Number(tick),
-          tickDataProvider
-        ),
+        pool,
       ]
     } catch (error) {
       console.error('Error when constructing the pool', error)

@@ -1,4 +1,4 @@
-import { BigintIsh, Price, Token, CurrencyAmount } from '@cykura/sdk-core'
+import { Price, Token, CurrencyAmount } from '@cykura/sdk-core'
 import { web3 } from '@project-serum/anchor'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
@@ -68,25 +68,27 @@ export class Pool {
     tokenA: Token,
     tokenB: Token,
     fee: FeeAmount,
-    sqrtRatioX32: BigintIsh,
-    liquidity: BigintIsh,
+    sqrtRatioX32: JSBI,
+    liquidity: JSBI,
     tickCurrent: number,
     tickDataProvider: TickDataProvider = NO_TICK_DATA_PROVIDER_DEFAULT
   ) {
+    console.log('in constructor')
     invariant(Number.isInteger(fee) && fee < 1_000_000, 'FEE')
 
     const tickCurrentSqrtRatioX32 = TickMath.getSqrtRatioAtTick(tickCurrent)
     const nextTickSqrtRatioX32 = TickMath.getSqrtRatioAtTick(tickCurrent + 1)
+    console.log('got ticks')
     invariant(
-      JSBI.greaterThanOrEqual(JSBI.BigInt(sqrtRatioX32), tickCurrentSqrtRatioX32) &&
-      JSBI.lessThanOrEqual(JSBI.BigInt(sqrtRatioX32), nextTickSqrtRatioX32),
+      JSBI.greaterThanOrEqual(sqrtRatioX32, tickCurrentSqrtRatioX32) &&
+      JSBI.lessThanOrEqual(sqrtRatioX32, nextTickSqrtRatioX32),
       'PRICE_BOUNDS'
     )
       // always create a copy of the list since we want the pool's tick list to be immutable
       ;[this.token0, this.token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
     this.fee = fee
-    this.sqrtRatioX32 = JSBI.BigInt(sqrtRatioX32)
-    this.liquidity = JSBI.BigInt(liquidity)
+    this.sqrtRatioX32 = sqrtRatioX32
+    this.liquidity = liquidity
     this.tickCurrent = tickCurrent
     this.tickDataProvider = tickDataProvider
   }

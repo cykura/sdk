@@ -1,19 +1,23 @@
-import {
-  TickDataProvider,
-  PoolVars,
-  u32ToSeed,
-  BITMAP_SEED,
-  u16ToSeed,
-  generateBitmapWord,
-  nextInitializedBit,
-  tickPosition,
-  TICK_SEED
-} from '@cykura/sdk'
+// import {
+//   TickDataProvider,
+//   PoolVars,
+//   u32ToSeed,
+//   BITMAP_SEED,
+//   u16ToSeed,
+//   generateBitmapWord,
+//   nextInitializedBit,
+//   tickPosition,
+//   TICK_SEED
+// } from '@cykura/sdk'
 import { BigintIsh } from '@cykura/sdk-core'
 import { CyclosCore } from './cykura-core'
 import * as anchor from '@project-serum/anchor'
 import { PublicKey } from '@solana/web3.js'
 import JSBI from 'jsbi'
+import { generateBitmapWord, nextInitializedBit } from '../src/entities/bitmap'
+import { tickPosition } from '../src/entities/tick'
+import { TickDataProvider, PoolVars } from '../src/entities/tickDataProvider'
+import { TICK_SEED, u32ToSeed, BITMAP_SEED, u16ToSeed } from '../src/utils'
 
 export class SolanaTickDataProvider implements TickDataProvider {
   // @ts-ignore
@@ -62,7 +66,7 @@ export class SolanaTickDataProvider implements TickDataProvider {
     lte: boolean,
     tickSpacing: number
   ): Promise<[number, boolean, number, number, PublicKey]> {
-    let compressed = Number(JSBI.divide(JSBI.BigInt(tick), JSBI.BigInt(tickSpacing)))
+    let compressed = JSBI.toNumber(JSBI.divide(JSBI.BigInt(tick), JSBI.BigInt(tickSpacing)))
     if (tick < 0 && tick % tickSpacing !== 0) {
       compressed -= 1
     }
