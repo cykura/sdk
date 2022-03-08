@@ -67,3 +67,7 @@ export function nextInitializedBit(word: BN, bitPos: number, lte: boolean): Next
     return { next, initialized }
   }
 }
+
+export function buildTick(wordPos: number, nextBit: number, tickSpacing: number) {
+  return ((wordPos << 8) + nextBit) * tickSpacing
+}
