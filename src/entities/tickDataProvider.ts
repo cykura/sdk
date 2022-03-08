@@ -1,6 +1,8 @@
 import { BigintIsh } from '@cykura/sdk-core'
 import * as anchor from  '@project-serum/anchor'
 import { PublicKey } from '@solana/web3.js'
+import JSBI from 'jsbi'
+
 /**
  * Provides information about ticks
  */
@@ -9,7 +11,7 @@ export interface TickDataProvider {
    * Return information corresponding to a specific tick
    * @param tick the tick to load
    */
-  getTick(tick: number): Promise<{ liquidityNet: BigintIsh }>
+  getTick(tick: number): Promise<{ liquidityNet: JSBI }>
 
   /**
    * Return the PDA corresponding to a specific tick
@@ -36,7 +38,7 @@ export class NoTickDataProvider implements TickDataProvider {
     throw new Error('Method not implemented.')
   }
   private static ERROR_MESSAGE = 'No tick data provider was given'
-  async getTick(_tick: number): Promise<{ liquidityNet: BigintIsh }> {
+  async getTick(_tick: number): Promise<{ liquidityNet: JSBI }> {
     throw new Error(NoTickDataProvider.ERROR_MESSAGE)
   }
 

@@ -1,4 +1,3 @@
-import { BigintIsh } from '@cykura/sdk-core'
 import { CyclosCore } from '../src/anchor/types/cyclos_core'
 import * as anchor from '@project-serum/anchor'
 import { PublicKey } from '@solana/web3.js'
@@ -18,26 +17,34 @@ export class SolanaTickDataProvider implements TickDataProvider {
     word: anchor.BN,
   } | undefined>
 
+  tickCache: Map<number, {
+    address: PublicKey,
+    liquidityNet: JSBI,
+  } | undefined>
+
   // @ts-ignore
   constructor(program: anchor.Program<CyclosCore>, pool: PoolVars) {
     this.program = program
     this.pool = pool
     this.bitmapCache = new Map()
+    this.tickCache = new Map()
   }
 
-  async getTick(tick: number): Promise<{ liquidityNet: BigintIsh }> {
-    try {
-      const tickState = await this.getTickAddress(tick)
+  async getTick(tick: number): Promise<{ liquidityNet: JSBI }> {
+    let savedTick = this.tickCache.get(tick)
 
+    if (!savedTick) {
+      const tickState = await this.getTickAddress(tick)
       const { liquidityNet } = await this.program.account.tickState.fetch(tickState)
-      return {
-        liquidityNet: liquidityNet.toString()
+      savedTick = {
+        address: tickState,
+        liquidityNet: JSBI.BigInt(liquidityNet),
       }
-    } catch (e) {
-      console.log('Fetching tick state fails', e)
-      return Promise.resolve({
-        liquidityNet: JSBI.BigInt(0)
-      })
+      this.tickCache.set(tick, savedTick)
+    }
+
+    return {
+      liquidityNet: JSBI.BigInt(savedTick.liquidityNet),
     }
   }
 
@@ -78,13 +85,7 @@ export class SolanaTickDataProvider implements TickDataProvider {
 
     const { wordPos, bitPos } = tickPosition(compressed)
 
-    // TODO #1 optimize- save address and account in cache
-    let bitmapState: PublicKey
-    let word: anchor.BN
-
     if (!this.bitmapCache.has(wordPos)) {
-      console.log('cache missing for wordPos', wordPos)
-      // this.bitmapCache.set(wordPos)
       const bitmapAddress = (
         await PublicKey.findProgramAddress(
           [
@@ -100,7 +101,7 @@ export class SolanaTickDataProvider implements TickDataProvider {
 
       let word: anchor.BN
       try {
-        const { word: wordArray } = await this.program.account.tickBitmapState.fetch(bitmapState)
+        const { word: wordArray } = await this.program.account.tickBitmapState.fetch(bitmapAddress)
         word = generateBitmapWord(wordArray)
       } catch(error) {
         // An uninitialized bitmap will have no initialized ticks, i.e. the bitmap will be empty
@@ -111,7 +112,6 @@ export class SolanaTickDataProvider implements TickDataProvider {
         address: bitmapAddress,
         word,
       })
-      console.log('cache saved for wordPos', wordPos)
     }
 
     let cachedState = this.bitmapCache.get(wordPos)
