@@ -164,7 +164,7 @@ export class Position {
       this.pool.token1,
       this.pool.fee,
       sqrtRatioX32Lower,
-      0 /* liquidity doesn't matter */,
+      JSBI.BigInt(0) /* liquidity doesn't matter */,
       TickMath.getTickAtSqrtRatio(sqrtRatioX32Lower)
     )
     const poolUpper = new Pool(
@@ -172,7 +172,7 @@ export class Position {
       this.pool.token1,
       this.pool.fee,
       sqrtRatioX32Upper,
-      0 /* liquidity doesn't matter */,
+      JSBI.BigInt(0) /* liquidity doesn't matter */,
       TickMath.getTickAtSqrtRatio(sqrtRatioX32Upper)
     )
 
@@ -220,7 +220,7 @@ export class Position {
       this.pool.token1,
       this.pool.fee,
       sqrtRatioX32Lower,
-      0 /* liquidity doesn't matter */,
+      JSBI.BigInt(0) /* liquidity doesn't matter */,
       TickMath.getTickAtSqrtRatio(sqrtRatioX32Lower)
     )
     const poolUpper = new Pool(
@@ -228,7 +228,7 @@ export class Position {
       this.pool.token1,
       this.pool.fee,
       sqrtRatioX32Upper,
-      0 /* liquidity doesn't matter */,
+      JSBI.BigInt(0) /* liquidity doesn't matter */,
       TickMath.getTickAtSqrtRatio(sqrtRatioX32Upper)
     )
 

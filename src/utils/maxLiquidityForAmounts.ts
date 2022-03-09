@@ -1,6 +1,6 @@
 import { BigintIsh } from '@cykura/sdk-core'
 import JSBI from 'jsbi'
-import { FullMath } from '.'
+import { FullMath } from './fullMath'
 import { Q64, Q32, MaxUint32 } from '../internalConstants'
 
 /**

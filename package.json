@@ -4,7 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "⚒️ An SDK for building applications on top of Cykura",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -21,8 +21,7 @@
     "build": "tsdx build",
     "start": "tsdx watch",
     "test": "tsdx test",
-    "prepublishOnly": "tsdx build",
-    "prepare": "tsdx build"
+    "prepublishOnly": "tsdx build"
   },
   "dependencies": {
     "@cykura/sdk-core": "0.1.4",
