@@ -40,7 +40,7 @@ export class SolanaTickDataProvider implements TickDataProvider {
     let { wordPos, bitPos } = tickPosition(compressed)
     const bitmapData = await this.getBitmap(wordPos)
 
-    const ticksToFetch = []
+    const ticksToFetch = [] as number[]
 
     let bitPosForBehind = bitPos
     for (let i = 0; i < 3; i++) {
@@ -76,7 +76,7 @@ export class SolanaTickDataProvider implements TickDataProvider {
     }
     const fetchedTicks = await this.program.account.tickState.fetchMultiple(tickAddresses)
 
-    for (const index in fetchedTicks) {
+    for (let index = 0; index < fetchedTicks.length; index++) {
       const { tick, liquidityNet } = fetchedTicks[index] as { tick: number, liquidityNet: anchor.BN }
       this.tickCache.set(tick, {
         address: tickAddresses[index],
