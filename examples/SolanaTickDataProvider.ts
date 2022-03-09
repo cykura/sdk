@@ -126,7 +126,7 @@ export class SolanaTickDataProvider implements TickDataProvider {
           this.pool.token0.toBuffer(),
           this.pool.token1.toBuffer(),
           u32ToSeed(this.pool.fee),
-          u32ToSeed(wordPos)
+          u16ToSeed(wordPos)
         ],
         this.program.programId
       )
