@@ -8,7 +8,7 @@ import { BN } from "@project-serum/anchor"
 export function generateBitmapWord(x: BN[]) {
   return x[0]
     .add(x[1].shln(64))
-    .add(x[2].shln(126))
+    .add(x[2].shln(128))
     .add(x[3].shln(192))
 }
 
