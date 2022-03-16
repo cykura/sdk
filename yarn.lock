@@ -944,10 +944,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@cykura/sdk-core@^0.1.5":
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/@cykura/sdk-core/-/sdk-core-0.1.5.tgz#87952f39cb4c18f2b12d1a42322940f6f5658b41"
-  integrity sha512-54u+9AZj5/alKzOA40iGaejEEPzeVg93PWUKpN8asTEvTng7dJUlkoykawI9MdgWP7IiU3yBlnTmg8Hhq0oA7w==
+"@cykura/sdk-core@0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@cykura/sdk-core/-/sdk-core-0.1.4.tgz#bb21a5ec1753e308e187211d2b0aabd7a386905e"
+  integrity sha512-PRFOLLb9yM+xFTBl9Q1JgOmEjCBTv1dqj3qJH5E1Mf8JvvHPDcgYx2lQmo5GKhYTS3k1+RRVg/GMjDnRWnqufw==
   dependencies:
     "@ethersproject/address" "^5.0.2"
     "@project-serum/anchor" "^0.22.0"
@@ -955,7 +955,7 @@
     big.js "^5.2.2"
     bs58 "^4.0.1"
     decimal.js-light "^2.5.0"
-    jsbi "^4.1.0"
+    jsbi "^3.1.4"
     tiny-invariant "^1.1.0"
     toformat "^2.0.0"
 
@@ -4689,10 +4689,10 @@ js-yaml@^3.13.1:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
-jsbi@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/jsbi/-/jsbi-4.1.0.tgz#f0c25ed8881bc09891334b03a3952efaa7add337"
-  integrity sha512-384Z4keIsJtYpnVggsxaB255MZctILbxv+ihtwoWPF7KNOlYHn1LFpRnUw5qsAspUAA2+I7qzjVJxVYtHVjxNw==
+jsbi@^3.1.4:
+  version "3.2.5"
+  resolved "https://registry.yarnpkg.com/jsbi/-/jsbi-3.2.5.tgz#b37bb90e0e5c2814c1c2a1bcd8c729888a2e37d6"
+  integrity sha512-aBE4n43IPvjaddScbvWRA2YlTzKEynHzu7MqOyTipdHucf/VxS63ViCjxYRg86M8Rxwbt/GfzHl1kKERkt45fQ==
 
 jsbn@~0.1.0:
   version "0.1.1"
