@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "cyclos_core",
   "instructions": [
     {
@@ -466,7 +466,7 @@
       "accounts": [
         {
           "name": "minter",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -921,7 +921,7 @@
       "accounts": [
         {
           "name": "payer",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -1028,7 +1028,7 @@
       "accounts": [
         {
           "name": "ownerOrDelegate",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -1111,7 +1111,7 @@
       "accounts": [
         {
           "name": "ownerOrDelegate",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -1211,7 +1211,7 @@
       "accounts": [
         {
           "name": "signer",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -1284,7 +1284,7 @@
       "accounts": [
         {
           "name": "signer",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {

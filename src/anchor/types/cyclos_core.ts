@@ -1,5 +1,5 @@
 export type CyclosCore = {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "cyclos_core",
   "instructions": [
     {
@@ -466,7 +466,7 @@ export type CyclosCore = {
       "accounts": [
         {
           "name": "minter",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -921,7 +921,7 @@ export type CyclosCore = {
       "accounts": [
         {
           "name": "payer",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -1028,7 +1028,7 @@ export type CyclosCore = {
       "accounts": [
         {
           "name": "ownerOrDelegate",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -1111,7 +1111,7 @@ export type CyclosCore = {
       "accounts": [
         {
           "name": "ownerOrDelegate",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -1211,7 +1211,7 @@ export type CyclosCore = {
       "accounts": [
         {
           "name": "signer",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -1284,7 +1284,7 @@ export type CyclosCore = {
       "accounts": [
         {
           "name": "signer",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -2157,7 +2157,7 @@ export type CyclosCore = {
 };
 
 export const IDL: CyclosCore = {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "cyclos_core",
   "instructions": [
     {
@@ -2624,7 +2624,7 @@ export const IDL: CyclosCore = {
       "accounts": [
         {
           "name": "minter",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -3079,7 +3079,7 @@ export const IDL: CyclosCore = {
       "accounts": [
         {
           "name": "payer",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -3186,7 +3186,7 @@ export const IDL: CyclosCore = {
       "accounts": [
         {
           "name": "ownerOrDelegate",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -3269,7 +3269,7 @@ export const IDL: CyclosCore = {
       "accounts": [
         {
           "name": "ownerOrDelegate",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -3369,7 +3369,7 @@ export const IDL: CyclosCore = {
       "accounts": [
         {
           "name": "signer",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -3442,7 +3442,7 @@ export const IDL: CyclosCore = {
       "accounts": [
         {
           "name": "signer",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
