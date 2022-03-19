@@ -244,6 +244,7 @@ export class Pool {
 
     let lastSavedWordPos: number | undefined
 
+    let loopCount = 0
     // loop across ticks until input liquidity is consumed, or the limit price is reached
     while (
       JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) &&
@@ -251,6 +252,10 @@ export class Pool {
       state.tick < TickMath.MAX_TICK &&
       state.tick > TickMath.MIN_TICK
     ) {
+      if (loopCount > 8) {
+        throw Error('price impact too high')
+      }
+
       let step: Partial<StepComputations> = {}
       step.sqrtPriceStartX32 = state.sqrtPriceX32
 
@@ -330,6 +335,7 @@ export class Pool {
         // recompute unless we're on a lower tick boundary (i.e. already transitioned ticks), and haven't moved
         state.tick = TickMath.getTickAtSqrtRatio(state.sqrtPriceX32)
       }
+      ++loopCount
     }
 
     return {
