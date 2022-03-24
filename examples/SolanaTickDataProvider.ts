@@ -6,21 +6,42 @@ import { buildTick, generateBitmapWord, nextInitializedBit } from '../src/entiti
 import { tickPosition } from '../src/entities/tick'
 import { TickDataProvider, PoolVars } from '../src/entities/tickDataProvider'
 import { TICK_SEED, u32ToSeed, BITMAP_SEED, u16ToSeed, TickMath } from '../src/utils'
+import { BN } from '@project-serum/anchor'
 
-export class SolanaTickDataProvider implements TickDataProvider {
+interface TickBitmap {
+  word: BN[]
+}
+
+interface Tick {
+  tick: number
+  liquidityNet: BN
+}
+
+/**
+ * Tick and bitmap data provider for a Cykura pool
+ */
+ export class SolanaTickDataProvider implements TickDataProvider {
   // @ts-ignore
   program: anchor.Program<CyclosCore>
   pool: PoolVars
 
-  bitmapCache: Map<number, {
-    address: PublicKey,
-    word: anchor.BN,
-  } | undefined>
+  bitmapCache: Map<
+    number,
+    | {
+        address: PublicKey
+        word: anchor.BN
+      }
+    | undefined
+  >
 
-  tickCache: Map<number, {
-    address: PublicKey,
-    liquidityNet: JSBI,
-  } | undefined>
+  tickCache: Map<
+    number,
+    | {
+        address: PublicKey
+        liquidityNet: JSBI
+      }
+    | undefined
+  >
 
   // @ts-ignore
   constructor(program: anchor.Program<CyclosCore>, pool: PoolVars) {
@@ -36,58 +57,89 @@ export class SolanaTickDataProvider implements TickDataProvider {
    * @param tickSpacing The pool tick spacing
    */
   async eagerLoadCache(tickCurrent: number, tickSpacing: number) {
-    let compressed = JSBI.toNumber(JSBI.divide(JSBI.BigInt(tickCurrent), JSBI.BigInt(tickSpacing)))
-    let { wordPos, bitPos } = tickPosition(compressed)
-    const bitmapData = await this.getBitmap(wordPos)
+    // fetch 10 bitmaps on each side in a single fetch. Find active ticks and read them together
+    const compressed = JSBI.toNumber(JSBI.divide(JSBI.BigInt(tickCurrent), JSBI.BigInt(tickSpacing)))
+    const { wordPos } = tickPosition(compressed)
 
-    const ticksToFetch = [] as number[]
-
-    let bitPosForBehind = bitPos
-    for (let i = 0; i < 3; i++) {
-      const { next: nextBitBehind, initialized } = nextInitializedBit(bitmapData.word, bitPosForBehind, true)
-      const tick = buildTick(wordPos, nextBitBehind, tickSpacing)
-
-      if (initialized) {
-        ticksToFetch.push(tick)
+    try {
+      const bitmapsToFetch = []
+      const { wordPos: WORD_POS_MIN } = tickPosition(Math.floor(TickMath.MIN_TICK / tickSpacing))
+      const { wordPos: WORD_POS_MAX } = tickPosition(Math.floor(TickMath.MAX_TICK / tickSpacing))
+      const minWord = Math.max(wordPos - 10, WORD_POS_MIN)
+      const maxWord = Math.min(wordPos + 10, WORD_POS_MAX)
+      for (let i = minWord; i < maxWord; i++) {
+        bitmapsToFetch.push(await this.getBitmapAddress(i))
       }
-      if (nextBitBehind === 0 || tick === TickMath.MIN_TICK) {
-        break
+
+      const fetchedBitmaps = (await this.program.account.tickBitmapState.fetchMultiple(
+        bitmapsToFetch
+      )) as (TickBitmap | null)[]
+
+      const tickAddresses = []
+      for (let i = 0; i < maxWord - minWord; i++) {
+        const currentWordPos = i + minWord
+        const wordArray = fetchedBitmaps[i]?.word
+        const word = wordArray ? generateBitmapWord(wordArray) : new BN(0)
+        this.bitmapCache.set(currentWordPos, {
+          address: bitmapsToFetch[i],
+          word,
+        })
+        if (word && !word.eqn(0)) {
+          for (let j = 0; j < 256; j++) {
+            if (word.shrn(j).and(new BN(1)).eqn(1)) {
+              const tick = ((currentWordPos << 8) + j) * tickSpacing
+              const tickAddress = await this.getTickAddress(tick)
+              tickAddresses.push(tickAddress)
+            }
+          }
+        }
       }
-      --bitPosForBehind
-    }
 
-    let bitPosForAhead = bitPos + 1
-    for (let i = 0; i < 3; i++) {
-      const { next: nextBitAhead, initialized } = nextInitializedBit(bitmapData.word, bitPosForAhead, false)
-      const tick = buildTick(wordPos, nextBitAhead, tickSpacing)
-
-      if (initialized) {
-        ticksToFetch.push(tick)
+      const fetchedTicks = (await this.program.account.tickState.fetchMultiple(tickAddresses)) as Tick[]
+      for (const i in tickAddresses) {
+        const { tick, liquidityNet } = fetchedTicks[i]
+        this.tickCache.set(tick, {
+          address: tickAddresses[i],
+          liquidityNet: JSBI.BigInt(liquidityNet),
+        })
       }
-      if (nextBitAhead === 255 || tick === TickMath.MAX_TICK) {
-        break
-      }
-      ++bitPosForAhead
+    } catch (error) {
+      console.log(error)
     }
+  }
 
-    const tickAddresses = [] as PublicKey[]
-    for (const tick of ticksToFetch) {
-      tickAddresses.push(await this.getTickAddress(tick))
-    }
-    const fetchedTicks = await this.program.account.tickState.fetchMultiple(tickAddresses)
+  async getTickAddress(tick: number): Promise<anchor.web3.PublicKey> {
+    return (
+      await PublicKey.findProgramAddress(
+        [
+          TICK_SEED,
+          this.pool.token0.toBuffer(),
+          this.pool.token1.toBuffer(),
+          u32ToSeed(this.pool.fee),
+          u32ToSeed(tick),
+        ],
+        this.program.programId
+      )
+    )[0]
+  }
 
-    for (let index = 0; index < fetchedTicks.length; index++) {
-      const { tick, liquidityNet } = fetchedTicks[index] as { tick: number, liquidityNet: anchor.BN }
-      this.tickCache.set(tick, {
-        address: tickAddresses[index],
-        liquidityNet: JSBI.BigInt(liquidityNet),
-      })
-    }
+  async getBitmapAddress(wordPos: number): Promise<anchor.web3.PublicKey> {
+    return (
+      await PublicKey.findProgramAddress(
+        [
+          BITMAP_SEED,
+          this.pool.token0.toBuffer(),
+          this.pool.token1.toBuffer(),
+          u32ToSeed(this.pool.fee),
+          u16ToSeed(wordPos),
+        ],
+        this.program.programId
+      )
+    )[0]
   }
 
   async getTick(tick: number): Promise<{ liquidityNet: JSBI }> {
     let savedTick = this.tickCache.get(tick)
-
     if (!savedTick) {
       const tickState = await this.getTickAddress(tick)
       const { liquidityNet } = await this.program.account.tickState.fetch(tickState)
@@ -103,36 +155,6 @@ export class SolanaTickDataProvider implements TickDataProvider {
     }
   }
 
-  async getTickAddress(tick: number): Promise<anchor.web3.PublicKey> {
-    return (
-      await PublicKey.findProgramAddress(
-        [
-          TICK_SEED,
-          this.pool.token0.toBuffer(),
-          this.pool.token1.toBuffer(),
-          u32ToSeed(this.pool.fee),
-          u32ToSeed(tick)
-        ],
-        this.program.programId
-      )
-    )[0]
-  }
-
-  async getBitmapAddress(wordPos: number): Promise<anchor.web3.PublicKey> {
-    return (
-      await PublicKey.findProgramAddress(
-        [
-          BITMAP_SEED,
-          this.pool.token0.toBuffer(),
-          this.pool.token1.toBuffer(),
-          u32ToSeed(this.pool.fee),
-          u16ToSeed(wordPos)
-        ],
-        this.program.programId
-      )
-    )[0]
-  }
-
   /**
    * Fetches bitmap for the word. Bitmaps are cached locally after each RPC call
    * @param wordPos
@@ -145,7 +167,7 @@ export class SolanaTickDataProvider implements TickDataProvider {
       try {
         const { word: wordArray } = await this.program.account.tickBitmapState.fetch(bitmapAddress)
         word = generateBitmapWord(wordArray)
-      } catch(error) {
+      } catch (error) {
         // An uninitialized bitmap will have no initialized ticks, i.e. the bitmap will be empty
         word = new anchor.BN(0)
       }
@@ -156,7 +178,7 @@ export class SolanaTickDataProvider implements TickDataProvider {
       })
     }
 
-    return this.bitmapCache.get(wordPos)
+    return this.bitmapCache.get(wordPos)!
   }
 
   /**
@@ -188,3 +210,4 @@ export class SolanaTickDataProvider implements TickDataProvider {
     return [nextTick, initialized, wordPos, bitPos, cachedState.address]
   }
 }
+
