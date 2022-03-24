@@ -253,7 +253,7 @@ export class Pool {
       state.tick > TickMath.MIN_TICK
     ) {
       if (loopCount > 8) {
-        throw Error('price impact too high')
+        throw Error('account limit')
       }
 
       let step: Partial<StepComputations> = {}
@@ -327,8 +327,6 @@ export class Pool {
           if (zeroForOne) liquidityNet = JSBI.multiply(liquidityNet, NEGATIVE_ONE)
 
           state.liquidity = LiquidityMath.addDelta(state.liquidity, liquidityNet)
-        } else {
-          console.log('reached uninitialized tick', step.tickNext)
         }
         state.tick = zeroForOne ? step.tickNext - 1 : step.tickNext
       } else if (state.sqrtPriceX32 != step.sqrtPriceStartX32) {
