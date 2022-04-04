@@ -148,15 +148,15 @@ export class Pool {
    * @param sqrtPriceLimitX32 The Q32.32 sqrt price limit
    * @returns The output amount and the pool with updated state
    */
-  public async getOutputAmount(
+  public getOutputAmount(
     inputAmount: CurrencyAmount<Token>,
     sqrtPriceLimitX32?: JSBI
-  ): Promise<[CurrencyAmount<Token>, Pool, AccountMeta[]]> {
+  ): [CurrencyAmount<Token>, Pool, AccountMeta[]] {
     invariant(this.involvesToken(inputAmount.currency), 'TOKEN')
 
     const zeroForOne = inputAmount.currency.equals(this.token0)
 
-    const { amountCalculated: outputAmount, sqrtRatioX32, liquidity, tickCurrent, accounts } = await this.swap(
+    const { amountCalculated: outputAmount, sqrtRatioX32, liquidity, tickCurrent, accounts } = this.swap(
       zeroForOne,
       inputAmount.quotient,
       sqrtPriceLimitX32
@@ -175,15 +175,15 @@ export class Pool {
    * @param sqrtPriceLimitX32 The Q32.32 sqrt price limit. If zero for one, the price cannot be less than this value after the swap. If one for zero, the price cannot be greater than this value after the swap
    * @returns The input amount and the pool with updated state
    */
-  public async getInputAmount(
+  public getInputAmount(
     outputAmount: CurrencyAmount<Token>,
     sqrtPriceLimitX32?: JSBI
-  ): Promise<[CurrencyAmount<Token>, Pool]> {
+  ): [CurrencyAmount<Token>, Pool] {
     invariant(outputAmount.currency.isToken && this.involvesToken(outputAmount.currency), 'TOKEN')
 
     const zeroForOne = outputAmount.currency.equals(this.token1)
 
-    const { amountCalculated: inputAmount, sqrtRatioX32, liquidity, tickCurrent } = await this.swap(
+    const { amountCalculated: inputAmount, sqrtRatioX32, liquidity, tickCurrent } = this.swap(
       zeroForOne,
       JSBI.multiply(outputAmount.quotient, NEGATIVE_ONE),
       sqrtPriceLimitX32
@@ -206,17 +206,17 @@ export class Pool {
    * @returns tickCurrent
    * @returns accounts Tick accounts flipped and bitmaps traversed
    */
-  private async swap(
+  private swap(
     zeroForOne: boolean,
     amountSpecified: JSBI,
     sqrtPriceLimitX32?: JSBI
-  ): Promise<{
+  ): {
     amountCalculated: JSBI
     sqrtRatioX32: JSBI
     liquidity: JSBI
     tickCurrent: number
     accounts: AccountMeta[]
-  }> {
+  } {
     invariant(JSBI.notEqual(amountSpecified, ZERO), 'AMOUNT_LESS_THAN_0')
 
     if (!sqrtPriceLimitX32)
@@ -260,7 +260,7 @@ export class Pool {
       step.sqrtPriceStartX32 = state.sqrtPriceX32
 
       // save the bitmap, and the tick account if it is initialized
-      const nextInitTick = await this.tickDataProvider.nextInitializedTickWithinOneWord(
+      const nextInitTick = this.tickDataProvider.nextInitializedTickWithinOneWord(
         state.tick,
         zeroForOne,
         this.tickSpacing
@@ -314,14 +314,15 @@ export class Pool {
       if (JSBI.equal(state.sqrtPriceX32, step.sqrtPriceNextX32)) {
         // if the tick is initialized, run the tick transition
         if (step.initialized) {
+          const tickNext = this.tickDataProvider.getTick(step.tickNext)
           // push the crossed tick to accounts array
           state.accounts.push({
-            pubkey: await this.tickDataProvider.getTickAddress(step.tickNext),
+            pubkey: tickNext.address,
             isWritable: true,
             isSigner: false
           })
           // get the liquidity at this tick
-          let liquidityNet = JSBI.BigInt((await this.tickDataProvider.getTick(step.tickNext)).liquidityNet)
+          let liquidityNet = tickNext.liquidityNet
           // if we're moving leftward, we interpret liquidityNet as the opposite sign
           // safe because liquidityNet cannot be type(int128).min
           if (zeroForOne) liquidityNet = JSBI.multiply(liquidityNet, NEGATIVE_ONE)

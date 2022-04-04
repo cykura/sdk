@@ -11,7 +11,10 @@ export interface TickDataProvider {
    * Return information corresponding to a specific tick
    * @param tick the tick to load
    */
-  getTick(tick: number): Promise<{ liquidityNet: JSBI }>
+  getTick(tick: number): {
+    address: anchor.web3.PublicKey;
+    liquidityNet: JSBI;
+  }
 
   /**
    * Return the PDA corresponding to a specific tick
@@ -26,7 +29,7 @@ export interface TickDataProvider {
    * @param tickSpacing The tick spacing of the pool
    */
   nextInitializedTickWithinOneWord(tick: number, lte: boolean, tickSpacing: number)
-    : Promise<[number, boolean, number, number, PublicKey]>
+    : [number, boolean, number, number, PublicKey]
 }
 
 /**
@@ -38,15 +41,18 @@ export class NoTickDataProvider implements TickDataProvider {
     throw new Error('Method not implemented.')
   }
   private static ERROR_MESSAGE = 'No tick data provider was given'
-  async getTick(_tick: number): Promise<{ liquidityNet: JSBI }> {
+  getTick(_tick: number): {
+    address: anchor.web3.PublicKey;
+    liquidityNet: JSBI;
+  } {
     throw new Error(NoTickDataProvider.ERROR_MESSAGE)
   }
 
-  async nextInitializedTickWithinOneWord(
+  nextInitializedTickWithinOneWord(
     _tick: number,
     _lte: boolean,
     _tickSpacing: number
-  ): Promise<[number, boolean, number, number, PublicKey]> {
+  ): [number, boolean, number, number, PublicKey] {
     throw new Error(NoTickDataProvider.ERROR_MESSAGE)
   }
 }

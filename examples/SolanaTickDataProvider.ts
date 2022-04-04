@@ -138,47 +138,35 @@ interface Tick {
     )[0]
   }
 
-  async getTick(tick: number): Promise<{ liquidityNet: JSBI }> {
+  getTick(tick: number): {
+    address: anchor.web3.PublicKey;
+    liquidityNet: JSBI;
+  } {
     let savedTick = this.tickCache.get(tick)
     if (!savedTick) {
-      const tickState = await this.getTickAddress(tick)
-      const { liquidityNet } = await this.program.account.tickState.fetch(tickState)
-      savedTick = {
-        address: tickState,
-        liquidityNet: JSBI.BigInt(liquidityNet),
-      }
-      this.tickCache.set(tick, savedTick)
+      throw new Error('Tick not cached')
     }
 
     return {
-      liquidityNet: JSBI.BigInt(savedTick.liquidityNet),
+      address: savedTick.address,
+      liquidityNet: savedTick.liquidityNet,
     }
   }
 
   /**
-   * Fetches bitmap for the word. Bitmaps are cached locally after each RPC call
+   * Fetches the cached bitmap for the word
    * @param wordPos
    */
-  async getBitmap(wordPos: number) {
-    if (!this.bitmapCache.has(wordPos)) {
-      const bitmapAddress = await this.getBitmapAddress(wordPos)
-
-      let word: anchor.BN
-      try {
-        const { word: wordArray } = await this.program.account.tickBitmapState.fetch(bitmapAddress)
-        word = generateBitmapWord(wordArray)
-      } catch (error) {
-        // An uninitialized bitmap will have no initialized ticks, i.e. the bitmap will be empty
-        word = new anchor.BN(0)
-      }
-
-      this.bitmapCache.set(wordPos, {
-        address: bitmapAddress,
-        word,
-      })
+  getBitmap(wordPos: number): {
+    address: anchor.web3.PublicKey;
+    word: anchor.BN;
+  } {
+    let savedBitmap = this.bitmapCache.get(wordPos)
+    if (!savedBitmap) {
+      throw new Error('Bitmap not cached')
     }
 
-    return this.bitmapCache.get(wordPos)!
+    return savedBitmap
   }
 
   /**
@@ -189,11 +177,11 @@ interface Tick {
    * @param tickSpacing The tick spacing for the pool
    * @returns
    */
-  async nextInitializedTickWithinOneWord(
+  nextInitializedTickWithinOneWord(
     tick: number,
     lte: boolean,
     tickSpacing: number
-  ): Promise<[number, boolean, number, number, PublicKey]> {
+  ): [number, boolean, number, number, PublicKey] {
     let compressed = JSBI.toNumber(JSBI.divide(JSBI.BigInt(tick), JSBI.BigInt(tickSpacing)))
     if (tick < 0 && tick % tickSpacing !== 0) {
       compressed -= 1
@@ -203,11 +191,11 @@ interface Tick {
     }
 
     const { wordPos, bitPos } = tickPosition(compressed)
-    const cachedState = await this.getBitmap(wordPos)
+    const cachedBitmap = this.getBitmap(wordPos)
 
-    const { next: nextBit, initialized } = nextInitializedBit(cachedState.word, bitPos, lte)
+    const { next: nextBit, initialized } = nextInitializedBit(cachedBitmap.word, bitPos, lte)
     const nextTick = buildTick(wordPos, nextBit, tickSpacing)
-    return [nextTick, initialized, wordPos, bitPos, cachedState.address]
+    return [nextTick, initialized, wordPos, bitPos, cachedBitmap.address]
   }
 }
 
