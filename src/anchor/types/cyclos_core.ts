@@ -1,5 +1,5 @@
 export type CyclosCore = {
-  "version": "0.1.1",
+  "version": "0.1.6",
   "name": "cyclos_core",
   "instructions": [
     {
@@ -113,32 +113,12 @@ export type CyclosCore = {
           "isSigner": false
         },
         {
-          "name": "vault0",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vault1",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
         },
         {
           "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
         }
@@ -2157,7 +2137,7 @@ export type CyclosCore = {
 };
 
 export const IDL: CyclosCore = {
-  "version": "0.1.1",
+  "version": "0.1.6",
   "name": "cyclos_core",
   "instructions": [
     {
@@ -2271,32 +2251,12 @@ export const IDL: CyclosCore = {
           "isSigner": false
         },
         {
-          "name": "vault0",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vault1",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
         },
         {
           "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
         }
