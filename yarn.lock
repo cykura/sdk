@@ -944,14 +944,14 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@cykura/sdk-core@^0.1.6":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@cykura/sdk-core/-/sdk-core-0.1.6.tgz#d8facab5a203f6731fd978766bcdfaf24833de4c"
-  integrity sha512-oFtRrEP1jXYa0cS3hNobxxgiicz2wzbPYACf0rkzN/HLBShAQLd5EVPdPg5pFl6fn5sBm/EmuOKUUirdsMBVkQ==
+"@cykura/sdk-core@^0.1.7":
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/@cykura/sdk-core/-/sdk-core-0.1.7.tgz#00b9bf26a1b6058b0a8729a67944c78829a80747"
+  integrity sha512-om4FyMkvIw1/8eYC6c7O7QAXL0I4UacffLiiOrlD3VPNj8m49QE+PgwkygqrDORKWGC/+fFp0lHxUk9qSHxtjg==
   dependencies:
     "@project-serum/anchor" "^0.22.0"
     big.js "^5.2.2"
-    decimal.js-light "^2.5.0"
+    decimal.js "^10.3.1"
     jsbi "^4.1.0"
     tiny-invariant "^1.1.0"
     toformat "^2.0.0"
@@ -2473,10 +2473,10 @@ decamelize@^1.2.0:
   resolved "https://registry.yarnpkg.com/decamelize/-/decamelize-1.2.0.tgz#f6534d15148269b20352e7bee26f501f9a191290"
   integrity sha1-9lNNFRSCabIDUue+4m9QH5oZEpA=
 
-decimal.js-light@^2.5.0:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/decimal.js-light/-/decimal.js-light-2.5.1.tgz#134fd32508f19e208f4fb2f8dac0d2626a867934"
-  integrity sha512-qIMFpTMZmny+MMIitAB6D7iVPEorVw6YQRWkvarTkT4tBeSLLiHzcwj6q0MmYSFCiVpiqPJTJEYIrpcPzVEIvg==
+decimal.js@^10.3.1:
+  version "10.3.1"
+  resolved "https://registry.yarnpkg.com/decimal.js/-/decimal.js-10.3.1.tgz#d8c3a444a9c6774ba60ca6ad7261c3a94fd5e783"
+  integrity sha512-V0pfhfr8suzyPGOx3nmq4aHqabehUZn6Ch9kyFpV79TGDTWFmHqUqXdabR7QHqxzrYolF4+tVmJhUG4OURg5dQ==
 
 decode-uri-component@^0.2.0:
   version "0.2.0"
