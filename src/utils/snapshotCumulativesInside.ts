@@ -12,7 +12,7 @@ export interface PoolState {
   tickSpacing: number,
   liquidity: BN,
   sqrtPriceX32: BN,
-  tick: BN,
+  tick: number,
   observationIndex: number,
   observationCardinality: number,
   observationCardinalityNext: number,
@@ -25,7 +25,7 @@ export interface PoolState {
 
 export interface TickState {
   bump: number,
-  tick: BN,
+  tick: number,
   liquidityNet: BN,
   liquidityGross: BN,
   feeGrowthOutside0X32: BN,
@@ -52,14 +52,14 @@ export function transformObservation({
 }: {
   observation: ObservationState,
   blockTimestamp: BN,
-  tick: BN,
+  tick: number,
   liquidity: BN,
 }): ObservationState {
   const delta = blockTimestamp.sub(observation.blockTimestamp)
 
   return {
     ...observation,
-    tickCumulative: observation.tickCumulative.add(tick.mul(delta)),
+    tickCumulative: observation.tickCumulative.add(delta.muln(tick)),
     secondsPerLiquidityCumulativeX32: observation.secondsPerLiquidityCumulativeX32.add(
       delta.shln(32).div(liquidity.gtn(0) ? liquidity : new BN(1))
     ),
@@ -86,7 +86,7 @@ export function snapshotCumulativesInside({
   latestObservation: ObservationState,
   time: BN,
 }): SnapshotCumulative {
-  if (poolState.tick.lt(tickLower.tick)) {
+  if (poolState.tick < tickLower.tick) {
     return {
       tickCumulativeInside: tickLower.tickCumulativeOutside
         .sub(tickUpper.tickCumulativeOutside),
@@ -95,7 +95,7 @@ export function snapshotCumulativesInside({
       secondsInside: tickLower.secondsOutside
         .sub(tickUpper.secondsOutside),
     }
-  } else if (poolState.tick.lt(tickUpper.tick)) {
+  } else if (poolState.tick <tickUpper.tick) {
     const { tickCumulative, secondsPerLiquidityCumulativeX32 } = latestObservation.blockTimestamp.eq(time)
       ? latestObservation
       : transformObservation({
