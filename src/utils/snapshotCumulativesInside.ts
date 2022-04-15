@@ -32,13 +32,13 @@ export interface TickState {
   feeGrowthOutside1X32: BN,
   tickCumulativeOutside: BN,
   secondsPerLiquidityOutsideX32: BN,
-  secondsOutside: BN,
+  secondsOutside: number,
 }
 
 export interface ObservationState {
   bump: number,
   index: number,
-  blockTimestamp: BN,
+  blockTimestamp: number,
   tickCumulative: BN,
   secondsPerLiquidityCumulativeX32: BN,
   initialized: boolean,
@@ -51,11 +51,11 @@ export function transformObservation({
   liquidity,
 }: {
   observation: ObservationState,
-  blockTimestamp: BN,
+  blockTimestamp: number,
   tick: number,
   liquidity: BN,
 }): ObservationState {
-  const delta = blockTimestamp.sub(observation.blockTimestamp)
+  const delta = new BN(blockTimestamp - observation.blockTimestamp)
 
   return {
     ...observation,
@@ -70,7 +70,7 @@ export function transformObservation({
 export interface SnapshotCumulative {
   tickCumulativeInside: BN,
   secondsPerLiquidityInsideX32: BN,
-  secondsInside: BN,
+  secondsInside: number,
 }
 
 export function snapshotCumulativesInside({
@@ -84,7 +84,7 @@ export function snapshotCumulativesInside({
   tickLower: TickState,
   tickUpper: TickState,
   latestObservation: ObservationState,
-  time: BN,
+  time: number,
 }): SnapshotCumulative {
   if (poolState.tick < tickLower.tick) {
     return {
@@ -92,11 +92,10 @@ export function snapshotCumulativesInside({
         .sub(tickUpper.tickCumulativeOutside),
       secondsPerLiquidityInsideX32: tickLower.secondsPerLiquidityOutsideX32
         .sub(tickUpper.secondsPerLiquidityOutsideX32),
-      secondsInside: tickLower.secondsOutside
-        .sub(tickUpper.secondsOutside),
+      secondsInside: tickLower.secondsOutside - tickUpper.secondsOutside,
     }
   } else if (poolState.tick <tickUpper.tick) {
-    const { tickCumulative, secondsPerLiquidityCumulativeX32 } = latestObservation.blockTimestamp.eq(time)
+    const { tickCumulative, secondsPerLiquidityCumulativeX32 } = latestObservation.blockTimestamp == time
       ? latestObservation
       : transformObservation({
         observation: latestObservation,
@@ -112,9 +111,7 @@ export function snapshotCumulativesInside({
       secondsPerLiquidityInsideX32: secondsPerLiquidityCumulativeX32
         .sub(tickLower.secondsPerLiquidityOutsideX32)
         .sub(tickUpper.secondsPerLiquidityOutsideX32),
-      secondsInside: time
-        .sub(tickLower.secondsOutside)
-        .sub(tickUpper.secondsOutside)
+      secondsInside: time - tickLower.secondsOutside - tickUpper.secondsOutside
     }
   } else {
     return {
@@ -122,8 +119,7 @@ export function snapshotCumulativesInside({
         .sub(tickLower.tickCumulativeOutside),
       secondsPerLiquidityInsideX32: tickUpper.secondsPerLiquidityOutsideX32
         .sub(tickLower.secondsPerLiquidityOutsideX32),
-      secondsInside: tickUpper.secondsOutside
-        .sub(tickLower.secondsOutside),
+      secondsInside: tickUpper.secondsOutside - tickLower.secondsOutside,
     }
   }
 }
